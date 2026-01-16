@@ -131,7 +131,7 @@ Now any AI assistant working on your codebase will know how to use roslyn-nav fo
 ## Building from Source
 
 ```bash
-git clone https://github.com/your-repo/RoslynNavigator.git
+git clone https://github.com/Forgate-Labs/RoslynNavigator.git
 cd RoslynNavigator
 dotnet build
 dotnet pack -c Release
