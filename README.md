@@ -1,6 +1,6 @@
 # Roslyn Navigator
 
-A .NET global tool for semantic C# code navigation using Roslyn. Designed to reduce token usage by 85%+ when AI assistants explore C# codebases.
+A .NET global tool for semantic C# code navigation using Roslyn. Designed to reduce token usage by 75%+ when AI assistants explore C# codebases.
 
 ## Why?
 
