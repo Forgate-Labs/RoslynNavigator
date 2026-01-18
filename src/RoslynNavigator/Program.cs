@@ -1,4 +1,5 @@
 using System.CommandLine;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using RoslynNavigator.Commands;
@@ -11,7 +12,13 @@ var jsonOptions = new JsonSerializerOptions
     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
 };
 
-var rootCommand = new RootCommand("Roslyn Navigator - Semantic C# code navigation tool");
+var fullVersion = Assembly.GetExecutingAssembly()
+    .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+    ?? Assembly.GetExecutingAssembly().GetName().Version?.ToString()
+    ?? "unknown";
+var version = fullVersion.Split('+')[0];
+
+var rootCommand = new RootCommand($"Roslyn Navigator v{version} - Semantic C# code navigation tool");
 
 // Shared options
 var solutionOption = new Option<string>("--solution", "Path to .sln file") { IsRequired = true };
