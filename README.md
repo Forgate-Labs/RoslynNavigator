@@ -37,14 +37,38 @@ roslyn-nav find-symbol --solution MyApp.sln --name UserRepository --kind class
 # Extract a specific method's source code
 roslyn-nav get-method --solution MyApp.sln --method CreateUser --class UserService
 
+# Extract multiple methods at once
+roslyn-nav get-methods --solution MyApp.sln --class UserService --methods "CreateUser,GetUser,DeleteUser"
+
 # Find all usages of a method
 roslyn-nav find-usages --solution MyApp.sln --symbol "UserService.CreateUser"
+
+# Find methods that call another method
+roslyn-nav find-callers --solution MyApp.sln --symbol "UserService.CreateUser"
+
+# Find all implementations of an interface
+roslyn-nav find-implementations --solution MyApp.sln --interface IUserRepository
+
+# Find where a class is instantiated
+roslyn-nav find-instantiations --solution MyApp.sln --class UserService
+
+# Find members with a specific attribute
+roslyn-nav find-by-attribute --solution MyApp.sln --attribute "Obsolete"
 
 # List all classes in a namespace
 roslyn-nav list-classes --solution MyApp.sln --namespace MyApp.Services
 
 # Get project namespace structure
 roslyn-nav get-namespace-structure --solution MyApp.sln --project MyApp.Api
+
+# Get class hierarchy (base types, interfaces, derived)
+roslyn-nav get-hierarchy --solution MyApp.sln --class BaseController
+
+# Analyze constructor dependencies
+roslyn-nav get-constructor-deps --solution MyApp.sln --class UserService
+
+# Check if a method is virtual/override
+roslyn-nav check-overridable --solution MyApp.sln --class UserService --method GetUser
 ```
 
 ## Commands
@@ -54,9 +78,17 @@ roslyn-nav get-namespace-structure --solution MyApp.sln --project MyApp.Api
 | `list-class` | Get class structure (fields, properties, methods with line ranges) |
 | `find-symbol` | Locate any symbol (class/method/property) in the solution |
 | `get-method` | Extract complete source code of a method |
+| `get-methods` | Extract multiple methods from a class at once |
 | `find-usages` | Find all references to a symbol |
+| `find-callers` | Find methods that call another method |
+| `find-implementations` | Find all implementations of an interface |
+| `find-instantiations` | Find where a class is instantiated |
+| `find-by-attribute` | Find members decorated with a specific attribute |
 | `list-classes` | List all classes in a namespace |
 | `get-namespace-structure` | Get complete namespace hierarchy of a project |
+| `get-hierarchy` | Get class inheritance hierarchy (base types, interfaces, derived types) |
+| `get-constructor-deps` | Analyze constructor dependencies for DI |
+| `check-overridable` | Check if a method is virtual/override/abstract/sealed |
 
 ## Output
 

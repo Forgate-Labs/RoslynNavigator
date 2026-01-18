@@ -76,6 +76,86 @@ roslyn-nav get-namespace-structure --solution <path.sln> --project <ProjectName>
 
 **When to use:** To understand the overall structure of a project.
 
+### 7. `get-methods` - Extract Multiple Methods
+
+Get source code for multiple methods from a class at once.
+
+```bash
+roslyn-nav get-methods --solution <path.sln> --class <ClassName> --methods "Method1,Method2,Method3"
+```
+
+**When to use:** When you need to review several related methods from the same class.
+
+### 8. `find-callers` - Find Method Callers
+
+Find all methods that call a specific method.
+
+```bash
+roslyn-nav find-callers --solution <path.sln> --symbol "ClassName.MethodName"
+```
+
+**When to use:** To understand where a method is being called from, useful before modifying a method's signature or behavior.
+
+### 9. `find-implementations` - Find Interface Implementations
+
+Find all classes/structs that implement an interface.
+
+```bash
+roslyn-nav find-implementations --solution <path.sln> --interface <InterfaceName>
+```
+
+**When to use:** To find all implementations of an interface before modifying it, or to understand the available implementations.
+
+### 10. `find-instantiations` - Find Class Instantiations
+
+Find where a class is instantiated with `new`.
+
+```bash
+roslyn-nav find-instantiations --solution <path.sln> --class <ClassName>
+```
+
+**When to use:** To understand where objects are created, useful for DI analysis or factory patterns.
+
+### 11. `find-by-attribute` - Search by Attribute
+
+Find members decorated with a specific attribute.
+
+```bash
+roslyn-nav find-by-attribute --solution <path.sln> --attribute <AttributeName> [--pattern <TextPattern>]
+```
+
+**When to use:** To find all deprecated methods (`[Obsolete]`), API endpoints (`[HttpGet]`), test methods (`[Fact]`, `[Test]`), or Reqnroll steps (`[Given]`, `[When]`, `[Then]`).
+
+### 12. `get-hierarchy` - Class Inheritance Hierarchy
+
+Get the complete inheritance hierarchy of a class.
+
+```bash
+roslyn-nav get-hierarchy --solution <path.sln> --class <ClassName>
+```
+
+**When to use:** To understand class inheritance, what interfaces it implements, and what classes derive from it.
+
+### 13. `get-constructor-deps` - Constructor Dependencies
+
+Analyze constructor parameters for dependency injection.
+
+```bash
+roslyn-nav get-constructor-deps --solution <path.sln> --class <ClassName>
+```
+
+**When to use:** To understand what dependencies a class requires, useful when setting up DI or writing tests.
+
+### 14. `check-overridable` - Check Method Modifiers
+
+Check if a method is virtual, override, abstract, or sealed.
+
+```bash
+roslyn-nav check-overridable --solution <path.sln> --class <ClassName> --method <MethodName>
+```
+
+**When to use:** Before attempting to override a method, to verify it can be overridden.
+
 ## Recommended Workflows
 
 ### Workflow 1: Exploring Unknown Code
@@ -116,6 +196,54 @@ roslyn-nav find-usages --solution app.sln --symbol "OldClassName"
 # 2. Review each usage location before making changes
 ```
 
+### Workflow 4: Working with Interfaces
+
+```bash
+# 1. Find all implementations of an interface
+roslyn-nav find-implementations --solution app.sln --interface IUserRepository
+
+# 2. Get constructor dependencies of each implementation
+roslyn-nav get-constructor-deps --solution app.sln --class SqlUserRepository
+
+# 3. Get hierarchy to see if there's a base class
+roslyn-nav get-hierarchy --solution app.sln --class SqlUserRepository
+```
+
+### Workflow 5: Before Modifying a Constructor
+
+```bash
+# 1. See current constructor dependencies
+roslyn-nav get-constructor-deps --solution app.sln --class UserService
+
+# 2. Find where the class is instantiated
+roslyn-nav find-instantiations --solution app.sln --class UserService
+
+# 3. Review each instantiation to update constructor calls
+```
+
+### Workflow 6: Working with Reqnroll/BDD Steps
+
+```bash
+# 1. Find all step definitions with a specific pattern
+roslyn-nav find-by-attribute --solution app.sln --attribute "Given" --pattern "user is logged in"
+
+# 2. Get the step method source
+roslyn-nav get-method --solution app.sln --method "GivenUserIsLoggedIn" --class "AuthSteps"
+```
+
+### Workflow 7: Understanding Method Dependencies
+
+```bash
+# 1. Find who calls a method
+roslyn-nav find-callers --solution app.sln --symbol "DataService.ProcessData"
+
+# 2. Check if the method can be overridden
+roslyn-nav check-overridable --solution app.sln --class DataService --method ProcessData
+
+# 3. Find usages (includes more than just direct calls)
+roslyn-nav find-usages --solution app.sln --symbol "DataService.ProcessData"
+```
+
 ## Output Format
 
 All commands return JSON. Key fields:
@@ -129,8 +257,12 @@ All commands return JSON. Key fields:
 1. **Always start with `list-class`** before reading a file - it tells you exactly which lines to read
 2. **Use `find-symbol`** when you don't know where something is defined
 3. **Use `find-usages`** before any refactoring to understand impact
-4. **Combine with Read tool**: After getting lineRange from roslyn-nav, use `Read(file, offset=startLine, limit=endLine-startLine+1)`
-5. **Cache awareness**: The tool caches solutions in memory, so subsequent commands on the same solution are faster
+4. **Use `find-implementations`** before modifying an interface
+5. **Use `get-constructor-deps`** when setting up tests or DI
+6. **Use `find-callers`** to understand the impact of changing a method
+7. **Use `find-by-attribute`** to find deprecated code, API endpoints, or test methods
+8. **Combine with Read tool**: After getting lineRange from roslyn-nav, use `Read(file, offset=startLine, limit=endLine-startLine+1)`
+9. **Cache awareness**: The tool caches solutions in memory, so subsequent commands on the same solution are faster
 
 ## Example Integration
 
