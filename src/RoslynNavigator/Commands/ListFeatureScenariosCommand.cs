@@ -4,6 +4,30 @@ namespace RoslynNavigator.Commands;
 
 public static class ListFeatureScenariosCommand
 {
+    // Gherkin keywords in multiple languages
+    private static readonly string[] FeatureKeywords =
+    {
+        "Feature:", "Funcionalidade:", "Característica:", "Caracteristica:",  // EN, PT-BR, PT
+        "Fonctionnalité:", "Función:", "Funcion:", "Funktionalität:",         // FR, ES, DE
+        "Funzionalità:", "機能:", "기능:", "Функция:", "Функціонал:"          // IT, JA, KO, RU, UK
+    };
+
+    private static readonly string[] ScenarioKeywords =
+    {
+        "Scenario:", "Cenário:", "Cenario:", "Exemplo:",                      // EN, PT-BR
+        "Scénario:", "Escenario:", "Szenario:", "Scenario:",                  // FR, ES, DE, IT
+        "シナリオ:", "시나리오:", "Сценарий:", "Сценарій:"                     // JA, KO, RU, UK
+    };
+
+    private static readonly string[] ScenarioOutlineKeywords =
+    {
+        "Scenario Outline:", "Scenario Template:",                             // EN
+        "Esquema do Cenário:", "Esquema do Cenario:", "Delineação do Cenário:", // PT-BR
+        "Esquema del escenario:", "Plan du Scénario:", "Szenariovorlage:",     // ES, FR, DE
+        "Schema dello scenario:", "シナリオアウトライン:", "시나리오 개요:",      // IT, JA, KO
+        "Структура сценария:", "Структура сценарію:"                           // RU, UK
+    };
+
     public static Task<FeatureScenariosResult> ExecuteAsync(string path)
     {
         if (string.IsNullOrEmpty(path))
@@ -49,24 +73,32 @@ public static class ListFeatureScenariosCommand
             var line = lines[i].Trim();
             var lineNumber = i + 1; // 1-based line numbers
 
-            // Parse Feature line
-            if (line.StartsWith("Feature:", StringComparison.OrdinalIgnoreCase))
+            // Parse Feature line (multi-language)
+            var featureKeyword = FindMatchingKeyword(line, FeatureKeywords);
+            if (featureKeyword != null)
             {
-                featureName = line.Substring("Feature:".Length).Trim();
+                featureName = line.Substring(featureKeyword.Length).Trim();
+                continue;
             }
-            // Parse Scenario or Scenario Outline
-            else if (line.StartsWith("Scenario Outline:", StringComparison.OrdinalIgnoreCase))
+
+            // Parse Scenario Outline (check before Scenario as it's more specific)
+            var outlineKeyword = FindMatchingKeyword(line, ScenarioOutlineKeywords);
+            if (outlineKeyword != null)
             {
-                var scenarioName = line.Substring("Scenario Outline:".Length).Trim();
+                var scenarioName = line.Substring(outlineKeyword.Length).Trim();
                 scenarios.Add(new ScenarioInfo
                 {
                     Line = lineNumber,
                     Name = scenarioName
                 });
+                continue;
             }
-            else if (line.StartsWith("Scenario:", StringComparison.OrdinalIgnoreCase))
+
+            // Parse Scenario
+            var scenarioKeyword = FindMatchingKeyword(line, ScenarioKeywords);
+            if (scenarioKeyword != null)
             {
-                var scenarioName = line.Substring("Scenario:".Length).Trim();
+                var scenarioName = line.Substring(scenarioKeyword.Length).Trim();
                 scenarios.Add(new ScenarioInfo
                 {
                     Line = lineNumber,
@@ -88,5 +120,17 @@ public static class ListFeatureScenariosCommand
             Name = featureName,
             Scenarios = scenarios
         };
+    }
+
+    private static string? FindMatchingKeyword(string line, string[] keywords)
+    {
+        foreach (var keyword in keywords)
+        {
+            if (line.StartsWith(keyword, StringComparison.OrdinalIgnoreCase))
+            {
+                return keyword;
+            }
+        }
+        return null;
     }
 }

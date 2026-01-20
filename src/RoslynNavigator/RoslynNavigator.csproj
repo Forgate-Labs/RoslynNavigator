@@ -9,7 +9,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>roslyn-nav</ToolCommandName>
     <PackageId>RoslynNavigator</PackageId>
-    <Version>1.0.4</Version>
+    <Version>1.0.5</Version>
     <Authors>Eduardo</Authors>
     <Description>CLI tool for semantic C# code navigation using Roslyn</Description>
   </PropertyGroup>
