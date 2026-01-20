@@ -55,6 +55,12 @@ roslyn-nav find-instantiations --solution MyApp.sln --class UserService
 # Find members with a specific attribute
 roslyn-nav find-by-attribute --solution MyApp.sln --attribute "Obsolete"
 
+# Find Reqnroll/SpecFlow step definitions by pattern
+roslyn-nav find-step-definition --solution MyApp.sln --pattern "user is logged in"
+
+# Find all implementations and injection points of an interface
+roslyn-nav find-interface-consumers --solution MyApp.sln --interface IUserRepository
+
 # List all classes in a namespace
 roslyn-nav list-classes --solution MyApp.sln --namespace MyApp.Services
 
@@ -69,6 +75,9 @@ roslyn-nav get-constructor-deps --solution MyApp.sln --class UserService
 
 # Check if a method is virtual/override
 roslyn-nav check-overridable --solution MyApp.sln --class UserService --method GetUser
+
+# List scenarios from Gherkin .feature files
+roslyn-nav list-feature-scenarios --path tests/Features
 ```
 
 ## Commands
@@ -82,9 +91,12 @@ roslyn-nav check-overridable --solution MyApp.sln --class UserService --method G
 | `find-usages` | Find all references to a symbol |
 | `find-callers` | Find methods that call another method |
 | `find-implementations` | Find all implementations of an interface |
+| `find-interface-consumers` | Find interface implementations and injection points |
 | `find-instantiations` | Find where a class is instantiated |
 | `find-by-attribute` | Find members decorated with a specific attribute |
+| `find-step-definition` | Find Reqnroll/SpecFlow step definitions by pattern |
 | `list-classes` | List all classes in a namespace |
+| `list-feature-scenarios` | List scenarios from Gherkin .feature files |
 | `get-namespace-structure` | Get complete namespace hierarchy of a project |
 | `get-hierarchy` | Get class inheritance hierarchy (base types, interfaces, derived types) |
 | `get-constructor-deps` | Analyze constructor dependencies for DI |

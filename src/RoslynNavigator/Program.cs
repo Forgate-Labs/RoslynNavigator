@@ -294,6 +294,61 @@ findByAttributeCommand.SetHandler(async (string solution, string attribute, stri
     }
 }, solutionOption, attributeOption, patternOption);
 
+// find-step-definition command
+var findStepDefinitionCommand = new Command("find-step-definition", "Find Reqnroll/SpecFlow step definitions by pattern");
+var stepPatternOption = new Option<string>("--pattern", "Text pattern to search for in step definitions") { IsRequired = true };
+findStepDefinitionCommand.AddOption(solutionOption);
+findStepDefinitionCommand.AddOption(stepPatternOption);
+findStepDefinitionCommand.SetHandler(async (string solution, string pattern) =>
+{
+    try
+    {
+        var result = await FindStepDefinitionCommand.ExecuteAsync(solution, pattern);
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("find_step_definition_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, solutionOption, stepPatternOption);
+
+// find-interface-consumers command
+var findInterfaceConsumersCommand = new Command("find-interface-consumers", "Find interface implementations and injection points");
+findInterfaceConsumersCommand.AddOption(solutionOption);
+findInterfaceConsumersCommand.AddOption(interfaceOption);
+findInterfaceConsumersCommand.SetHandler(async (string solution, string interfaceName) =>
+{
+    try
+    {
+        var result = await FindInterfaceConsumersCommand.ExecuteAsync(solution, interfaceName);
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("find_interface_consumers_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, solutionOption, interfaceOption);
+
+// list-feature-scenarios command
+var listFeatureScenariosCommand = new Command("list-feature-scenarios", "List scenarios from Gherkin .feature files");
+var pathOption = new Option<string>("--path", "Directory containing .feature files") { IsRequired = true };
+listFeatureScenariosCommand.AddOption(pathOption);
+listFeatureScenariosCommand.SetHandler(async (string path) =>
+{
+    try
+    {
+        var result = await ListFeatureScenariosCommand.ExecuteAsync(path);
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("list_feature_scenarios_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, pathOption);
+
 // Add all commands to root
 rootCommand.AddCommand(listClassCommand);
 rootCommand.AddCommand(findSymbolCommand);
@@ -309,6 +364,9 @@ rootCommand.AddCommand(findInstantiationsCommand);
 rootCommand.AddCommand(findCallersCommand);
 rootCommand.AddCommand(getHierarchyCommand);
 rootCommand.AddCommand(findByAttributeCommand);
+rootCommand.AddCommand(findStepDefinitionCommand);
+rootCommand.AddCommand(findInterfaceConsumersCommand);
+rootCommand.AddCommand(listFeatureScenariosCommand);
 
 return await rootCommand.InvokeAsync(args);
 

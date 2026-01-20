@@ -156,6 +156,36 @@ roslyn-nav check-overridable --solution <path.sln> --class <ClassName> --method 
 
 **When to use:** Before attempting to override a method, to verify it can be overridden.
 
+### 15. `find-step-definition` - Find Step Definitions
+
+Find Reqnroll/SpecFlow step definitions by text pattern.
+
+```bash
+roslyn-nav find-step-definition --solution <path.sln> --pattern "user is logged in"
+```
+
+**When to use:** To find BDD step definitions matching a text pattern. More targeted than `find-by-attribute` for step discovery.
+
+### 16. `find-interface-consumers` - Find Interface Consumers
+
+Find all implementations and injection points of an interface.
+
+```bash
+roslyn-nav find-interface-consumers --solution <path.sln> --interface <InterfaceName>
+```
+
+**When to use:** To see the full picture of how an interface is used - both who implements it and who depends on it via constructor injection, fields, or properties.
+
+### 17. `list-feature-scenarios` - List Feature Scenarios
+
+Parse .feature files (Gherkin) to list all scenarios.
+
+```bash
+roslyn-nav list-feature-scenarios --path <DirectoryPath>
+```
+
+**When to use:** To get an overview of all BDD scenarios in a directory, useful for understanding test coverage or finding specific scenarios.
+
 ## Recommended Workflows
 
 ### Workflow 1: Exploring Unknown Code
@@ -224,11 +254,14 @@ roslyn-nav find-instantiations --solution app.sln --class UserService
 ### Workflow 6: Working with Reqnroll/BDD Steps
 
 ```bash
-# 1. Find all step definitions with a specific pattern
-roslyn-nav find-by-attribute --solution app.sln --attribute "Given" --pattern "user is logged in"
+# 1. Find step definitions matching a pattern (searches all step types)
+roslyn-nav find-step-definition --solution app.sln --pattern "user is logged in"
 
 # 2. Get the step method source
 roslyn-nav get-method --solution app.sln --method "GivenUserIsLoggedIn" --class "AuthSteps"
+
+# 3. List all scenarios in the features directory
+roslyn-nav list-feature-scenarios --path tests/Features
 ```
 
 ### Workflow 7: Understanding Method Dependencies
@@ -242,6 +275,19 @@ roslyn-nav check-overridable --solution app.sln --class DataService --method Pro
 
 # 3. Find usages (includes more than just direct calls)
 roslyn-nav find-usages --solution app.sln --symbol "DataService.ProcessData"
+```
+
+### Workflow 8: Understanding Interface Usage
+
+```bash
+# 1. Find all consumers of an interface (implementations + injections)
+roslyn-nav find-interface-consumers --solution app.sln --interface IUserRepository
+
+# 2. Get constructor dependencies for a specific implementation
+roslyn-nav get-constructor-deps --solution app.sln --class SqlUserRepository
+
+# 3. Find where implementations are instantiated
+roslyn-nav find-instantiations --solution app.sln --class SqlUserRepository
 ```
 
 ## Output Format
@@ -261,8 +307,11 @@ All commands return JSON. Key fields:
 5. **Use `get-constructor-deps`** when setting up tests or DI
 6. **Use `find-callers`** to understand the impact of changing a method
 7. **Use `find-by-attribute`** to find deprecated code, API endpoints, or test methods
-8. **Combine with Read tool**: After getting lineRange from roslyn-nav, use `Read(file, offset=startLine, limit=endLine-startLine+1)`
-9. **Cache awareness**: The tool caches solutions in memory, so subsequent commands on the same solution are faster
+8. **Use `find-step-definition`** for BDD step discovery - more targeted than `find-by-attribute`
+9. **Use `find-interface-consumers`** for complete interface usage analysis (implementations + injections)
+10. **Use `list-feature-scenarios`** to get an overview of BDD test scenarios
+11. **Combine with Read tool**: After getting lineRange from roslyn-nav, use `Read(file, offset=startLine, limit=endLine-startLine+1)`
+12. **Cache awareness**: The tool caches solutions in memory, so subsequent commands on the same solution are faster
 
 ## Example Integration
 

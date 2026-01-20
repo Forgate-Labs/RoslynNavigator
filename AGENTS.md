@@ -26,7 +26,10 @@ dotnet tool install --global RoslynNavigator
 | `find-implementations` | Find interface implementations | `--solution`, `--interface` |
 | `find-instantiations` | Find class instantiations | `--solution`, `--class` |
 | `find-by-attribute` | Find by attribute decoration | `--solution`, `--attribute`, `--pattern` |
+| `find-step-definition` | Find Reqnroll/SpecFlow step definitions | `--solution`, `--pattern` |
+| `find-interface-consumers` | Find implementations and injections | `--solution`, `--interface` |
 | `list-classes` | List classes in namespace | `--solution`, `--namespace` |
+| `list-feature-scenarios` | List Gherkin feature scenarios | `--path` |
 | `get-namespace-structure` | Get project structure | `--solution`, `--project` |
 | `get-hierarchy` | Get inheritance hierarchy | `--solution`, `--class` |
 | `get-constructor-deps` | Analyze constructor dependencies | `--solution`, `--class` |
@@ -47,7 +50,12 @@ Need to understand a codebase?
 
 Working with interfaces?
 ├── Find implementations → find-implementations
+├── Find implementations + injections → find-interface-consumers
 └── Check hierarchy → get-hierarchy
+
+Working with BDD/Reqnroll?
+├── Find step definitions → find-step-definition
+└── List feature scenarios → list-feature-scenarios
 
 Refactoring a class?
 ├── Find instantiations → find-instantiations
@@ -115,12 +123,25 @@ roslyn-nav find-by-attribute --solution app.sln --attribute "Obsolete"
 
 # Find API endpoints:
 roslyn-nav find-by-attribute --solution app.sln --attribute "HttpGet"
-
-# Find Reqnroll steps with pattern:
-roslyn-nav find-by-attribute --solution app.sln --attribute "Given" --pattern "user logged in"
 ```
 
-### Pattern 7: Hierarchy Analysis
+### Pattern 7: BDD/Reqnroll Step Discovery
+```bash
+# Find step definitions by pattern (searches all step types):
+roslyn-nav find-step-definition --solution app.sln --pattern "user logged in"
+
+# List all scenarios in feature files:
+roslyn-nav list-feature-scenarios --path tests/Features
+```
+
+### Pattern 8: Complete Interface Analysis
+```bash
+# Find all implementations AND injection points:
+roslyn-nav find-interface-consumers --solution app.sln --interface IUserRepository
+# Returns: implementations + constructor params, fields, properties using the interface
+```
+
+### Pattern 9: Hierarchy Analysis
 ```bash
 # Understand class relationships:
 roslyn-nav get-hierarchy --solution app.sln --class BaseController
@@ -330,6 +351,77 @@ roslyn-nav get-hierarchy --solution app.sln --class BaseController
 }
 ```
 
+### find-step-definition
+```json
+{
+  "pattern": "string",
+  "matches": [
+    {
+      "type": "Given|When|Then|And|But",
+      "regex": "the step regex pattern",
+      "filePath": "string",
+      "className": "string",
+      "methodName": "string",
+      "startLine": number,
+      "endLine": number,
+      "lineCount": number,
+      "scope": "derived from class name"
+    }
+  ],
+  "totalCount": number
+}
+```
+
+### find-interface-consumers
+```json
+{
+  "interface": "string",
+  "definedIn": "string",
+  "definitionLine": number,
+  "implementations": [
+    {
+      "name": "string",
+      "kind": "class|struct|record",
+      "filePath": "string",
+      "line": number,
+      "namespace": "string"
+    }
+  ],
+  "injections": [
+    {
+      "className": "string",
+      "memberName": "string",
+      "memberType": "constructor-parameter|field|property",
+      "filePath": "string",
+      "line": number
+    }
+  ]
+}
+```
+
+### list-feature-scenarios
+```json
+{
+  "path": "string",
+  "features": [
+    {
+      "file": "relative/path.feature",
+      "name": "Feature name",
+      "scenarios": [
+        {
+          "line": number,
+          "name": "Scenario name"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "totalFeatures": number,
+    "totalScenarios": number
+  }
+}
+```
+
 ## Best Practices for Agents
 
 1. **Always use roslyn-nav before reading C# files** - Get the structure first
@@ -337,10 +429,12 @@ roslyn-nav get-hierarchy --solution app.sln --class BaseController
 3. **Prefer find-symbol over grep** - Semantic search is more accurate
 4. **Use find-usages before refactoring** - Understand the impact first
 5. **Use find-implementations before modifying interfaces** - Know all affected code
-6. **Use get-constructor-deps for DI analysis** - Understand dependencies
-7. **Use find-callers to understand method impact** - Different from find-usages (callers vs all references)
-8. **Use find-by-attribute for BDD/Reqnroll steps** - Pattern matching makes it powerful
-9. **Cache the solution path** - Reuse it across multiple commands in the same session
+6. **Use find-interface-consumers for complete interface analysis** - Shows both implementations and injections
+7. **Use get-constructor-deps for DI analysis** - Understand dependencies
+8. **Use find-callers to understand method impact** - Different from find-usages (callers vs all references)
+9. **Use find-step-definition for BDD step discovery** - More targeted than find-by-attribute
+10. **Use list-feature-scenarios for BDD test overview** - Quick scan of all scenarios
+11. **Cache the solution path** - Reuse it across multiple commands in the same session
 
 ## Error Handling
 
