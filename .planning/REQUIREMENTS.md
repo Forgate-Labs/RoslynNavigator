@@ -19,16 +19,16 @@
 
 ### File Stage (Write)
 
-- [ ] **FSTAGE-01**: `file plan edit <path> <line> <old> <new>` — edição determinística: valida que a linha `<line>` contém `<old>` antes de aceitar; recusa se não bater
+- [x] **FSTAGE-01**: `file plan edit <path> <line> <old> <new>` — edição determinística: valida que a linha `<line>` contém `<old>` antes de aceitar; recusa se não bater
 - [ ] **FSTAGE-02**: `file plan write <path> <content>` — staged: cria ou sobrescreve o arquivo inteiro com `<content>`
 - [ ] **FSTAGE-03**: `file plan append <path> <content>` — staged: adiciona `<content>` ao final do arquivo
-- [ ] **FSTAGE-04**: `file plan delete <path> <line> <old>` — staged: remove a linha `<line>`, validando que contém `<old>`
+- [x] **FSTAGE-04**: `file plan delete <path> <line> <old>` — staged: remove a linha `<line>`, validando que contém `<old>`
 
 ### File Commit / Rollback
 
 - [ ] **FCOMMIT-01**: `file status` — exibe todas as mudanças staged como unified diff preview; aceita `--json` para saída machine-readable
-- [ ] **FCOMMIT-02**: `file commit` — cria backup, valida todas as operações (falha rápido se qualquer validação falhar), aplica atomicamente, retorna unified diff; aceita `--json`
-- [ ] **FCOMMIT-03**: `file rollback` — restaura todos os arquivos modificados do último backup em `.roslyn-nav-backup/`
+- [x] **FCOMMIT-02**: `file commit` — cria backup, valida todas as operações (falha rápido se qualquer validação falhar), aplica atomicamente, retorna unified diff; aceita `--json`
+- [x] **FCOMMIT-03**: `file rollback` — restaura todos os arquivos modificados do último backup em `.roslyn-nav-backup/`
 - [ ] **FCOMMIT-04**: `file clear` — descarta todos os planos staged sem aplicar, deleta `.roslyn-nav-plans.json`
 
 ### Dotnet Scaffold
@@ -58,7 +58,7 @@
 ### Cross-cutting
 
 - [x] **CROSS-01**: Todos os comandos `dotnet` write/edit são staged (compartilham o mesmo `IPlanStore` dos comandos `file`)
-- [ ] **CROSS-02**: Mensagens de erro específicas: linha errada, old string não encontrada, classe não encontrada, erro de parse no conteúdo
+- [x] **CROSS-02**: Mensagens de erro específicas: linha errada, old string não encontrada, classe não encontrada, erro de parse no conteúdo
 - [ ] **CROSS-03**: `dotnet add`, `update` e `remove` resolvem o tipo alvo buscando em `ClassDeclarationSyntax`, `RecordDeclarationSyntax` e `StructDeclarationSyntax`
 - [ ] **CROSS-04**: CLAUDE.md atualizado com todos os novos comandos, workflows e dicas
 
@@ -95,13 +95,13 @@
 | INFRA-04 | Phase 1 | Complete |
 | FREAD-01 | Phase 1 | Complete |
 | FREAD-02 | Phase 1 | Complete |
-| FSTAGE-01 | Phase 2 | Pending |
+| FSTAGE-01 | Phase 2 | Complete |
 | FSTAGE-02 | Phase 2 | Pending |
 | FSTAGE-03 | Phase 2 | Pending |
-| FSTAGE-04 | Phase 2 | Pending |
+| FSTAGE-04 | Phase 2 | Complete |
 | FCOMMIT-01 | Phase 2 | Pending |
-| FCOMMIT-02 | Phase 2 | Pending |
-| FCOMMIT-03 | Phase 2 | Pending |
+| FCOMMIT-02 | Phase 2 | Complete |
+| FCOMMIT-03 | Phase 2 | Complete |
 | FCOMMIT-04 | Phase 2 | Pending |
 | SCAF-01 | Phase 3 | Pending |
 | SCAF-02 | Phase 3 | Pending |
@@ -119,7 +119,7 @@
 | DREM-02 | Phase 5 | Pending |
 | DREM-03 | Phase 5 | Pending |
 | CROSS-01 | Phase 1 | Complete |
-| CROSS-02 | Phase 2 | Pending |
+| CROSS-02 | Phase 2 | Complete |
 | CROSS-03 | Phase 4 | Pending |
 | CROSS-04 | Phase 5 | Pending |
 
