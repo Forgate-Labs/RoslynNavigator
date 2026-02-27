@@ -2,68 +2,49 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-27)
+See: .planning/PROJECT.md (updated 2026-02-27 after v2.1)
 
-**Core value:** O assistente de IA consegue navegar, criar e modificar código C# com precisão cirúrgica sem precisar ler arquivos inteiros — reduzindo tokens e eliminando edições ambíguas.
-**Current focus:** Milestone v2.0 Snapshot, Rules & Ask
+**Core value:** O assistente de IA consegue navegar, criar, modificar e analisar código C# com precisão cirúrgica sem precisar ler arquivos inteiros — reduzindo tokens e eliminando edições ambíguas.
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase: 4 (Integration & Polish)
-Plan: 2 (completed)
-Status: Plan 04-02 complete - CLI integration verified
-Last activity: 2026-02-27 — Completed plan 04-02 (CLI integration and compatibility)
+Phase: — (between milestones)
+Status: v2.1 complete — ready to plan next milestone
+Last activity: 2026-02-27 — Completed v2.1 milestone (Sonar Baseline Scope)
 
-Progress: [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%
+Progress: v1.0 ✅ | v2.1 ✅ | v2.2+ 📋
 
-## Current Milestone
+## Shipped Milestones
 
-**v2.0 Snapshot, Rules & Ask** (Phases 1-4)
-
-- Phase 1: Snapshot Foundation — Generate SQLite snapshot with full schema
-- Phase 2: Rules Engine — Evaluate YAML rules and report violations
-- Phase 3: Query Integration — SQL arbitrary queries with JSON output
-- Phase 4: Integration & Polish — New projects, CLI integration, compatibility
+- **v1.0 File & Dotnet Commands** — 5 phases, 13 plans — shipped 2026-02-27
+- **v2.1 Sonar Baseline Scope** — 4 phases, 10 plans — shipped 2026-02-27
 
 ## Accumulated Context
 
 ### Decisions
 
-- **01-01 Completed:** Snapshot Foundation - SQLite with embedded schema, schema/path services, 18 tests pass
-- **01-02 Completed:** Snapshot Extraction - SnapshotExtractorService, SnapshotSignalAnalyzer, 9 TDD tests, 69 tests total pass
-- **01-03 Completed:** Wire snapshot to CLI - SnapshotCommand, CLI registration, 9 command tests, tests pass
-- **02-01 Completed:** Rule Loader Foundation - YamlDotNet, embedded YAML packs, RuleLoaderService, 16 loader tests
-- **02-02 Completed:** Rule SQL Compilation - RuleSqlCompiler with LIKE wildcards, RuleEvaluatorService with read-only queries, NOT EXISTS semantics, 19 tests
-- **02-03 Completed:** Check Command - CLI command with --db, --severity, --ruleId filters, 10 command tests
-- **03-01 Completed:** SQL Read-Only Guard - SqlReadOnlyGuard service, integration with RuleEvaluatorService, 61 guard tests
-- **03-02 Completed:** Snapshot Query Command - SnapshotQueryCommand, JSON output, CLI integration, 17 command tests
-- **04-01 Completed:** Multi-Project Structure - RoslynNavigator.Snapshot and RoslynNavigator.Rules class libraries, 4-project solution, 201 tests pass
-- **04-02 Completed:** CLI Integration & Polish - Help output verified, backward compatibility confirmed, all 201 tests pass
-See PROJECT.md for key decisions from v1.0.
+See PROJECT.md Key Decisions table for full history.
+
+Most recent (v2.1):
+- Schema SQLite como embedded resource — migration idempotente na inicialização
+- SqlReadOnlyGuard antes de qualquer query — impede mutação do snapshot
+- Libs separadas (Snapshot + Rules) — solution de 4 projetos
+- Baseline Sonar high-confidence only — evita false positives ruidosos
 
 ### Pending Todos
 
-- v2.0 milestone complete!
+None — milestone complete, ready for next cycle.
 
 ### Blockers/Concerns
 
-None yet.
+None.
 
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Phase 4 complete - v2.0 milestone shipped
-Resume from: None - milestone complete
+Stopped at: v2.1 milestone complete — archived and tagged
+Resume from: `/gsd-new-milestone` to plan v2.2+
 
 ---
-
-## v2.0 Requirements Summary
-
-| Category | Requirements | Phase |
-|----------|--------------|-------|
-| Snapshot | SNAP-01, SNAP-02, SNAP-03, SNAP-04 | 1 |
-| Rules | RULE-01, RULE-02, RULE-03, RULE-04, RULE-05 | 2 |
-| Query | [x] ASK-01, [x] ASK-02, [x] ASK-03 | 3 |
-| Integration | [x] INT-01, [x] INT-02, [x] INT-03 | 4 |
-
-**Total:** 16 requirements across 4 phases (all complete)
+*State updated: 2026-02-27 after v2.1 milestone completion*

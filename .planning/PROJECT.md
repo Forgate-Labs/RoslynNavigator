@@ -2,43 +2,32 @@
 
 ## What This Is
 
-Uma ferramenta CLI .NET global (`roslyn-nav`) que usa Roslyn para navegação semântica e mutação de código C#. Projetada para assistentes de IA (Claude, GPT, Copilot) reduzirem o consumo de tokens em 85%+ ao explorar e modificar codebases C# — substituindo leituras de arquivos inteiros por consultas cirúrgicas e edições AST-aware.
+Uma ferramenta CLI .NET global (`roslyn-nav`) que usa Roslyn para navegação semântica e mutação de código C#, e análise offline via snapshot SQLite. Projetada para assistentes de IA (Claude, GPT, Copilot) reduzirem o consumo de tokens em 85%+ ao explorar e modificar codebases C# — substituindo leituras de arquivos inteiros por consultas cirúrgicas e edições AST-aware, e permitindo análise de arquitetura/qualidade sem Roslyn em runtime.
 
 ## Core Value
 
-O assistente de IA consegue navegar, criar e modificar código C# com precisão cirúrgica sem precisar ler arquivos inteiros — reduzindo tokens e eliminando edições ambíguas.
-
-## Current Milestone: v2.0 Snapshot, Rules & Ask
-
-**Goal:** Expandir o Roslyn Navigator para análise completa de solution via snapshot SQLite, avaliação de regras YAML e consulta SQL direta para suporte a perguntas em linguagem natural.
-
-**Target features:**
-- Comando `snapshot` para gerar banco SQLite com classes, métodos, dependências, chamadas, annotations, flags e metadados
-- Comando `check` para aplicar regras builtin/domain e reportar violações filtráveis por severidade/regra
-- Comando `snapshot query` para executar SQL arbitrário no snapshot e retornar JSON para consumo da LLM
-- Novos projetos `RoslynNavigator.Snapshot` e `RoslynNavigator.Rules` integrados à solution existente
-- Registro dos novos comandos no CLI mantendo padrões existentes de output JSON e arquitetura
+O assistente de IA consegue navegar, criar, modificar e analisar código C# com precisão cirúrgica sem precisar ler arquivos inteiros — reduzindo tokens e eliminando edições ambíguas.
 
 ## Requirements
 
 ### Validated
 
-- ✓ `list-class` — estrutura da classe com line ranges de todos os membros
-- ✓ `find-symbol` — localiza classes, métodos e propriedades na solution
-- ✓ `get-method` / `get-methods` — extrai source code de métodos específicos
-- ✓ `find-usages` — encontra todas as referências a um símbolo
-- ✓ `find-callers` — encontra quem chama um método
-- ✓ `find-implementations` — implementações de uma interface
-- ✓ `find-interface-consumers` — implementações + pontos de injeção de uma interface
-- ✓ `find-instantiations` — onde uma classe é instanciada
-- ✓ `find-by-attribute` — membros decorados com um atributo
-- ✓ `find-step-definition` — step definitions Reqnroll/SpecFlow por padrão de texto
-- ✓ `list-classes` — todas as classes em um namespace
-- ✓ `list-feature-scenarios` — cenários de arquivos .feature (Gherkin)
-- ✓ `get-namespace-structure` — hierarquia de namespaces de um projeto
-- ✓ `get-hierarchy` — hierarquia de herança de uma classe
-- ✓ `get-constructor-deps` — dependências do construtor para DI
-- ✓ `check-overridable` — verifica modificadores de método (virtual/override/abstract/sealed)
+- ✓ `list-class` — estrutura da classe com line ranges de todos os membros — v1.0
+- ✓ `find-symbol` — localiza classes, métodos e propriedades na solution — v1.0
+- ✓ `get-method` / `get-methods` — extrai source code de métodos específicos — v1.0
+- ✓ `find-usages` — encontra todas as referências a um símbolo — v1.0
+- ✓ `find-callers` — encontra quem chama um método — v1.0
+- ✓ `find-implementations` — implementações de uma interface — v1.0
+- ✓ `find-interface-consumers` — implementações + pontos de injeção de uma interface — v1.0
+- ✓ `find-instantiations` — onde uma classe é instanciada — v1.0
+- ✓ `find-by-attribute` — membros decorados com um atributo — v1.0
+- ✓ `find-step-definition` — step definitions Reqnroll/SpecFlow por padrão de texto — v1.0
+- ✓ `list-classes` — todas as classes em um namespace — v1.0
+- ✓ `list-feature-scenarios` — cenários de arquivos .feature (Gherkin) — v1.0
+- ✓ `get-namespace-structure` — hierarquia de namespaces de um projeto — v1.0
+- ✓ `get-hierarchy` — hierarquia de herança de uma classe — v1.0
+- ✓ `get-constructor-deps` — dependências do construtor para DI — v1.0
+- ✓ `check-overridable` — verifica modificadores de método (virtual/override/abstract/sealed) — v1.0
 - ✓ Plan/commit Unit of Work — IPlanStore, FilePlanStore, BackupService — v1.0
 - ✓ `file read` / `file grep` — leitura imediata com line numbers e busca regex — v1.0
 - ✓ `file plan edit/write/append/delete` — staged file mutations com validação — v1.0
@@ -48,13 +37,15 @@ O assistente de IA consegue navegar, criar e modificar código C# com precisão 
 - ✓ `dotnet update property/field` — substituição de membros existentes — v1.0
 - ✓ `dotnet remove method/property/field` — remoção de membros pelo nome — v1.0
 - ✓ CLAUDE.md documentado com todos os comandos write/mutation — v1.0
+- ✓ `roslyn-nav snapshot` — gera SQLite com schema completo + sinais de análise — v2.1
+- ✓ `roslyn-nav check` — avalia regras YAML builtin/domain com filtros severity/ruleId — v2.1
+- ✓ `roslyn-nav snapshot query` — SQL arbitrário no snapshot com JSON output para LLM — v2.1
+- ✓ Projetos `RoslynNavigator.Snapshot` e `RoslynNavigator.Rules` separados na solution — v2.1
+- ✓ Integração baseline Sonar C# (`SonarQube.yaml`) + `check --rules` customizável — v2.1
 
 ### Active
 
-- [ ] Entregar `snapshot` com Walker estrutural/semântico, detector de padrões e persistência SQLite
-- [ ] Entregar `check` com RuleLoader, QueryBuilder e RuleEvaluator genéricos para YAML
-- [ ] Entregar `snapshot query` para consulta SQL direta com output JSON consistente
-- [ ] Integrar os novos projetos/comandos sem quebrar os 41 comandos atuais
+_(empty — planning next milestone)_
 
 ### Out of Scope
 
@@ -63,23 +54,31 @@ O assistente de IA consegue navegar, criar e modificar código C# com precisão 
 - Watcher de arquivos em tempo real
 - Interface visual ou servidor HTTP
 - Upgrade de pacotes NuGet existentes
-- Alteração dos comandos de navegação existentes
+- Projeto separado `RoslynNavigator.Ask` — a LLM permanece externa
+- LLM embutida no binário `roslyn-nav`
+- Paridade completa com SonarQube (sem taint/dataflow engine completo ainda)
 
 ## Context
 
-**Shipped v1.0** com ~7.165 LOC C#, 122 arquivos modificados em 42 dias.
-Tech stack: .NET 10, C#, `Microsoft.CodeAnalysis.CSharp`, `System.CommandLine`, xUnit.
+**Shipped v1.0** com ~7.165 LOC C#, 122 arquivos, 42 dias.
+**Shipped v2.1** com ~13.229 LOC C# total, ~87 arquivos modificados.
 
-A superfície de mutação completa está entregue: `file` group (10 subcomandos) + `dotnet` group (scaffold 4 + add 5 + update 2 + remove 3 = 14 subcomandos). Total: 17 navegação + 24 write/mutation = 41 comandos no CLI.
+Tech stack: .NET 10, C#, `Microsoft.CodeAnalysis.CSharp`, `System.CommandLine`, `Microsoft.Data.Sqlite`, `YamlDotNet`, xUnit.
 
-O principal desafio técnico — `dotnet add method` com detecção de indentação e ordem convencional de membros — foi resolvido via `BaseTypeDeclarationSyntax` concrete-type switch expression.
+**Arquitetura atual:** 4 projetos na solution — `RoslynNavigator` (CLI), `RoslynNavigator.Snapshot` (lib), `RoslynNavigator.Rules` (lib), `RoslynNavigator.Tests` (xUnit). 201 testes passando. Total: 17 navegação + 24 write/mutation + 3 snapshot/rules/query = 44 comandos no CLI.
+
+**Direções possíveis para v2.2+:**
+- Suporte a regras de taint/dataflow para paridade maior com SonarQube
+- Modo watch (`roslyn-nav snapshot --watch`) para snapshot incremental
+- Exportação de snapshot para outros formatos (Parquet, CSV) para pipelines de dados
 
 ## Constraints
 
 - **Tech stack**: .NET 10, C# — sem criar nova solution
-- **Compatibilidade**: Pacotes NuGet existentes não mudam
+- **Compatibilidade**: Pacotes NuGet existentes não mudam; output JSON contratos mantidos
 - **Padrão existente**: Saída JSON em todos os comandos; seguir estrutura de `Commands/` existente
 - **Atomicidade**: `file commit` aplica todas as mudanças ou nenhuma; backup sempre criado
+- **Read-only snapshot**: `check` e `snapshot query` nunca mutam o arquivo `.db`
 
 ## Key Decisions
 
@@ -95,6 +94,11 @@ O principal desafio técnico — `dotnet add method` com detecção de indentaç
 | Detecção de indentação via `DetectIndentation` helper | Inserção de membros deve respeitar o estilo do arquivo existente | ✓ Good — funciona com tabs e spaces |
 | `dotnet add using` ordena alphabetically | Mantém using block ordenado | ✓ Good — sem duplicatas, inserção limpa |
 | `ParseUpdateRemoveMetadata` usa `TryGetProperty` para `content` | RemoveMember não tem campo content, UpdateMember tem | ✓ Good — comando único trata ambos os casos |
+| Schema SQLite como embedded resource | Schema versionável junto ao código; migration idempotente | ✓ Good — schema carregado na inicialização sem config externa |
+| `SqlReadOnlyGuard` antes de qualquer query | Impede mutação acidental do snapshot por regras mal-escritas | ✓ Good — guard testado com 61 casos |
+| `RoslynNavigator.Snapshot` + `RoslynNavigator.Rules` como libs separadas | CLI evolution sem código monolítico; reuso futuro possível | ✓ Good — solution de 4 projetos, embedded resources migrados com libs |
+| Baseline Sonar apenas high-confidence mappings | Evita false positives ruidosos; melhor experiência inicial | ✓ Good — catálogo present mas predicados só para regras com sinais confiáveis |
+| Sinais de snapshot expandidos para suporte a regras de segurança | Predicados Sonar precisam de `parameter_count`, `uses_insecure_random`, etc | ✓ Good — snapshot mais rico sem breaking change no schema base |
 
 ---
-*Last updated: 2026-02-27 after starting milestone v2.0 Snapshot, Rules & Ask*
+*Last updated: 2026-02-27 after v2.1 milestone (Sonar Baseline Scope)*
