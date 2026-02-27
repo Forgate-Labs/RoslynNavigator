@@ -15,7 +15,7 @@
 ### Rules / Check
 
 - [ ] **RULE-01**: Usuário pode rodar `roslyn-nav check` para avaliar regras sobre snapshot existente
-- [ ] **RULE-02**: Engine carrega regras builtin embedded (`architecture.yaml`, `code-quality.yaml`, `security.yaml`) e regras domain opcionais em `roslyn-nav-rules/`
+- [x] **RULE-02**: Engine carrega regras builtin embedded (`architecture.yaml`, `code-quality.yaml`, `security.yaml`) e regras domain opcionais em `roslyn-nav-rules/`
 - [ ] **RULE-03**: Predicados `calls` com wildcard (`IRepo.*`) são avaliados via `LIKE`
 - [ ] **RULE-04**: Bloco `not:` é avaliado com semântica `NOT EXISTS`
 - [ ] **RULE-05**: `check` suporta filtros por severidade e por `ruleId` no output JSON
@@ -48,21 +48,21 @@ Nenhum item adicional mapeado para este milestone.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SNAP-01 | Phase 1 - Snapshot Foundation | Pending |
-| SNAP-02 | Phase 1 - Snapshot Foundation | Pending |
-| SNAP-03 | Phase 1 - Snapshot Foundation | Pending |
-| SNAP-04 | Phase 1 - Snapshot Foundation | Pending |
-| RULE-01 | Phase 2 - Rules Engine | Pending |
-| RULE-02 | Phase 2 - Rules Engine | Pending |
-| RULE-03 | Phase 2 - Rules Engine | Pending |
-| RULE-04 | Phase 2 - Rules Engine | Pending |
-| RULE-05 | Phase 2 - Rules Engine | Pending |
-| ASK-01 | Phase 3 - Query Integration | Pending |
-| ASK-02 | Phase 3 - Query Integration | Pending |
-| ASK-03 | Phase 3 - Query Integration | Pending |
-| INT-01 | Phase 4 - Integration & Polish | Pending |
-| INT-02 | Phase 4 - Integration & Polish | Pending |
-| INT-03 | Phase 4 - Integration & Polish | Pending |
+| SNAP-01 | Phase 1 | Complete |
+| SNAP-02 | Phase 1 | Complete |
+| SNAP-03 | Phase 1 | Complete |
+| SNAP-04 | Phase 1 | Complete |
+| RULE-01 | Phase 2 | Pending |
+| RULE-02 | Phase 2 | Complete |
+| RULE-03 | Phase 2 | Pending |
+| RULE-04 | Phase 2 | Pending |
+| RULE-05 | Phase 2 | Pending |
+| ASK-01 | Phase 3 | Pending |
+| ASK-02 | Phase 3 | Pending |
+| ASK-03 | Phase 3 | Pending |
+| INT-01 | Phase 4 | Pending |
+| INT-02 | Phase 4 | Pending |
+| INT-03 | Phase 4 | Pending |
 
 **Coverage:**
 - Milestone requirements: 15 total

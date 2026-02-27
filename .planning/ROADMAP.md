@@ -59,7 +59,7 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Add YAML rule contracts and loader for builtin/domain packs
+- [x] 02-01-PLAN.md — Add YAML rule contracts and loader for builtin/domain packs
 - [ ] 02-02-PLAN.md — TDD SQL compiler/evaluator semantics for wildcard and `not:`
 - [ ] 02-03-PLAN.md — Expose `check` command with severity/ruleId filters and tests
 
@@ -103,8 +103,8 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Snapshot Foundation | 1/3 | In progress | 2026-02-27 |
-| 2. Rules Engine | 0/3 | Not started | - |
+| 1. Snapshot Foundation | 3/3 | Complete | 2026-02-27 |
+| 2. Rules Engine | 1/3 | In progress | 2026-02-27 |
 | 3. Query Integration | 0/1 | Not started | - |
 | 4. Integration & Polish | 0/1 | Not started | - |
 
