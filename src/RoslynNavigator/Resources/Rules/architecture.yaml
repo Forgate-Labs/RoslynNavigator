@@ -1,0 +1,37 @@
+# Architecture Rules - Builtin Rule Pack
+# Defines rules for enforcing architectural boundaries and dependencies
+
+rules:
+  - id: arch-001
+    title: Repository should not depend on Controller
+    severity: error
+    message: "Repository classes should not have direct dependencies on Controller namespaces"
+    predicate:
+      calls: "Controller.*"
+      fromNamespace: "*.Data.*"
+      not:
+        calls: "IController"
+
+  - id: arch-002
+    title: Domain layer should not access database directly
+    severity: warning
+    message: "Domain classes should not directly access database (Data.SqlClient, Microsoft.Data.Sqlite)"
+    predicate:
+      calls: "*.SqlClient.*"
+
+  - id: arch-003
+    title: Service layer should only depend on Repository interfaces
+    severity: error
+    message: "Services should depend on repository interfaces, not concrete implementations"
+    predicate:
+      calls: "*.Data.Repositories.*"
+
+  - id: arch-004
+    title: No circular dependencies between namespaces
+    severity: error
+    message: "Circular namespace dependencies detected"
+    predicate:
+      calls: "*"
+      fromNamespace: "*.Services.*"
+      not:
+        calls: "*.Domain.*"

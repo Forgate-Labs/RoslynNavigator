@@ -15,6 +15,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\Rules\*.yaml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Include="Resources\SnapshotSchema.sql" />
   </ItemGroup>
 
@@ -24,6 +28,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.11.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.11.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.0" />
+    <PackageReference Include="YamlDotNet" Version="16.0.0" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
   </ItemGroup>
 </Project>
