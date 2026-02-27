@@ -24,7 +24,11 @@ The project already has 17 navigation commands. This milestone adds write capabi
   3. `.roslyn-nav-plans.json` is created on first staged operation and persists between CLI invocations
   4. `IPlanStore` / `FilePlanStore` can be injected into any command without knowing the storage detail
   5. A `file commit` on a clean state creates a timestamped backup in `.roslyn-nav-backup/` before touching any file
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Plan/commit infrastructure: PlanModels, IPlanStore, FilePlanStore, BackupService
+- [ ] 01-02-PLAN.md — file read and file grep commands + file subcommand group in Program.cs
 
 ### Phase 2: File Stage & Commit
 **Goal**: AI can stage a set of file edits and apply them atomically, preview the diff before committing, and roll back if needed
@@ -74,7 +78,7 @@ The project already has 17 navigation commands. This milestone adds write capabi
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Infrastructure & File Read | 0/? | Not started | - |
+| 1. Infrastructure & File Read | 0/2 | Not started | - |
 | 2. File Stage & Commit | 0/? | Not started | - |
 | 3. Dotnet Scaffold | 0/? | Not started | - |
 | 4. Dotnet Add | 0/? | Not started | - |
