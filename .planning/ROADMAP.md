@@ -84,7 +84,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Infrastructure & File Read | 2/2 | Complete   | 2026-02-27 |
-| 2. File Stage & Commit | 0/? | Not started | - |
+| 2. File Stage & Commit | 2/3 | In Progress|  |
 | 3. Dotnet Scaffold | 0/? | Not started | - |
 | 4. Dotnet Add | 0/? | Not started | - |
 | 5. Dotnet Update, Remove & Docs | 0/? | Not started | - |

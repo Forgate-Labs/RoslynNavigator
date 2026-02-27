@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 ## Current Position
 
 Phase: 2 of 5 (File Stage & Commit)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In progress
-Last activity: 2026-02-27 — Completed 02-01 (FilePlanEngine — validation, diff, atomic apply, rollback)
+Last activity: 2026-02-27 — Completed 02-02 (file plan staging commands: edit/write/append/delete + file status)
 
-Progress: [███░░░░░░░] 30%
+Progress: [████░░░░░░] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 2.3 min
-- Total execution time: 7 min
+- Total plans completed: 4
+- Average duration: 2.25 min
+- Total execution time: 9 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-infrastructure-file-read | 2 | 4 min | 2 min |
-| 02-file-stage-commit | 1 | 3 min | 3 min |
+| 02-file-stage-commit | 2 | 5 min | 2.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2 min), 01-02 (2 min), 02-01 (3 min)
+- Last 5 plans: 01-01 (2 min), 01-02 (2 min), 02-01 (3 min), 02-02 (2 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -57,6 +57,9 @@ Recent decisions affecting current work:
 - [Phase 02-file-stage-commit]: ComputeDiff captures original lines before writing to disk to avoid empty diff after CommitAsync
 - [Phase 02-file-stage-commit]: LCS-based Myers-style diff implemented inline per plan constraint (no external library)
 - [Phase 02-file-stage-commit]: xUnit test project uses Guid temp directories with IDisposable cleanup for full test isolation
+- [02-02]: Edit and Delete validate eagerly via FilePlanEngine.ValidateAsync([op], cwd) before staging; first error wins
+- [02-02]: Write and Append skip validation entirely — always accepted per FSTAGE-02/03
+- [02-02]: file status --json outputs full FileStatusResult JSON; without flag outputs only UnifiedDiff string for human readability
 
 ### Pending Todos
 
@@ -69,5 +72,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 02-01-PLAN.md — FilePlanEngine (ValidateAsync, ComputeDiff, CommitAsync, RollbackAsync) + xUnit test project
+Stopped at: Completed 02-02-PLAN.md — file plan staging commands (edit/write/append/delete) + file status with unified diff preview
 Resume file: None
