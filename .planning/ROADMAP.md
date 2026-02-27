@@ -70,7 +70,12 @@ Plans:
   3. `dotnet add using` is a no-op (no error, no duplicate) when the directive already exists
   4. All `dotnet add` operations work on `ClassDeclarationSyntax`, `RecordDeclarationSyntax`, and `StructDeclarationSyntax`
   5. Providing syntactically invalid content to any `dotnet add` command returns an error before staging anything
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — TDD: DotnetAddMemberService (Roslyn insertion logic for all member kinds + using dedup)
+- [ ] 04-02-PLAN.md — DotnetAddResult model + DotnetAddCommand + FilePlanEngine AddMember support
+- [ ] 04-03-PLAN.md — Wire dotnet add subcommand group (using/field/property/constructor/method) in Program.cs
 
 ### Phase 5: Dotnet Update, Remove & Docs
 **Goal**: AI can replace or delete existing members and CLAUDE.md documents all new commands so AI assistants can discover and use them
@@ -89,5 +94,5 @@ Plans:
 | 1. Infrastructure & File Read | 2/2 | Complete   | 2026-02-27 |
 | 2. File Stage & Commit | 3/3 | Complete   | 2026-02-27 |
 | 3. Dotnet Scaffold | 1/1 | Complete   | 2026-02-27 |
-| 4. Dotnet Add | 0/? | Not started | - |
+| 4. Dotnet Add | 0/3 | Not started | - |
 | 5. Dotnet Update, Remove & Docs | 0/? | Not started | - |
