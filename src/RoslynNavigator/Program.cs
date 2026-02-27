@@ -573,6 +573,132 @@ dotnetScaffoldCommand.AddCommand(scaffoldEnumSubcommand);
 dotnetCommand.AddCommand(dotnetScaffoldCommand);
 dotnetCommand.AddCommand(dotnetAddCommand);
 
+// dotnet update property
+var updPropertyPathArg = new Argument<string>("path", "Path to the C# file");
+var updPropertyClassArg = new Argument<string>("className", "Name of the target class/record/struct");
+var updPropertyNameArg = new Argument<string>("propertyName", "Name of the property to replace");
+var updPropertyContentArg = new Argument<string>("content", "Full replacement property source");
+var updPropertySubcommand = new Command("property", "Replace a property in a class/record/struct");
+updPropertySubcommand.AddArgument(updPropertyPathArg);
+updPropertySubcommand.AddArgument(updPropertyClassArg);
+updPropertySubcommand.AddArgument(updPropertyNameArg);
+updPropertySubcommand.AddArgument(updPropertyContentArg);
+updPropertySubcommand.SetHandler(async (string path, string className, string name, string content) =>
+{
+    try
+    {
+        var result = await DotnetUpdateCommand.ExecuteAsync(path, className, "property", name, content);
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("dotnet_update_property_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, updPropertyPathArg, updPropertyClassArg, updPropertyNameArg, updPropertyContentArg);
+
+// dotnet update field
+var updFieldPathArg = new Argument<string>("path", "Path to the C# file");
+var updFieldClassArg = new Argument<string>("className", "Name of the target class/record/struct");
+var updFieldNameArg = new Argument<string>("fieldName", "Name of the field to replace (with or without leading underscore)");
+var updFieldContentArg = new Argument<string>("content", "Full replacement field source");
+var updFieldSubcommand = new Command("field", "Replace a field in a class/record/struct");
+updFieldSubcommand.AddArgument(updFieldPathArg);
+updFieldSubcommand.AddArgument(updFieldClassArg);
+updFieldSubcommand.AddArgument(updFieldNameArg);
+updFieldSubcommand.AddArgument(updFieldContentArg);
+updFieldSubcommand.SetHandler(async (string path, string className, string name, string content) =>
+{
+    try
+    {
+        var result = await DotnetUpdateCommand.ExecuteAsync(path, className, "field", name, content);
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("dotnet_update_field_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, updFieldPathArg, updFieldClassArg, updFieldNameArg, updFieldContentArg);
+
+// dotnet remove method
+var remMethodPathArg = new Argument<string>("path", "Path to the C# file");
+var remMethodClassArg = new Argument<string>("className", "Name of the target class/record/struct");
+var remMethodNameArg = new Argument<string>("methodName", "Name of the method to remove");
+var remMethodSubcommand = new Command("method", "Remove a method from a class/record/struct");
+remMethodSubcommand.AddArgument(remMethodPathArg);
+remMethodSubcommand.AddArgument(remMethodClassArg);
+remMethodSubcommand.AddArgument(remMethodNameArg);
+remMethodSubcommand.SetHandler(async (string path, string className, string name) =>
+{
+    try
+    {
+        var result = await DotnetRemoveCommand.ExecuteAsync(path, className, "method", name);
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("dotnet_remove_method_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, remMethodPathArg, remMethodClassArg, remMethodNameArg);
+
+// dotnet remove property
+var remPropertyPathArg = new Argument<string>("path", "Path to the C# file");
+var remPropertyClassArg = new Argument<string>("className", "Name of the target class/record/struct");
+var remPropertyNameArg = new Argument<string>("propertyName", "Name of the property to remove");
+var remPropertySubcommand = new Command("property", "Remove a property from a class/record/struct");
+remPropertySubcommand.AddArgument(remPropertyPathArg);
+remPropertySubcommand.AddArgument(remPropertyClassArg);
+remPropertySubcommand.AddArgument(remPropertyNameArg);
+remPropertySubcommand.SetHandler(async (string path, string className, string name) =>
+{
+    try
+    {
+        var result = await DotnetRemoveCommand.ExecuteAsync(path, className, "property", name);
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("dotnet_remove_property_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, remPropertyPathArg, remPropertyClassArg, remPropertyNameArg);
+
+// dotnet remove field
+var remFieldPathArg = new Argument<string>("path", "Path to the C# file");
+var remFieldClassArg = new Argument<string>("className", "Name of the target class/record/struct");
+var remFieldNameArg = new Argument<string>("fieldName", "Name of the field to remove (with or without leading underscore)");
+var remFieldSubcommand = new Command("field", "Remove a field from a class/record/struct");
+remFieldSubcommand.AddArgument(remFieldPathArg);
+remFieldSubcommand.AddArgument(remFieldClassArg);
+remFieldSubcommand.AddArgument(remFieldNameArg);
+remFieldSubcommand.SetHandler(async (string path, string className, string name) =>
+{
+    try
+    {
+        var result = await DotnetRemoveCommand.ExecuteAsync(path, className, "field", name);
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("dotnet_remove_field_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, remFieldPathArg, remFieldClassArg, remFieldNameArg);
+
+var dotnetUpdateCommand = new Command("update", "Replace members in existing C# types");
+dotnetUpdateCommand.AddCommand(updPropertySubcommand);
+dotnetUpdateCommand.AddCommand(updFieldSubcommand);
+
+var dotnetRemoveCommand = new Command("remove", "Remove members from existing C# types");
+dotnetRemoveCommand.AddCommand(remMethodSubcommand);
+dotnetRemoveCommand.AddCommand(remPropertySubcommand);
+dotnetRemoveCommand.AddCommand(remFieldSubcommand);
+
+dotnetCommand.AddCommand(dotnetUpdateCommand);
+dotnetCommand.AddCommand(dotnetRemoveCommand);
+
 // ── file command group ──────────────────────────────────────────────────────
 var fileCommand = new Command("file", "File read and staged-edit operations");
 
