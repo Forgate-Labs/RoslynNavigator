@@ -349,6 +349,104 @@ listFeatureScenariosCommand.SetHandler(async (string path) =>
     }
 }, pathOption);
 
+// ── dotnet command group ────────────────────────────────────────────────────
+var dotnetCommand = new Command("dotnet", "dotnet-specific operations (scaffold, etc.)");
+var dotnetScaffoldCommand = new Command("scaffold", "Scaffold new C# type files");
+
+// dotnet scaffold class
+var scaffoldClassPathArg = new Argument<string>("path", "Output file path for the new class");
+var scaffoldClassNamespaceArg = new Argument<string>("namespace", "Namespace for the new class");
+var scaffoldClassNameArg = new Argument<string>("className", "Name of the new class");
+var scaffoldClassSubcommand = new Command("class", "Scaffold a new C# class file");
+scaffoldClassSubcommand.AddArgument(scaffoldClassPathArg);
+scaffoldClassSubcommand.AddArgument(scaffoldClassNamespaceArg);
+scaffoldClassSubcommand.AddArgument(scaffoldClassNameArg);
+scaffoldClassSubcommand.SetHandler(async (string path, string ns, string typeName) =>
+{
+    try
+    {
+        var result = await DotnetScaffoldCommand.ExecuteAsync(path, ns, typeName, "class");
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("dotnet_scaffold_class_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, scaffoldClassPathArg, scaffoldClassNamespaceArg, scaffoldClassNameArg);
+
+// dotnet scaffold interface
+var scaffoldInterfacePathArg = new Argument<string>("path", "Output file path for the new interface");
+var scaffoldInterfaceNamespaceArg = new Argument<string>("namespace", "Namespace for the new interface");
+var scaffoldInterfaceNameArg = new Argument<string>("interfaceName", "Name of the new interface");
+var scaffoldInterfaceSubcommand = new Command("interface", "Scaffold a new C# interface file");
+scaffoldInterfaceSubcommand.AddArgument(scaffoldInterfacePathArg);
+scaffoldInterfaceSubcommand.AddArgument(scaffoldInterfaceNamespaceArg);
+scaffoldInterfaceSubcommand.AddArgument(scaffoldInterfaceNameArg);
+scaffoldInterfaceSubcommand.SetHandler(async (string path, string ns, string typeName) =>
+{
+    try
+    {
+        var result = await DotnetScaffoldCommand.ExecuteAsync(path, ns, typeName, "interface");
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("dotnet_scaffold_interface_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, scaffoldInterfacePathArg, scaffoldInterfaceNamespaceArg, scaffoldInterfaceNameArg);
+
+// dotnet scaffold record
+var scaffoldRecordPathArg = new Argument<string>("path", "Output file path for the new record");
+var scaffoldRecordNamespaceArg = new Argument<string>("namespace", "Namespace for the new record");
+var scaffoldRecordNameArg = new Argument<string>("recordName", "Name of the new record");
+var scaffoldRecordSubcommand = new Command("record", "Scaffold a new C# record file");
+scaffoldRecordSubcommand.AddArgument(scaffoldRecordPathArg);
+scaffoldRecordSubcommand.AddArgument(scaffoldRecordNamespaceArg);
+scaffoldRecordSubcommand.AddArgument(scaffoldRecordNameArg);
+scaffoldRecordSubcommand.SetHandler(async (string path, string ns, string typeName) =>
+{
+    try
+    {
+        var result = await DotnetScaffoldCommand.ExecuteAsync(path, ns, typeName, "record");
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("dotnet_scaffold_record_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, scaffoldRecordPathArg, scaffoldRecordNamespaceArg, scaffoldRecordNameArg);
+
+// dotnet scaffold enum
+var scaffoldEnumPathArg = new Argument<string>("path", "Output file path for the new enum");
+var scaffoldEnumNamespaceArg = new Argument<string>("namespace", "Namespace for the new enum");
+var scaffoldEnumNameArg = new Argument<string>("enumName", "Name of the new enum");
+var scaffoldEnumSubcommand = new Command("enum", "Scaffold a new C# enum file");
+scaffoldEnumSubcommand.AddArgument(scaffoldEnumPathArg);
+scaffoldEnumSubcommand.AddArgument(scaffoldEnumNamespaceArg);
+scaffoldEnumSubcommand.AddArgument(scaffoldEnumNameArg);
+scaffoldEnumSubcommand.SetHandler(async (string path, string ns, string typeName) =>
+{
+    try
+    {
+        var result = await DotnetScaffoldCommand.ExecuteAsync(path, ns, typeName, "enum");
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("dotnet_scaffold_enum_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, scaffoldEnumPathArg, scaffoldEnumNamespaceArg, scaffoldEnumNameArg);
+
+dotnetScaffoldCommand.AddCommand(scaffoldClassSubcommand);
+dotnetScaffoldCommand.AddCommand(scaffoldInterfaceSubcommand);
+dotnetScaffoldCommand.AddCommand(scaffoldRecordSubcommand);
+dotnetScaffoldCommand.AddCommand(scaffoldEnumSubcommand);
+dotnetCommand.AddCommand(dotnetScaffoldCommand);
+
 // ── file command group ──────────────────────────────────────────────────────
 var fileCommand = new Command("file", "File read and staged-edit operations");
 
@@ -590,6 +688,7 @@ rootCommand.AddCommand(findByAttributeCommand);
 rootCommand.AddCommand(findStepDefinitionCommand);
 rootCommand.AddCommand(findInterfaceConsumersCommand);
 rootCommand.AddCommand(listFeatureScenariosCommand);
+rootCommand.AddCommand(dotnetCommand);
 rootCommand.AddCommand(fileCommand);
 
 return await rootCommand.InvokeAsync(args);
