@@ -1,105 +1,105 @@
-# roslyn-nav — Referência Completa
+# roslyn-nav — Complete Reference
 
-`roslyn-nav` é um CLI .NET que usa Roslyn para navegar e mutar código C# sem ler arquivos inteiros. Todos os comandos retornam JSON. Use `--solution <path.sln>` em todos os comandos de navegação.
+`roslyn-nav` is a .NET CLI that uses Roslyn to navigate and mutate C# code without reading entire files. All commands return JSON. Use `--solution <path.sln>` on all navigation commands.
 
 ---
 
-## Navegação
+## Navigation
 
 ```bash
-# Estrutura de uma classe (membros + lineRanges) — use SEMPRE antes de ler um arquivo
+# Class structure (members + lineRanges) — use ALWAYS before reading a file
 roslyn-nav list-class --solution app.sln --file path/to/File.cs --class ClassName
 
-# Localizar símbolo na solution
+# Locate a symbol in the solution
 roslyn-nav find-symbol --solution app.sln --name SymbolName --kind class|method|property
 
-# Extrair source de um método
+# Extract a method's source code
 roslyn-nav get-method --solution app.sln --method MethodName --class ClassName
 
-# Extrair múltiplos métodos de uma vez
+# Extract multiple methods at once
 roslyn-nav get-methods --solution app.sln --class ClassName --methods "M1,M2,M3"
 
-# Todas as referências a um símbolo
+# All references to a symbol
 roslyn-nav find-usages --solution app.sln --symbol "ClassName.MethodName"
 
-# Quem chama um método
+# Who calls a method
 roslyn-nav find-callers --solution app.sln --symbol "ClassName.MethodName"
 
-# Implementações de uma interface
+# Implementations of an interface
 roslyn-nav find-implementations --solution app.sln --interface IInterfaceName
 
-# Implementações + pontos de injeção de uma interface
+# Implementations + injection points of an interface
 roslyn-nav find-interface-consumers --solution app.sln --interface IInterfaceName
 
-# Onde uma classe é instanciada (new)
+# Where a class is instantiated (new)
 roslyn-nav find-instantiations --solution app.sln --class ClassName
 
-# Membros com um atributo específico
+# Members decorated with a specific attribute
 roslyn-nav find-by-attribute --solution app.sln --attribute AttributeName
 
-# Step definitions Reqnroll/SpecFlow por padrão de texto
+# Reqnroll/SpecFlow step definitions by text pattern
 roslyn-nav find-step-definition --solution app.sln --pattern "user is logged in"
 
-# Classes em um namespace
+# Classes in a namespace
 roslyn-nav list-classes --solution app.sln --namespace My.Namespace
 
-# Hierarquia de namespaces de um projeto
+# Namespace hierarchy of a project
 roslyn-nav get-namespace-structure --solution app.sln --project ProjectName
 
-# Herança de uma classe (base types, interfaces, derived)
+# Class inheritance hierarchy (base types, interfaces, derived)
 roslyn-nav get-hierarchy --solution app.sln --class ClassName
 
-# Dependências do construtor (DI)
+# Constructor dependencies (DI)
 roslyn-nav get-constructor-deps --solution app.sln --class ClassName
 
-# Verificar se método é virtual/override/abstract/sealed
+# Check if a method is virtual/override/abstract/sealed
 roslyn-nav check-overridable --solution app.sln --class ClassName --method MethodName
 
-# Cenários de arquivos .feature (Gherkin)
+# Scenarios from Gherkin .feature files
 roslyn-nav list-feature-scenarios --path tests/Features
 ```
 
 ---
 
-## Write & Mutation — Pipeline Stage → Commit
+## Write & Mutation — Stage → Commit Pipeline
 
-**Regra:** todos os comandos write/dotnet são *staged* em `.roslyn-nav-plans.json`. Nada toca o disco até `file commit`.
+**Rule:** all write/dotnet commands are *staged* in `.roslyn-nav-plans.json`. Nothing touches disk until `file commit`.
 
 ```
-stage ops  →  file status  →  file commit  →  (file rollback se necessário)
+stage ops  →  file status  →  file commit  →  (file rollback if needed)
 ```
 
-### File Read (imediato, sem staging)
+### File Read (immediate, no staging)
 
 ```bash
-roslyn-nav file read path/to/File.cs                  # arquivo inteiro com line numbers
-roslyn-nav file read path/to/File.cs --lines 10-30    # só o range
+roslyn-nav file read path/to/File.cs                  # whole file with line numbers
+roslyn-nav file read path/to/File.cs --lines 10-30    # range only
 roslyn-nav file grep "pattern" src/ --ext .cs --max-lines 50
 ```
 
 ### File Stage
 
 ```bash
-# Edit: valida que linha N contém <old> antes de aceitar — falha rápido se não bater
+# Edit: validates that line N contains <old> before accepting — fails fast if mismatch
 roslyn-nav file plan edit path/File.cs <lineN> "<old content>" "<new content>"
 
-# Write: cria ou sobrescreve o arquivo inteiro
+# Write: creates or overwrites the entire file
 roslyn-nav file plan write path/File.cs "<full content>"
 
-# Append: adiciona ao final
+# Append: adds content to end of file
 roslyn-nav file plan append path/File.cs "<content>"
 
-# Delete: remove linha N, valida <old>
+# Delete: removes line N, validates <old>
 roslyn-nav file plan delete path/File.cs <lineN> "<old content>"
 ```
 
 ### File Commit / Rollback
 
 ```bash
-roslyn-nav file status           # unified diff de tudo staged (preview)
-roslyn-nav file commit           # cria backup em .roslyn-nav-backup/<ts>/, valida tudo, aplica atomicamente
-roslyn-nav file rollback         # restaura todos os arquivos do último backup
-roslyn-nav file clear            # descarta todos os staged ops sem tocar arquivos
+roslyn-nav file status           # unified diff of all staged ops (preview)
+roslyn-nav file commit           # creates backup in .roslyn-nav-backup/<ts>/, validates all, applies atomically
+roslyn-nav file rollback         # restores all files from last backup
+roslyn-nav file clear            # discards all staged ops without touching files
 ```
 
 ### Dotnet Scaffold (staged)
@@ -109,57 +109,57 @@ roslyn-nav dotnet scaffold class     path/ClassName.cs     My.Namespace ClassNam
 roslyn-nav dotnet scaffold interface path/IName.cs         My.Namespace IName
 roslyn-nav dotnet scaffold record    path/RecordName.cs    My.Namespace RecordName
 roslyn-nav dotnet scaffold enum      path/EnumName.cs      My.Namespace EnumName
-# depois: roslyn-nav file commit
+# then: roslyn-nav file commit
 ```
 
 ### Dotnet Add (staged)
 
 ```bash
-# using: idempotente, insere em ordem alfabética
+# using: idempotent, inserted in alphabetical order
 roslyn-nav dotnet add using path/File.cs My.Namespace
 
-# field: prepende _ automaticamente (passe o nome sem _)
+# field: auto-prepends _ (pass name without _)
 roslyn-nav dotnet add field path/File.cs ClassName private ILogger logger
-# → insere: private ILogger _logger;
+# → inserts: private ILogger _logger;
 
 # property
 roslyn-nav dotnet add property path/File.cs ClassName public string Name
 
-# constructor: passe a assinatura + corpo completos
+# constructor: pass full signature + body
 roslyn-nav dotnet add constructor path/File.cs ClassName \
   "public ClassName(ILogger<ClassName> logger) { _logger = logger; }"
 
-# method: passe a assinatura + corpo completos
+# method: pass full signature + body
 roslyn-nav dotnet add method path/File.cs ClassName \
   "public async Task<User> GetByIdAsync(int id) { return await _repo.FindAsync(id); }"
 
-# ordem de inserção respeitada: fields → properties → constructors → methods
+# insertion order enforced: fields → properties → constructors → methods
 ```
 
 ### Dotnet Update / Remove (staged)
 
 ```bash
-# update: substitui a declaração inteira do membro
+# update: replaces the entire member declaration
 roslyn-nav dotnet update property path/File.cs ClassName PropName \
   "public string PropName { get; init; } = string.Empty;"
 
 roslyn-nav dotnet update field path/File.cs ClassName _fieldName \
   "private readonly ILogger<ClassName> _fieldName;"
 
-# remove: apaga o membro pelo nome
+# remove: deletes member by name
 roslyn-nav dotnet remove method   path/File.cs ClassName MethodName
 roslyn-nav dotnet remove property path/File.cs ClassName PropName
-roslyn-nav dotnet remove field    path/File.cs ClassName _fieldName  # aceita com ou sem _
+roslyn-nav dotnet remove field    path/File.cs ClassName _fieldName  # accepts with or without _
 ```
 
 ---
 
-## Regras essenciais
+## Essential Rules
 
-1. **Navegação antes de ler:** use `list-class` para obter `lineRange` dos membros; depois `file read --lines` só naquele range.
-2. **Stage → status → commit:** nunca pule o `file status` antes do `file commit` em mudanças críticas.
-3. **`file plan edit` falha rápido:** se a linha não contiver `<old>`, a operação é rejeitada imediatamente — nenhum arquivo é tocado.
-4. **Atomicidade:** se qualquer validação falhar no `file commit`, zero arquivos são modificados.
-5. **`dotnet add using` é idempotente:** chame sem verificar se já existe.
-6. **`dotnet update/remove` encontra pelo nome:** não importa a linha atual, Roslyn localiza o nó.
-7. **Misture raw e AST:** `file plan edit` e `dotnet add/update/remove` compartilham o mesmo store — um único `file commit` aplica tudo.
+1. **Navigate before reading:** use `list-class` to get member `lineRange`; then `file read --lines` only that range.
+2. **Stage → status → commit:** always run `file status` before `file commit` on critical changes.
+3. **`file plan edit` fails fast:** if line N does not contain `<old>`, the op is rejected immediately — no file is touched.
+4. **Atomicity:** if any validation fails during `file commit`, zero files are modified.
+5. **`dotnet add using` is idempotent:** call it without checking whether the directive already exists.
+6. **`dotnet update/remove` finds by name:** current line number doesn't matter, Roslyn locates the node.
+7. **Mix raw and AST:** `file plan edit` and `dotnet add/update/remove` share the same store — a single `file commit` applies everything.
