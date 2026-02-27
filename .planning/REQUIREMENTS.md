@@ -14,11 +14,11 @@
 
 ### Rules / Check
 
-- [ ] **RULE-01**: Usuário pode rodar `roslyn-nav check` para avaliar regras sobre snapshot existente
+- [x] **RULE-01**: Usuário pode rodar `roslyn-nav check` para avaliar regras sobre snapshot existente
 - [x] **RULE-02**: Engine carrega regras builtin embedded (`architecture.yaml`, `code-quality.yaml`, `security.yaml`) e regras domain opcionais em `roslyn-nav-rules/`
-- [ ] **RULE-03**: Predicados `calls` com wildcard (`IRepo.*`) são avaliados via `LIKE`
-- [ ] **RULE-04**: Bloco `not:` é avaliado com semântica `NOT EXISTS`
-- [ ] **RULE-05**: `check` suporta filtros por severidade e por `ruleId` no output JSON
+- [x] **RULE-03**: Predicados `calls` com wildcard (`IRepo.*`) são avaliados via `LIKE`
+- [x] **RULE-04**: Bloco `not:` é avaliado com semântica `NOT EXISTS`
+- [x] **RULE-05**: `check` suporta filtros por severidade e por `ruleId` no output JSON
 
 ### Query / Ask Integration
 
@@ -52,11 +52,11 @@ Nenhum item adicional mapeado para este milestone.
 | SNAP-02 | Phase 1 | Complete |
 | SNAP-03 | Phase 1 | Complete |
 | SNAP-04 | Phase 1 | Complete |
-| RULE-01 | Phase 2 | Pending |
+| RULE-01 | Phase 2 | Complete |
 | RULE-02 | Phase 2 | Complete |
-| RULE-03 | Phase 2 | Pending |
-| RULE-04 | Phase 2 | Pending |
-| RULE-05 | Phase 2 | Pending |
+| RULE-03 | Phase 2 | Complete |
+| RULE-04 | Phase 2 | Complete |
+| RULE-05 | Phase 2 | Complete |
 | ASK-01 | Phase 3 | Pending |
 | ASK-02 | Phase 3 | Pending |
 | ASK-03 | Phase 3 | Pending |
@@ -71,4 +71,4 @@ Nenhum item adicional mapeado para este milestone.
 
 ---
 *Requirements defined: 2026-02-27*
-*Last updated: 2026-02-27 after milestone v2.0 requirement definition*
+*Last updated: 2026-02-27 after Phase 2 (Rules Engine) verification - all 5 RULE requirements complete*

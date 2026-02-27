@@ -10,7 +10,7 @@
 - [x] **Phase 1: Snapshot Foundation** - Gera banco SQLite com classes, métodos, dependências, chamadas, annotations, flags e metadados
 - [x] **Phase 2: Rules Engine** - Avalia regras YAML builtin/domain e reporta violações filtráveis
 - [x] **Phase 3: Query Integration** - Consulta SQL arbitrária com output JSON para LLM
-- [ ] **Phase 4: Integration & Polish** - Novos projetos integrados, CLI atualizado, compatibilidade garantida
+- [x] **Phase 4: Integration & Polish** - Novos projetos integrados, CLI atualizado, compatibilidade garantida
 
 ## Phase Details
 
@@ -103,7 +103,7 @@ Plans:
 
 Plans:
 - [x] 04-01-PLAN.md — Split snapshot/rules into dedicated projects and wire solution references
-- [ ] 04-02-PLAN.md — Preserve CLI help/output contracts and run full compatibility regression
+- [x] 04-02-PLAN.md — Preserve CLI help/output contracts and run full compatibility regression
 
 ---
 
@@ -114,7 +114,7 @@ Plans:
 | 1. Snapshot Foundation | 3/3 | Complete | 2026-02-27 |
 | 2. Rules Engine | 3/3 | Complete | 2026-02-27 |
 | 3. Query Integration | 2/2 | Complete | 2026-02-27 |
-| 4. Integration & Polish | 1/2 | In progress | - |
+| 4. Integration & Polish | 2/2 | Complete | 2026-02-27 |
 
 ---
 
