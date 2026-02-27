@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 ## Current Position
 
 Phase: 2 (Rules Engine)
-Plan: 1 (completed)
-Status: Plan 02-01 complete
-Last activity: 2026-02-27 — Completed plan 02-01 (Rule loader foundation)
+Plan: 2 (completed)
+Status: Plan 02-02 complete
+Last activity: 2026-02-27 — Completed plan 02-02 (Rule SQL compilation and evaluation)
 
-Progress: [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 35%
+Progress: [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 53%
 
 ## Current Milestone
 
@@ -31,8 +31,9 @@ Progress: [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 - **01-01 Completed:** Snapshot Foundation - SQLite with embedded schema, schema/path services, 18 tests pass
 - **01-02 Completed:** Snapshot Extraction - SnapshotExtractorService, SnapshotSignalAnalyzer, 9 TDD tests, 69 tests total pass
-- **01-03 Completed:** Wire snapshot to CLI - SnapshotCommand, CLI registration, 9 command tests,  tests pass
--36 snapshot **02-01 Completed:** Rule Loader Foundation - YamlDotNet, embedded YAML packs, RuleLoaderService, 16 loader tests
+- **01-03 Completed:** Wire snapshot to CLI - SnapshotCommand, CLI registration, 9 command tests, tests pass
+- **02-01 Completed:** Rule Loader Foundation - YamlDotNet, embedded YAML packs, RuleLoaderService, 16 loader tests
+- **02-02 Completed:** Rule SQL Compilation - RuleSqlCompiler with LIKE wildcards, RuleEvaluatorService with read-only queries, NOT EXISTS semantics, 19 tests
 See PROJECT.md for key decisions from v1.0.
 
 ### Pending Todos
@@ -48,8 +49,8 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed plan 02-01 - Rule loader foundation
-Resume from: Phase 2 plan 1 complete, ready for plan 02-02
+Stopped at: Completed plan 02-02 - Rule SQL compilation and evaluation
+Resume from: Phase 2 plan 2 complete, ready for plan 02-03
 
 ---
 
