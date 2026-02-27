@@ -55,7 +55,10 @@ Plans:
   1. `dotnet scaffold class` produces a valid C# file with file-scoped namespace and minimal `public class` body
   2. `dotnet scaffold interface`, `record`, and `enum` each produce syntactically valid files following the same pattern
   3. Scaffolded files are staged (not written immediately) and become part of the next `file commit`
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 03-01-PLAN.md — DotnetScaffoldCommand (all 4 types) + FilePlanEngine ScaffoldFile support + dotnet scaffold CLI wiring
 
 ### Phase 4: Dotnet Add
 **Goal**: AI can insert members (using directive, field, property, constructor, method) into existing C# types while respecting conventional member order
@@ -85,6 +88,6 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Infrastructure & File Read | 2/2 | Complete   | 2026-02-27 |
 | 2. File Stage & Commit | 3/3 | Complete   | 2026-02-27 |
-| 3. Dotnet Scaffold | 0/? | Not started | - |
+| 3. Dotnet Scaffold | 0/1 | Not started | - |
 | 4. Dotnet Add | 0/? | Not started | - |
 | 5. Dotnet Update, Remove & Docs | 0/? | Not started | - |
