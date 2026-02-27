@@ -80,8 +80,8 @@ roslyn-nav file grep "pattern" src/ --ext .cs --max-lines 50
 ### File Stage
 
 ```bash
-# Edit: validates that line N contains <old> before accepting — fails fast if mismatch
-roslyn-nav file plan edit path/File.cs <lineN> "<old content>" "<new content>"
+# Edit: stage replacement at line N (supports sequential multi-line via \n)
+roslyn-nav file plan edit path/File.cs <lineN> "<new content>"
 
 # Write: creates or overwrites the entire file
 roslyn-nav file plan write path/File.cs "<full content>"
@@ -158,7 +158,7 @@ roslyn-nav dotnet remove field    path/File.cs ClassName _fieldName  # accepts w
 
 1. **Navigate before reading:** use `list-class` to get member `lineRange`; then `file read --lines` only that range.
 2. **Stage → status → commit:** always run `file status` before `file commit` on critical changes.
-3. **`file plan edit` fails fast:** if line N does not contain `<old>`, the op is rejected immediately — no file is touched.
+3. **`file plan edit` supports sequential replacement:** pass `\n` inside `<new content>` to replace multiple consecutive lines starting at line N.
 4. **Atomicity:** if any validation fails during `file commit`, zero files are modified.
 5. **`dotnet add using` is idempotent:** call it without checking whether the directive already exists.
 6. **`dotnet update/remove` finds by name:** current line number doesn't matter, Roslyn locates the node.

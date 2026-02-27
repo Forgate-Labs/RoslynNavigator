@@ -403,10 +403,16 @@ var checkCommand = new Command("check", "Evaluate rules against a snapshot and r
 var checkDbOption = new Option<string?>("--db", "Path to the snapshot database (required)");
 var checkSeverityOption = new Option<string?>("--severity", "Filter violations by severity (error, warning, info)");
 var checkRuleIdOption = new Option<string?>("--ruleId", "Filter violations by rule ID (partial match)");
+var checkRulesOption = new Option<string[]>("--rules", "Optional custom rule YAML files. Repeat --rules or pass comma-separated paths.")
+{
+    Arity = ArgumentArity.ZeroOrMore,
+    AllowMultipleArgumentsPerToken = true
+};
 checkCommand.AddOption(checkDbOption);
 checkCommand.AddOption(checkSeverityOption);
 checkCommand.AddOption(checkRuleIdOption);
-checkCommand.SetHandler(async (string? db, string? severity, string? ruleId) =>
+checkCommand.AddOption(checkRulesOption);
+checkCommand.SetHandler(async (string? db, string? severity, string? ruleId, string[]? rules) =>
 {
     try
     {
@@ -418,7 +424,12 @@ checkCommand.SetHandler(async (string? db, string? severity, string? ruleId) =>
         }
 
         var command = new CheckCommand();
-        var result = await command.ExecuteAsync(db, severity, ruleId);
+        var parsedRuleFiles = (rules ?? Array.Empty<string>())
+            .SelectMany(value => value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        var result = await command.ExecuteAsync(db, severity, ruleId, parsedRuleFiles);
         Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
     }
     catch (Exception ex)
@@ -426,7 +437,7 @@ checkCommand.SetHandler(async (string? db, string? severity, string? ruleId) =>
         OutputError("check_error", ex.Message);
         Environment.ExitCode = 1;
     }
-}, checkDbOption, checkSeverityOption, checkRuleIdOption);
+}, checkDbOption, checkSeverityOption, checkRuleIdOption, checkRulesOption);
 
 // ── dotnet command group ────────────────────────────────────────────────────
 var dotnetCommand = new Command("dotnet", "dotnet-specific operations (scaffold, etc.)");
@@ -831,26 +842,24 @@ var filePlanCommand = new Command("plan", "Stage file operations for atomic comm
 // file plan edit
 var planEditPathArg = new Argument<string>("path", "File path to edit");
 var planEditLineArg = new Argument<int>("line", "1-based line number to edit");
-var planEditOldArg = new Argument<string>("old", "Expected current content of the line");
-var planEditNewArg = new Argument<string>("new", "Replacement content for the line");
-var planEditSubcommand = new Command("edit", "Stage a line edit (validates old string before accepting)");
+var planEditNewArg = new Argument<string>("new", "Replacement content. Use \\n for sequential multi-line replacement.");
+var planEditSubcommand = new Command("edit", "Stage a line or sequential multi-line edit");
 planEditSubcommand.AddArgument(planEditPathArg);
 planEditSubcommand.AddArgument(planEditLineArg);
-planEditSubcommand.AddArgument(planEditOldArg);
 planEditSubcommand.AddArgument(planEditNewArg);
-planEditSubcommand.SetHandler(async (string path, int line, string old, string newContent) =>
+planEditSubcommand.SetHandler(async (string path, int line, string newContent) =>
 {
     try
     {
-        var result = await FilePlanEditCommand.ExecuteAsync(path, line, old, newContent);
-        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+        await FilePlanEditCommand.ExecuteAsync(path, line, newContent);
+        Console.WriteLine("DONE");
     }
     catch (Exception ex)
     {
         OutputError("file_plan_edit_error", ex.Message);
         Environment.ExitCode = 1;
     }
-}, planEditPathArg, planEditLineArg, planEditOldArg, planEditNewArg);
+}, planEditPathArg, planEditLineArg, planEditNewArg);
 
 // file plan write
 var planWritePathArg = new Argument<string>("path", "File path to write");

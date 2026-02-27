@@ -55,6 +55,13 @@ public class SnapshotMethodRow
     public bool CallsExternal { get; set; }
     public bool AccessesDb { get; set; }
     public bool FiltersByTenant { get; set; }
+    public int ParameterCount { get; set; }
+    public bool UsesInsecureRandom { get; set; }
+    public bool UsesWeakCrypto { get; set; }
+    public bool CatchesGeneralException { get; set; }
+    public bool ThrowsGeneralException { get; set; }
+    public bool HasSqlStringConcatenation { get; set; }
+    public bool HasHardcodedSecret { get; set; }
 }
 
 /// <summary>

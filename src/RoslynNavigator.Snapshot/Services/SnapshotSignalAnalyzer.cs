@@ -32,6 +32,8 @@ public class SnapshotSignalAnalyzer
     {
         var signals = new MethodSignals();
 
+        signals.ParameterCount = method.ParameterList.Parameters.Count;
+
         // Returns null detection
         signals.ReturnsNull = AnalyzeReturnsNull(method, semanticModel);
 
@@ -49,6 +51,13 @@ public class SnapshotSignalAnalyzer
 
         // Tenant filtering detection
         signals.FiltersByTenant = AnalyzeTenantFiltering(method, semanticModel);
+
+        signals.UsesInsecureRandom = AnalyzeInsecureRandomUsage(method, semanticModel);
+        signals.UsesWeakCrypto = AnalyzeWeakCryptoUsage(method, semanticModel);
+        signals.CatchesGeneralException = AnalyzeCatchGeneralException(method, semanticModel);
+        signals.ThrowsGeneralException = AnalyzeThrowGeneralException(method, semanticModel);
+        signals.HasSqlStringConcatenation = AnalyzeSqlStringConcatenation(method, semanticModel);
+        signals.HasHardcodedSecret = AnalyzeHardcodedSecret(method);
 
         return signals;
     }
@@ -216,19 +225,199 @@ public class SnapshotSignalAnalyzer
             {
                 var methodName = symbol.Name;
                 var typeName = symbol.ContainingType?.Name ?? "";
+                var namespaceName = symbol.ContainingType?.ContainingNamespace?.ToDisplayString() ?? "";
 
-                // Check method names for database patterns
-                if (DatabasePatterns.Any(p => methodName.Contains(p, StringComparison.OrdinalIgnoreCase)))
+                var dbTypeNames = new[] { "DbContext", "DbSet", "SqlConnection", "SqlCommand", "NpgsqlConnection", "MySqlConnection", "OracleConnection" };
+                var dbNamespaces = new[]
+                {
+                    "Microsoft.EntityFrameworkCore",
+                    "System.Data",
+                    "Microsoft.Data.SqlClient",
+                    "Npgsql",
+                    "Dapper"
+                };
+
+                if (dbTypeNames.Any(t => typeName.Contains(t, StringComparison.OrdinalIgnoreCase)) ||
+                    dbNamespaces.Any(n => namespaceName.StartsWith(n, StringComparison.OrdinalIgnoreCase)))
                 {
                     return true;
                 }
 
-                // Check type names for database-related types
-                var dbTypeNames = new[] { "Repository", "DbContext", "DataContext", "Entity", "Table" };
-                if (dbTypeNames.Any(t => typeName.Contains(t, StringComparison.OrdinalIgnoreCase)))
+                if (typeName.Contains("Repository", StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }
+
+                if (DatabasePatterns.Any(p => methodName.Contains(p, StringComparison.OrdinalIgnoreCase)) &&
+                    typeName.Contains("Repository", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private bool AnalyzeInsecureRandomUsage(MethodDeclarationSyntax method, SemanticModel semanticModel)
+    {
+        if (method.Body == null) return false;
+
+        foreach (var invocation in method.Body.DescendantNodes().OfType<InvocationExpressionSyntax>())
+        {
+            var symbol = semanticModel.GetSymbolInfo(invocation).Symbol;
+            var type = symbol?.ContainingType;
+            if (type == null) continue;
+
+            if (type.ToDisplayString() == "System.Random")
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool AnalyzeWeakCryptoUsage(MethodDeclarationSyntax method, SemanticModel semanticModel)
+    {
+        if (method.Body == null) return false;
+
+        var weakTypes = new[]
+        {
+            "System.Security.Cryptography.MD5",
+            "System.Security.Cryptography.SHA1",
+            "System.Security.Cryptography.DES",
+            "System.Security.Cryptography.RC2",
+            "System.Security.Cryptography.TripleDES"
+        };
+
+        foreach (var invocation in method.Body.DescendantNodes().OfType<InvocationExpressionSyntax>())
+        {
+            var symbol = semanticModel.GetSymbolInfo(invocation).Symbol;
+            var owner = symbol?.ContainingType?.ToDisplayString() ?? string.Empty;
+            if (weakTypes.Any(owner.Equals))
+            {
+                return true;
+            }
+        }
+
+        foreach (var creation in method.Body.DescendantNodes().OfType<ObjectCreationExpressionSyntax>())
+        {
+            var type = semanticModel.GetTypeInfo(creation).Type?.ToDisplayString() ?? string.Empty;
+            if (weakTypes.Any(type.Equals))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool AnalyzeCatchGeneralException(MethodDeclarationSyntax method, SemanticModel semanticModel)
+    {
+        if (method.Body == null) return false;
+
+        foreach (var catchClause in method.Body.DescendantNodes().OfType<CatchClauseSyntax>())
+        {
+            if (catchClause.Declaration == null)
+            {
+                return true;
+            }
+
+            var type = semanticModel.GetTypeInfo(catchClause.Declaration.Type).Type?.ToDisplayString() ?? string.Empty;
+            if (type == "System.Exception")
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool AnalyzeThrowGeneralException(MethodDeclarationSyntax method, SemanticModel semanticModel)
+    {
+        if (method.Body == null) return false;
+
+        foreach (var throwStmt in method.Body.DescendantNodes().OfType<ThrowStatementSyntax>())
+        {
+            if (throwStmt.Expression is not ObjectCreationExpressionSyntax objCreation)
+            {
+                continue;
+            }
+
+            var type = semanticModel.GetTypeInfo(objCreation).Type?.ToDisplayString() ?? string.Empty;
+            if (type is "System.Exception" or "System.ApplicationException")
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool AnalyzeSqlStringConcatenation(MethodDeclarationSyntax method, SemanticModel semanticModel)
+    {
+        if (method.Body == null) return false;
+
+        foreach (var invocation in method.Body.DescendantNodes().OfType<InvocationExpressionSyntax>())
+        {
+            var symbol = semanticModel.GetSymbolInfo(invocation).Symbol;
+            if (symbol == null)
+            {
+                continue;
+            }
+
+            var methodName = symbol.Name;
+            var owner = symbol.ContainingType?.ToDisplayString() ?? string.Empty;
+            var isSqlExecution = methodName.Contains("Query", StringComparison.OrdinalIgnoreCase)
+                || methodName.Contains("Execute", StringComparison.OrdinalIgnoreCase)
+                || methodName.Contains("FromSql", StringComparison.OrdinalIgnoreCase)
+                || owner.Contains("SqlCommand", StringComparison.OrdinalIgnoreCase);
+
+            if (!isSqlExecution)
+            {
+                continue;
+            }
+
+            foreach (var argument in invocation.ArgumentList.Arguments)
+            {
+                if (argument.Expression is BinaryExpressionSyntax binary && binary.IsKind(SyntaxKind.AddExpression))
+                {
+                    return true;
+                }
+
+                if (argument.Expression is InterpolatedStringExpressionSyntax)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private bool AnalyzeHardcodedSecret(MethodDeclarationSyntax method)
+    {
+        if (method.Body == null) return false;
+
+        var secretPattern = new[] { "password", "passwd", "secret", "token", "apikey", "api_key", "privatekey", "private_key" };
+
+        foreach (var literal in method.Body.DescendantNodes().OfType<LiteralExpressionSyntax>())
+        {
+            if (!literal.IsKind(SyntaxKind.StringLiteralExpression))
+            {
+                continue;
+            }
+
+            var text = literal.Token.ValueText;
+            if (text.Length < 6)
+            {
+                continue;
+            }
+
+            if (secretPattern.Any(pattern => text.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
+            {
+                return true;
             }
         }
 
@@ -293,6 +482,13 @@ public class MethodSignals
     public bool CallsExternal { get; set; }
     public bool AccessesDb { get; set; }
     public bool FiltersByTenant { get; set; }
+    public int ParameterCount { get; set; }
+    public bool UsesInsecureRandom { get; set; }
+    public bool UsesWeakCrypto { get; set; }
+    public bool CatchesGeneralException { get; set; }
+    public bool ThrowsGeneralException { get; set; }
+    public bool HasSqlStringConcatenation { get; set; }
+    public bool HasHardcodedSecret { get; set; }
 }
 
 /// <summary>

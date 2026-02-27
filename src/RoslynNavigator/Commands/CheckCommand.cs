@@ -39,8 +39,13 @@ public class CheckCommand
     /// <param name="dbPath">Path to the snapshot database.</param>
     /// <param name="severityFilter">Optional severity filter (error, warning, info).</param>
     /// <param name="ruleIdFilter">Optional ruleId filter.</param>
+    /// <param name="ruleFiles">Optional explicit rule YAML files (.yaml/.yml).</param>
     /// <returns>Structured result with violations.</returns>
-    public async Task<CheckCommandResult> ExecuteAsync(string dbPath, string? severityFilter = null, string? ruleIdFilter = null)
+    public async Task<CheckCommandResult> ExecuteAsync(
+        string dbPath,
+        string? severityFilter = null,
+        string? ruleIdFilter = null,
+        IEnumerable<string>? ruleFiles = null)
     {
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
@@ -63,8 +68,26 @@ public class CheckCommand
                 return result;
             }
 
-            // Load all rules
+            // Load builtins first, then explicit custom rule files
             var rules = _loader.LoadAllRules();
+
+            if (ruleFiles != null)
+            {
+                var fileLoadResult = _loader.LoadRulesFromFiles(ruleFiles);
+                if (!fileLoadResult.Success)
+                {
+                    var firstError = fileLoadResult.Errors.FirstOrDefault();
+                    result.Success = false;
+                    result.ErrorMessage = firstError == null
+                        ? "Failed to load one or more custom rule files"
+                        : $"Failed to load rules from '{firstError.File}': {firstError.Reason}";
+                    stopwatch.Stop();
+                    result.ElapsedMs = stopwatch.ElapsedMilliseconds;
+                    return result;
+                }
+
+                rules.AddRange(fileLoadResult.Rules);
+            }
             
             if (rules.Count == 0)
             {
@@ -129,9 +152,10 @@ public class CheckCommand
         string dbPath,
         string? severityFilter,
         string? ruleIdFilter,
-        RuleLoaderService loader)
+        RuleLoaderService loader,
+        IEnumerable<string>? ruleFiles = null)
     {
         var command = new CheckCommand(loader, dbPath);
-        return await command.ExecuteAsync(dbPath, severityFilter, ruleIdFilter);
+        return await command.ExecuteAsync(dbPath, severityFilter, ruleIdFilter, ruleFiles);
     }
 }

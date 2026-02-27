@@ -141,6 +141,35 @@ rules:
     }
 
     [Fact]
+    public void LoadDomainRules_ParsesSnakeCasePredicateFields()
+    {
+        var domainDir = Path.Combine(_tempDir, "roslyn-nav-rules");
+        Directory.CreateDirectory(domainDir);
+
+        var customRules = @"
+rules:
+  - id: custom-parse-001
+    title: Parse predicate keys
+    severity: warning
+    message: test
+    predicate:
+      cognitive_complexity: 15
+      returns_null: true
+      parameter_count_min: 8
+";
+        File.WriteAllText(Path.Combine(domainDir, "custom-parse.yaml"), customRules);
+
+        var result = _loaderService.LoadDomainRules(domainDir);
+
+        Assert.True(result.Success);
+        var rule = Assert.Single(result.Rules);
+        Assert.NotNull(rule.Predicate);
+        Assert.Equal(15, rule.Predicate!.CognitiveComplexity);
+        Assert.True(rule.Predicate.ReturnsNull);
+        Assert.Equal(8, rule.Predicate.ParameterCountMin);
+    }
+
+    [Fact]
     public void LoadDomainRules_MergesWithBuiltinRules()
     {
         // Arrange
@@ -187,6 +216,54 @@ rules:
         // Assert
         Assert.True(result.Success);
         Assert.Empty(result.Rules);
+    }
+
+    [Fact]
+    public void LoadRulesFromFiles_LoadsYamlAndYmlFiles()
+    {
+        // Arrange
+        var yamlPath = Path.Combine(_tempDir, "custom-a.yaml");
+        var ymlPath = Path.Combine(_tempDir, "custom-b.yml");
+
+        File.WriteAllText(yamlPath, @"
+rules:
+  - id: custom-file-001
+    title: Custom file yaml rule
+    severity: warning
+    message: loaded from yaml
+");
+
+        File.WriteAllText(ymlPath, @"
+rules:
+  - id: custom-file-002
+    title: Custom file yml rule
+    severity: error
+    message: loaded from yml
+");
+
+        // Act
+        var result = _loaderService.LoadRulesFromFiles(new[] { yamlPath, ymlPath });
+
+        // Assert
+        Assert.True(result.Success);
+        Assert.Equal(2, result.Rules.Count);
+        Assert.Contains(result.Rules, r => r.Id == "custom-file-001");
+        Assert.Contains(result.Rules, r => r.Id == "custom-file-002");
+    }
+
+    [Fact]
+    public void LoadRulesFromFiles_ReturnsError_ForMissingFile()
+    {
+        // Arrange
+        var missingPath = Path.Combine(_tempDir, "missing.yaml");
+
+        // Act
+        var result = _loaderService.LoadRulesFromFiles(new[] { missingPath });
+
+        // Assert
+        Assert.False(result.Success);
+        Assert.Single(result.Errors);
+        Assert.Contains("not found", result.Errors[0].Reason, StringComparison.OrdinalIgnoreCase);
     }
 
     // --- Duplicate handling tests ---

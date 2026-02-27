@@ -82,7 +82,7 @@ public class SnapshotSchemaServiceTests : IDisposable
         Assert.NotNull(meta);
         Assert.Equal(solutionPath, meta.SolutionPath);
         Assert.False(string.IsNullOrEmpty(meta.GeneratedAt));
-        Assert.Equal(1, meta.SchemaVersion);
+        Assert.Equal(2, meta.SchemaVersion);
     }
 
     [Fact]

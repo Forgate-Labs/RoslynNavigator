@@ -149,6 +149,55 @@ public class RuleSqlCompiler
             parameters[paramName] = predicate.CallsExternal.Value ? 1 : 0;
         }
 
+        if (predicate.ParameterCountMin.HasValue)
+        {
+            var paramName = $"@p{_paramCounter++}";
+            conditions.Add($"m.parameter_count >= {paramName}");
+            parameters[paramName] = predicate.ParameterCountMin.Value;
+        }
+
+        if (predicate.UsesInsecureRandom.HasValue)
+        {
+            var paramName = $"@p{_paramCounter++}";
+            conditions.Add($"m.uses_insecure_random = {paramName}");
+            parameters[paramName] = predicate.UsesInsecureRandom.Value ? 1 : 0;
+        }
+
+        if (predicate.UsesWeakCrypto.HasValue)
+        {
+            var paramName = $"@p{_paramCounter++}";
+            conditions.Add($"m.uses_weak_crypto = {paramName}");
+            parameters[paramName] = predicate.UsesWeakCrypto.Value ? 1 : 0;
+        }
+
+        if (predicate.CatchesGeneralException.HasValue)
+        {
+            var paramName = $"@p{_paramCounter++}";
+            conditions.Add($"m.catches_general_exception = {paramName}");
+            parameters[paramName] = predicate.CatchesGeneralException.Value ? 1 : 0;
+        }
+
+        if (predicate.ThrowsGeneralException.HasValue)
+        {
+            var paramName = $"@p{_paramCounter++}";
+            conditions.Add($"m.throws_general_exception = {paramName}");
+            parameters[paramName] = predicate.ThrowsGeneralException.Value ? 1 : 0;
+        }
+
+        if (predicate.HasSqlStringConcatenation.HasValue)
+        {
+            var paramName = $"@p{_paramCounter++}";
+            conditions.Add($"m.has_sql_string_concatenation = {paramName}");
+            parameters[paramName] = predicate.HasSqlStringConcatenation.Value ? 1 : 0;
+        }
+
+        if (predicate.HasHardcodedSecret.HasValue)
+        {
+            var paramName = $"@p{_paramCounter++}";
+            conditions.Add($"m.has_hardcoded_secret = {paramName}");
+            parameters[paramName] = predicate.HasHardcodedSecret.Value ? 1 : 0;
+        }
+
         // Handle 'filters_by_tenant' predicate - filter on method filters_by_tenant flag
         if (predicate.FiltersByTenant.HasValue)
         {

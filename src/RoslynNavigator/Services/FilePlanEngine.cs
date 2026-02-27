@@ -85,7 +85,7 @@ public class FilePlanEngine
                 continue;
             }
 
-            // Edit and Delete ops must validate that the expected line content matches
+            // Edit and Delete ops must validate target lines
             if (op.Type == OperationType.Edit || op.Type == OperationType.Delete)
             {
                 var absPath = ToAbsolutePath(op.FilePath, workingDir);
@@ -105,13 +105,30 @@ public class FilePlanEngine
                     continue;
                 }
 
-                var actualLine = lines[lineNumber - 1];
-                var expectedOld = op.OldContent ?? string.Empty;
-
-                if (actualLine != expectedOld)
+                if (op.Type == OperationType.Edit)
                 {
-                    var opTypeName = op.Type == OperationType.Edit ? "Edit" : "Delete";
-                    errors.Add($"{opTypeName} op on '{absPath}' line {lineNumber}: expected '{expectedOld}' but found '{actualLine}'");
+                    var replacementLines = SplitContentLines(op.NewContent);
+                    var endLine = lineNumber + replacementLines.Count - 1;
+                    if (replacementLines.Count == 0)
+                    {
+                        errors.Add($"Edit op on '{absPath}' line {lineNumber}: replacement content cannot be empty");
+                        continue;
+                    }
+
+                    if (endLine > lines.Length)
+                    {
+                        errors.Add($"Edit op on '{absPath}' lines {lineNumber}-{endLine} is out of range (file has {lines.Length} lines)");
+                        continue;
+                    }
+                }
+                else
+                {
+                    var actualLine = lines[lineNumber - 1];
+                    var expectedOld = op.OldContent ?? string.Empty;
+                    if (actualLine != expectedOld)
+                    {
+                        errors.Add($"Delete op on '{absPath}' line {lineNumber}: expected '{expectedOld}' but found '{actualLine}'");
+                    }
                 }
             }
         }
@@ -278,7 +295,15 @@ public class FilePlanEngine
             {
                 case OperationType.Edit:
                     if (op.Line.HasValue && op.Line.Value >= 1 && op.Line.Value <= fileLines.Count)
-                        fileLines[op.Line.Value - 1] = op.NewContent ?? string.Empty;
+                    {
+                        var replacementLines = SplitContentLines(op.NewContent);
+                        var start = op.Line.Value - 1;
+                        var maxReplace = Math.Min(replacementLines.Count, fileLines.Count - start);
+                        for (var i = 0; i < maxReplace; i++)
+                        {
+                            fileLines[start + i] = replacementLines[i];
+                        }
+                    }
                     break;
 
                 case OperationType.Delete:
@@ -498,6 +523,19 @@ public class FilePlanEngine
         var memberName = doc.TryGetProperty("memberName", out var mn) ? mn.GetString() ?? "" : "";
         var content = doc.TryGetProperty("content", out var c) ? c.GetString() ?? "" : "";
         return (typeName, memberKind, memberName, content);
+    }
+
+    private static List<string> SplitContentLines(string? content)
+    {
+        if (content == null)
+        {
+            return new List<string>();
+        }
+
+        return content
+            .Split('\n')
+            .Select(line => line.TrimEnd('\r'))
+            .ToList();
     }
 
     private static List<EditEntry> BuildEditScript(string[] original, string[] modified)

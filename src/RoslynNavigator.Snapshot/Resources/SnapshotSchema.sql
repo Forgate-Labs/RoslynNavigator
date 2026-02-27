@@ -61,6 +61,13 @@ CREATE TABLE IF NOT EXISTS methods (
     calls_external INTEGER DEFAULT 0,
     accesses_db INTEGER DEFAULT 0,
     filters_by_tenant INTEGER DEFAULT 0,
+    parameter_count INTEGER DEFAULT 0,
+    uses_insecure_random INTEGER DEFAULT 0,
+    uses_weak_crypto INTEGER DEFAULT 0,
+    catches_general_exception INTEGER DEFAULT 0,
+    throws_general_exception INTEGER DEFAULT 0,
+    has_sql_string_concatenation INTEGER DEFAULT 0,
+    has_hardcoded_secret INTEGER DEFAULT 0,
     FOREIGN KEY (snapshot_id) REFERENCES snapshot_meta(id),
     FOREIGN KEY (class_id) REFERENCES classes(id)
 );

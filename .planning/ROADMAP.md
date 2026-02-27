@@ -4,6 +4,7 @@
 
 - ✅ **v1.0 File & Dotnet Commands** — Phases 1-5 (shipped 2026-02-27)
 - ✅ **v2.0 Snapshot, Rules & Ask** — Phases 1-3 (shipped 2026-02-27)
+- ✅ **v2.1 Sonar Integration Baseline** — custom rule files + Sonar catalog + high-confidence predicate mapping (shipped 2026-02-27)
 
 ## Phases
 
@@ -141,6 +142,21 @@ Plans:
 | INT-01 | Phase 4 |
 | INT-02 | Phase 4 |
 | INT-03 | Phase 4 |
+
+---
+
+## Sonar Baseline Scope (v2.1)
+
+- Included:
+  - `check` supports custom rule files via `--rules` (explicit file paths, not folder-bound)
+  - Full Sonar C# catalog is available in `roslyn-nav-rules/SonarQube.yaml`
+  - Snapshot/rules engine now supports extra method signals used by mapped Sonar rules (e.g., parameter count, insecure random, weak crypto, broad catch, SQL concatenation, hardcoded secret)
+  - Only high-confidence Sonar mappings are enabled to avoid noisy false positives
+
+- Current limits (documented):
+  - Not full SonarQube parity yet (no complete taint/dataflow engine across all rules)
+  - Many Sonar rules remain catalog-only (metadata present, no executable predicate yet)
+  - Security rules requiring deep interprocedural analysis/sanitization tracking are intentionally not auto-mapped
 
 ---
 

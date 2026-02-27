@@ -198,7 +198,14 @@ public class SnapshotExtractorService
             HasTryCatch = signals.HasTryCatch,
             CallsExternal = signals.CallsExternal,
             AccessesDb = signals.AccessesDb,
-            FiltersByTenant = signals.FiltersByTenant
+            FiltersByTenant = signals.FiltersByTenant,
+            ParameterCount = signals.ParameterCount,
+            UsesInsecureRandom = signals.UsesInsecureRandom,
+            UsesWeakCrypto = signals.UsesWeakCrypto,
+            CatchesGeneralException = signals.CatchesGeneralException,
+            ThrowsGeneralException = signals.ThrowsGeneralException,
+            HasSqlStringConcatenation = signals.HasSqlStringConcatenation,
+            HasHardcodedSecret = signals.HasHardcodedSecret
         };
 
         return row;
@@ -351,13 +358,19 @@ public class SnapshotExtractorService
                 is_virtual, is_override, is_static, is_abstract, parameters,
                 start_line, end_line,
                 returns_null, cognitive_complexity, has_try_catch,
-                calls_external, accesses_db, filters_by_tenant
+                calls_external, accesses_db, filters_by_tenant,
+                parameter_count, uses_insecure_random, uses_weak_crypto,
+                catches_general_exception, throws_general_exception,
+                has_sql_string_concatenation, has_hardcoded_secret
             ) VALUES (
                 @snapshot_id, @class_id, @name, @return_type, @accessibility,
                 @is_virtual, @is_override, @is_static, @is_abstract, @parameters,
                 @start_line, @end_line,
                 @returns_null, @cognitive_complexity, @has_try_catch,
-                @calls_external, @accesses_db, @filters_by_tenant
+                @calls_external, @accesses_db, @filters_by_tenant,
+                @parameter_count, @uses_insecure_random, @uses_weak_crypto,
+                @catches_general_exception, @throws_general_exception,
+                @has_sql_string_concatenation, @has_hardcoded_secret
             );
             SELECT last_insert_rowid();";
 
@@ -460,6 +473,13 @@ public class SnapshotExtractorService
         command.Parameters.AddWithValue("@calls_external", row.CallsExternal ? 1 : 0);
         command.Parameters.AddWithValue("@accesses_db", row.AccessesDb ? 1 : 0);
         command.Parameters.AddWithValue("@filters_by_tenant", row.FiltersByTenant ? 1 : 0);
+        command.Parameters.AddWithValue("@parameter_count", row.ParameterCount);
+        command.Parameters.AddWithValue("@uses_insecure_random", row.UsesInsecureRandom ? 1 : 0);
+        command.Parameters.AddWithValue("@uses_weak_crypto", row.UsesWeakCrypto ? 1 : 0);
+        command.Parameters.AddWithValue("@catches_general_exception", row.CatchesGeneralException ? 1 : 0);
+        command.Parameters.AddWithValue("@throws_general_exception", row.ThrowsGeneralException ? 1 : 0);
+        command.Parameters.AddWithValue("@has_sql_string_concatenation", row.HasSqlStringConcatenation ? 1 : 0);
+        command.Parameters.AddWithValue("@has_hardcoded_secret", row.HasHardcodedSecret ? 1 : 0);
     }
 
     private void AddCallParameters(SqliteCommand command, SnapshotCallRow row)

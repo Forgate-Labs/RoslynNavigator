@@ -5,16 +5,16 @@ namespace RoslynNavigator.Commands;
 
 public static class FilePlanEditCommand
 {
-    public static async Task<FilePlanStagedResult> ExecuteAsync(
-        string path, int line, string oldContent, string newContent)
+    public static async Task ExecuteAsync(string path, int line, string newContent)
     {
+        var normalizedContent = NormalizeNewContent(newContent);
+
         var op = new PlanOperation
         {
             Type = OperationType.Edit,
             FilePath = path,
             Line = line,
-            OldContent = oldContent,
-            NewContent = newContent
+            NewContent = normalizedContent
         };
 
         var errors = await new FilePlanEngine().ValidateAsync([op], Directory.GetCurrentDirectory());
@@ -25,13 +25,12 @@ public static class FilePlanEditCommand
         var state = await store.LoadAsync();
         state.Operations.Add(op);
         await store.SaveAsync(state);
+    }
 
-        return new FilePlanStagedResult
-        {
-            Operation = "edit",
-            FilePath = path,
-            Line = line,
-            TotalStagedOps = state.Operations.Count
-        };
+    private static string NormalizeNewContent(string value)
+    {
+        return value
+            .Replace("\\r\\n", "\n", StringComparison.Ordinal)
+            .Replace("\\n", "\n", StringComparison.Ordinal);
     }
 }

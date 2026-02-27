@@ -7,7 +7,7 @@ public class SnapshotSchemaService
 {
     private const string ResourceName = "RoslynNavigator.Snapshot.Resources.SnapshotSchema.sql";
     private const string SchemaVersionColumn = "schema_version";
-    private const int CurrentSchemaVersion = 1;
+    private const int CurrentSchemaVersion = 2;
 
     private readonly SnapshotPathService _pathService;
 
@@ -59,6 +59,14 @@ public class SnapshotSchemaService
 
             // Upsert snapshot_meta row
             UpsertSnapshotMeta(connection, transaction, solutionPath);
+
+            EnsureColumnExists(connection, transaction, "methods", "parameter_count", "INTEGER DEFAULT 0");
+            EnsureColumnExists(connection, transaction, "methods", "uses_insecure_random", "INTEGER DEFAULT 0");
+            EnsureColumnExists(connection, transaction, "methods", "uses_weak_crypto", "INTEGER DEFAULT 0");
+            EnsureColumnExists(connection, transaction, "methods", "catches_general_exception", "INTEGER DEFAULT 0");
+            EnsureColumnExists(connection, transaction, "methods", "throws_general_exception", "INTEGER DEFAULT 0");
+            EnsureColumnExists(connection, transaction, "methods", "has_sql_string_concatenation", "INTEGER DEFAULT 0");
+            EnsureColumnExists(connection, transaction, "methods", "has_hardcoded_secret", "INTEGER DEFAULT 0");
 
             transaction.Commit();
         }
@@ -201,6 +209,41 @@ public class SnapshotSchemaService
         command.Transaction = transaction;
 
         command.ExecuteNonQuery();
+    }
+
+    private void EnsureColumnExists(
+        SqliteConnection connection,
+        SqliteTransaction transaction,
+        string tableName,
+        string columnName,
+        string columnSqlType)
+    {
+        using var checkCommand = connection.CreateCommand();
+        checkCommand.Transaction = transaction;
+        checkCommand.CommandText = $"PRAGMA table_info({tableName})";
+
+        var exists = false;
+        using (var reader = checkCommand.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                if (string.Equals(reader.GetString(1), columnName, StringComparison.OrdinalIgnoreCase))
+                {
+                    exists = true;
+                    break;
+                }
+            }
+        }
+
+        if (exists)
+        {
+            return;
+        }
+
+        using var alterCommand = connection.CreateCommand();
+        alterCommand.Transaction = transaction;
+        alterCommand.CommandText = $"ALTER TABLE {tableName} ADD COLUMN {columnName} {columnSqlType}";
+        alterCommand.ExecuteNonQuery();
     }
 }
 

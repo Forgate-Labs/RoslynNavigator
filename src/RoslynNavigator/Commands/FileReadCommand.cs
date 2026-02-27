@@ -18,17 +18,14 @@ public static class FileReadCommand
 
         int rangeStart;
         int rangeEnd;
-        bool hasRange;
 
         if (string.IsNullOrEmpty(lines))
         {
             rangeStart = 1;
             rangeEnd = totalLines;
-            hasRange = false;
         }
         else
         {
-            hasRange = true;
             var parts = lines.Split('-');
             if (parts.Length != 2 || !int.TryParse(parts[0], out rangeStart) || !int.TryParse(parts[1], out rangeEnd))
                 throw new ArgumentException($"Invalid line range format: '{lines}'. Expected format: START-END (e.g., 10-20)");
@@ -41,17 +38,13 @@ public static class FileReadCommand
         }
 
         var sliced = allLines[(rangeStart - 1)..rangeEnd];
-        var lineInfos = sliced
-            .Select((line, i) => new FileLineInfo { Line = rangeStart + i, Content = line })
+        var compactLines = sliced
+            .Select((line, i) => $"{rangeStart + i}: {line}")
             .ToList();
 
         return new FileReadResult
         {
-            FilePath = path,
-            TotalLines = totalLines,
-            RangeStart = hasRange ? rangeStart : null,
-            RangeEnd = hasRange ? rangeEnd : null,
-            Lines = lineInfos
+            Lines = compactLines
         };
     }
 }

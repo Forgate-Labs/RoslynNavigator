@@ -338,6 +338,35 @@ public class CheckCommandTests : IDisposable
     // --- Integration test with real snapshot ---
 
     [Fact]
+    public async Task ExecuteAsync_WithCustomRuleFile_LoadsAndEvaluatesCustomRules()
+    {
+        // Arrange
+        var customRulePath = Path.Combine(_tempDir, "custom-check.yaml");
+        File.WriteAllText(customRulePath, @"
+rules:
+  - id: custom-file-001
+    title: Complexity guard
+    severity: error
+    message: custom file rule triggered
+    predicate:
+      cognitive_complexity: 20
+");
+
+        var command = new CheckCommand();
+
+        // Act
+        var result = await command.ExecuteAsync(
+            _dbPath,
+            ruleIdFilter: "custom-file-001",
+            ruleFiles: new[] { customRulePath });
+
+        // Assert
+        Assert.True(result.Success, result.ErrorMessage);
+        Assert.NotEmpty(result.Violations);
+        Assert.All(result.Violations, v => Assert.Equal("custom-file-001", v.RuleId));
+    }
+
+    [Fact]
     public async Task ExecuteAsync_WithSampleSolution_ReturnsResult()
     {
         // This test creates a snapshot from the sample solution and runs check on it

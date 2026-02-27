@@ -38,7 +38,7 @@ public class FilePlanEngineTests : IDisposable
     }
 
     [Fact]
-    public async Task ValidateAsync_EditOpLineDoesNotMatch_ReturnsSpecificError()
+    public async Task ValidateAsync_EditOpIgnoresOldContent_ReturnsNoErrors()
     {
         var filePath = WriteFile("sample.cs", "line1\nline2\nline3");
         var ops = new List<PlanOperation>
@@ -48,10 +48,7 @@ public class FilePlanEngineTests : IDisposable
 
         var errors = await _engine.ValidateAsync(ops, _tempDir);
 
-        Assert.Single(errors);
-        Assert.Contains("line 2", errors[0]);
-        Assert.Contains("WRONG", errors[0]);
-        Assert.Contains("line2", errors[0]);
+        Assert.Empty(errors);
     }
 
     [Fact]
@@ -167,7 +164,7 @@ public class FilePlanEngineTests : IDisposable
     }
 
     [Fact]
-    public async Task CommitAsync_InvalidOp_ThrowsAndDoesNotModifyAnyFile()
+    public async Task CommitAsync_InvalidEditRange_ThrowsAndDoesNotModifyAnyFile()
     {
         var filePath = WriteFile("target.cs", "line1\nline2\nline3");
         var originalContent = await File.ReadAllTextAsync(filePath);
@@ -175,7 +172,7 @@ public class FilePlanEngineTests : IDisposable
 
         var ops = new List<PlanOperation>
         {
-            new PlanOperation { Type = OperationType.Edit, FilePath = filePath, Line = 2, OldContent = "WRONG", NewContent = "should_not_appear" }
+            new PlanOperation { Type = OperationType.Edit, FilePath = filePath, Line = 3, NewContent = "new_line_3\nnew_line_4" }
         };
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -236,6 +233,26 @@ public class FilePlanEngineTests : IDisposable
         Assert.Contains("@@", diff);
         Assert.Contains("-line2", diff);
         Assert.Contains("+line2_changed", diff);
+    }
+
+    [Fact]
+    public async Task CommitAsync_EditOpMultiLine_ReplacesSequentialLines()
+    {
+        var filePath = WriteFile("multi_target.cs", "line1\nline2\nline3\nline4");
+        var backupService = new BackupService(_tempDir);
+
+        var ops = new List<PlanOperation>
+        {
+            new PlanOperation { Type = OperationType.Edit, FilePath = filePath, Line = 2, NewContent = "A\nB" }
+        };
+
+        await _engine.CommitAsync(ops, _tempDir, backupService);
+
+        var lines = await File.ReadAllLinesAsync(filePath);
+        Assert.Equal("line1", lines[0]);
+        Assert.Equal("A", lines[1]);
+        Assert.Equal("B", lines[2]);
+        Assert.Equal("line4", lines[3]);
     }
 
     // --- Helpers ---

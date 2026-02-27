@@ -175,6 +175,30 @@ public class RuleSqlCompilerTests
         Assert.Contains("has_try_catch", sql);
     }
 
+    [Fact]
+    public void Compile_ParameterCountMin_GeneratesCondition()
+    {
+        var compiler = new RuleSqlCompiler();
+        var predicate = new RulePredicate { ParameterCountMin = 8 };
+
+        var (sql, parameters) = compiler.Compile(predicate);
+
+        Assert.Contains("parameter_count", sql);
+        Assert.Contains("@p0", sql);
+        Assert.Equal(8, parameters["@p0"]);
+    }
+
+    [Fact]
+    public void Compile_UsesWeakCrypto_GeneratesCondition()
+    {
+        var compiler = new RuleSqlCompiler();
+        var predicate = new RulePredicate { UsesWeakCrypto = true };
+
+        var (sql, _) = compiler.Compile(predicate);
+
+        Assert.Contains("uses_weak_crypto", sql);
+    }
+
     // --- Parameterization tests ---
 
     [Fact]

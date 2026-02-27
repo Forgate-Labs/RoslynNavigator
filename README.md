@@ -13,6 +13,9 @@ Roslyn Navigator provides targeted commands that extract and mutate only what yo
 - Navigate namespaces and project structure
 - **Stage file edits atomically** with diff preview and rollback
 - **Insert, update, and remove C# members** via Roslyn AST — no regex, no full rewrites
+- **Generate SQLite snapshots** of your solution for fast analysis
+- **Run rules packs** (architecture, code quality, security) against snapshots
+- **Query snapshots with SQL** and get stable JSON output for LLM workflows
 
 **Result:** Read 18 lines instead of 500. Edit one method without touching the rest.
 
@@ -45,7 +48,7 @@ roslyn-nav get-method --solution MyApp.sln --method CreateUser --class UserServi
 roslyn-nav find-usages --solution MyApp.sln --symbol "UserService.CreateUser"
 ```
 
-### Write & Mutation (v1.1)
+### Write & Mutation
 
 All write commands are **staged** — nothing touches disk until `file commit`.
 
@@ -56,8 +59,11 @@ roslyn-nav file read Services/UserService.cs --lines 10-30
 # Search across files
 roslyn-nav file grep "ILogger" src/ --ext .cs
 
-# Stage a line edit (validates old content before accepting)
-roslyn-nav file plan edit Services/UserService.cs 12 "    private int _count;" "    private long _count;"
+# Stage a line edit
+roslyn-nav file plan edit Services/UserService.cs 12 "    private long _count;"
+
+# Stage sequential multi-line replacement via \n
+roslyn-nav file plan edit Services/UserService.cs 20 "if (x == null)\n{\n    return;\n}"
 
 # Preview all staged changes as unified diff
 roslyn-nav file status
@@ -99,6 +105,22 @@ roslyn-nav dotnet remove property src/Models/User.cs User DeprecatedField
 roslyn-nav file commit
 ```
 
+### Snapshot, Rules, and Query
+
+```bash
+# Generate snapshot database (default output in workspace)
+roslyn-nav snapshot --solution MyApp.sln
+
+# Run builtin + optional domain rules against snapshot
+roslyn-nav check --db ./.roslyn-nav/snapshot.db
+
+# Filter violations
+roslyn-nav check --severity error --ruleId no-naked-strings
+
+# Run read-only SQL queries against snapshot
+roslyn-nav snapshot query --sql "SELECT name, namespace FROM classes LIMIT 10"
+```
+
 ## Commands
 
 ### Navigation
@@ -123,6 +145,14 @@ roslyn-nav file commit
 | `get-constructor-deps` | Analyze constructor dependencies for DI |
 | `check-overridable` | Check if a method is virtual/override/abstract/sealed |
 
+### Snapshot & Rules
+
+| Command | Description |
+|---------|-------------|
+| `snapshot --solution <path.sln> [--db <path>]` | Generate/update SQLite snapshot with classes, methods, dependencies, calls, annotations and analysis flags |
+| `check [--db <path>] [--severity <level>] [--ruleId <id>]` | Evaluate YAML rules against snapshot and return violations as JSON |
+| `snapshot query --sql "<SELECT...>" [--db <path>]` | Execute read-only SQL against snapshot and return JSON array of rows |
+
 ### File Read
 
 | Command | Description |
@@ -134,7 +164,7 @@ roslyn-nav file commit
 
 | Command | Description |
 |---------|-------------|
-| `file plan edit <path> <line> <old> <new>` | Stage a line edit — validates old content before accepting |
+| `file plan edit <path> <line> <new>` | Stage a line or sequential multi-line replacement (use `\n`); returns `DONE` |
 | `file plan write <path> <content>` | Stage a full file overwrite (creates if missing) |
 | `file plan append <path> <content>` | Stage an append to end of file |
 | `file plan delete <path> <line> <old>` | Stage a line deletion — validates old content |
@@ -231,6 +261,13 @@ Now any AI assistant working on your codebase will know how to use roslyn-nav fo
 - **Token savings:** 85-98% reduction on navigation tasks
 - **Edit safety:** atomic commit + automatic backup on every `file commit`
 
+## What's New (Phases 1-4)
+
+- **Phase 1 - Snapshot Foundation:** `snapshot` command now builds a SQLite database with schema for classes, methods, dependencies, calls, annotations, flags, and metadata.
+- **Phase 2 - Rules Engine:** `check` command now evaluates builtin YAML rule packs plus optional domain rules and supports severity/rule filters.
+- **Phase 3 - Query Integration:** `snapshot query` enables arbitrary read-only SQL over snapshot data with stable JSON output for automation/LLM use.
+- **Phase 4 - Integration & Polish:** solution split into modular projects (`RoslynNavigator`, `RoslynNavigator.Snapshot`, `RoslynNavigator.Rules`, `RoslynNavigator.Tests`) with backward compatibility preserved.
+
 ## Requirements
 
 - .NET 10 SDK or later
@@ -252,7 +289,10 @@ dotnet tool install --global --add-source ./src/RoslynNavigator/bin/Release Rosl
 
 ```
 RoslynNavigator/
-├── src/RoslynNavigator/     # Main tool source
+├── src/RoslynNavigator/             # CLI executable and command surface
+├── src/RoslynNavigator.Snapshot/    # Snapshot extraction + SQLite schema/services
+├── src/RoslynNavigator.Rules/       # Rules loading, SQL compilation, evaluation
+├── tests/RoslynNavigator.Tests/     # Unit/integration test suite
 ├── tests/SampleSolution/    # Test solution for development
 ├── CLAUDE.md                # Instructions for Claude Code
 ├── AGENTS.md                # Instructions for AI agents
