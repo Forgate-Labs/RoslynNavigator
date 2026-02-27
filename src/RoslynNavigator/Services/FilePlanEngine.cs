@@ -1,3 +1,4 @@
+using System.Text.Json;
 using RoslynNavigator.Models;
 
 namespace RoslynNavigator.Services;
@@ -49,6 +50,38 @@ public class FilePlanEngine
                 }
                 if (!success)
                     errors.Add($"dotnet add {meta.MemberKind} on '{absPath}': {error}");
+                continue;
+            }
+
+            if (op.Type == OperationType.UpdateMember)
+            {
+                var absPath = ToAbsolutePath(op.FilePath, workingDir);
+                if (!File.Exists(absPath))
+                {
+                    errors.Add($"File not found: {absPath}");
+                    continue;
+                }
+                var sourceText = await File.ReadAllTextAsync(absPath);
+                var meta = ParseUpdateRemoveMetadata(op.Metadata);
+                var result = DotnetUpdateRemoveService.UpdateMember(sourceText, meta.TypeName, meta.MemberKind, meta.MemberName, meta.Content);
+                if (!result.Success)
+                    errors.Add($"dotnet update {meta.MemberKind} on '{absPath}': {result.Error}");
+                continue;
+            }
+
+            if (op.Type == OperationType.RemoveMember)
+            {
+                var absPath = ToAbsolutePath(op.FilePath, workingDir);
+                if (!File.Exists(absPath))
+                {
+                    errors.Add($"File not found: {absPath}");
+                    continue;
+                }
+                var sourceText = await File.ReadAllTextAsync(absPath);
+                var meta = ParseUpdateRemoveMetadata(op.Metadata);
+                var result = DotnetUpdateRemoveService.RemoveMember(sourceText, meta.TypeName, meta.MemberKind, meta.MemberName);
+                if (!result.Success)
+                    errors.Add($"dotnet remove {meta.MemberKind} on '{absPath}': {result.Error}");
                 continue;
             }
 
@@ -290,6 +323,26 @@ public class FilePlanEngine
                     fileLines.AddRange(modifiedSource.Split('\n').Select(l => l.TrimEnd('\r')));
                     break;
                 }
+
+                case OperationType.UpdateMember:
+                {
+                    var sourceText = string.Join("\n", fileLines);
+                    var meta = ParseUpdateRemoveMetadata(op.Metadata);
+                    var modifiedSource = DotnetUpdateRemoveService.UpdateMember(sourceText, meta.TypeName, meta.MemberKind, meta.MemberName, meta.Content).ModifiedSource;
+                    fileLines.Clear();
+                    fileLines.AddRange(modifiedSource.Split('\n').Select(l => l.TrimEnd('\r')));
+                    break;
+                }
+
+                case OperationType.RemoveMember:
+                {
+                    var sourceText = string.Join("\n", fileLines);
+                    var meta = ParseUpdateRemoveMetadata(op.Metadata);
+                    var modifiedSource = DotnetUpdateRemoveService.RemoveMember(sourceText, meta.TypeName, meta.MemberKind, meta.MemberName).ModifiedSource;
+                    fileLines.Clear();
+                    fileLines.AddRange(modifiedSource.Split('\n').Select(l => l.TrimEnd('\r')));
+                    break;
+                }
             }
         }
 
@@ -433,6 +486,18 @@ public class FilePlanEngine
             root.GetProperty("memberKind").GetString() ?? "",
             root.GetProperty("content").GetString() ?? ""
         );
+    }
+
+    private static (string TypeName, string MemberKind, string MemberName, string Content) ParseUpdateRemoveMetadata(string? metadata)
+    {
+        if (string.IsNullOrEmpty(metadata))
+            return (string.Empty, string.Empty, string.Empty, string.Empty);
+        var doc = JsonSerializer.Deserialize<JsonElement>(metadata);
+        var typeName = doc.TryGetProperty("typeName", out var tn) ? tn.GetString() ?? "" : "";
+        var memberKind = doc.TryGetProperty("memberKind", out var mk) ? mk.GetString() ?? "" : "";
+        var memberName = doc.TryGetProperty("memberName", out var mn) ? mn.GetString() ?? "" : "";
+        var content = doc.TryGetProperty("content", out var c) ? c.GetString() ?? "" : "";
+        return (typeName, memberKind, memberName, content);
     }
 
     private static List<EditEntry> BuildEditScript(string[] original, string[] modified)
