@@ -85,7 +85,13 @@ Plans:
   1. `dotnet update property` and `dotnet update field` replace the target member with provided content; a member name that does not exist returns an error
   2. `dotnet remove method`, `remove property`, and `remove field` remove the named member; removing a non-existent member returns an error
   3. CLAUDE.md contains entries for every new command (`file read`, `file grep`, `file plan edit/write/append/delete`, `file status/commit/rollback/clear`, all `dotnet scaffold` and `dotnet add/update/remove` variants) with usage examples
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — TDD: DotnetUpdateRemoveService (Roslyn update/remove logic for property, field, method)
+- [ ] 05-02-PLAN.md — DotnetUpdateResult + DotnetRemoveResult models + command classes + FilePlanEngine UpdateMember/RemoveMember support
+- [ ] 05-03-PLAN.md — Wire dotnet update (property/field) and dotnet remove (method/property/field) in Program.cs
+- [ ] 05-04-PLAN.md — Extend CLAUDE.md with all write commands documentation
 
 ## Progress
 
@@ -95,4 +101,4 @@ Plans:
 | 2. File Stage & Commit | 3/3 | Complete   | 2026-02-27 |
 | 3. Dotnet Scaffold | 1/1 | Complete   | 2026-02-27 |
 | 4. Dotnet Add | 3/3 | Complete   | 2026-02-27 |
-| 5. Dotnet Update, Remove & Docs | 0/? | Not started | - |
+| 5. Dotnet Update, Remove & Docs | 0/4 | Not started | - |
