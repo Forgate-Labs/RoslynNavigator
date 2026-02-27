@@ -41,6 +41,7 @@ Progress: [██████████] 100%
 | Phase 04-dotnet-add P03 | 3 | 1 tasks | 1 files |
 | Phase 05-dotnet-update-remove-docs P01 | 4 | 2 tasks | 2 files |
 | Phase 05-dotnet-update-remove-docs P04 | 1 | 1 tasks | 1 files |
+| Phase 05-dotnet-update-remove-docs P02 | 1 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,7 @@ Recent decisions affecting current work:
 - [Phase 05-dotnet-update-remove-docs]: Underscore-tolerant field matching normalizes both sides: strip leading underscore from stored name and memberName before comparing
 - [Phase 05-dotnet-update-remove-docs]: RemoveMember uses WithMembers(Members.Remove(found)) via concrete-type switch expression — same dispatch pattern as AddMember
 - [Phase 05-dotnet-update-remove-docs]: Appended Write & Mutation Commands section to CLAUDE.md after existing navigation docs to preserve existing content
+- [Phase 05-dotnet-update-remove-docs]: ParseUpdateRemoveMetadata uses TryGetProperty for content to handle RemoveMember ops (no content field) and UpdateMember ops (has content)
 
 ### Pending Todos
 
