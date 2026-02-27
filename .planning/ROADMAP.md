@@ -32,7 +32,12 @@
 
 
 
-**Plans:** TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Build SQLite schema foundation (embedded resource + bootstrap/path services)
+- [ ] 01-02-PLAN.md — TDD snapshot extraction and analysis signal persistence
+- [ ] 01-03-PLAN.md — Expose `snapshot` CLI command and verify end-to-end behavior
 
 ---
 
@@ -93,7 +98,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Snapshot Foundation | 0/1 | Not started | - |
+| 1. Snapshot Foundation | 0/3 | Not started | - |
 | 2. Rules Engine | 0/1 | Not started | - |
 | 3. Query Integration | 0/1 | Not started | - |
 | 4. Integration & Polish | 0/1 | Not started | - |
