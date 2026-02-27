@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-27)
 
 **Core value:** AI assistant navigates, creates, and modifies C# code with surgical precision — no full-file reads, no ambiguous edits
-**Current focus:** Phase 2 — File Stage & Commit (Complete)
+**Current focus:** Phase 4 — DotnetAdd (In progress)
 
 ## Current Position
 
-Phase: 3 of 5 (dotnet-scaffold)
-Plan: 1 of ? in current phase
-Status: In progress — plan 03-01 complete
-Last activity: 2026-02-27 — Completed 03-01 (dotnet scaffold class/interface/record/enum command group)
+Phase: 4 of 5 (dotnet-add)
+Plan: 2 of 3 complete in current phase
+Status: In progress — plan 04-02 complete
+Last activity: 2026-02-27 — Completed 04-02 (DotnetAddCommand and FilePlanEngine AddMember wiring)
 
-Progress: [██████░░░░] 60%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
@@ -37,6 +37,7 @@ Progress: [██████░░░░] 60%
 *Updated after each plan completion*
 | Phase 03-dotnet-scaffold P01 | 2 | 2 tasks | 4 files |
 | Phase 04-dotnet-add P01 | 8 | 2 tasks | 2 files |
+| Phase 04-dotnet-add P02 | 2 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -72,6 +73,8 @@ Recent decisions affecting current work:
 - [Phase 04-dotnet-add]: BaseTypeDeclarationSyntax lacks Members/WithMembers — requires concrete-type switch expression for dispatch (ClassDeclarationSyntax, RecordDeclarationSyntax, StructDeclarationSyntax)
 - [Phase 04-dotnet-add]: SyntaxFactory.UsingDirective requires explicit SyntaxFactory.Space leading trivia on the name node to produce 'using X;'
 - [Phase 04-dotnet-add]: AddUsing inserts directives in alphabetical order (Ordinal comparison) for a sorted using block
+- [Phase 04-dotnet-add]: Metadata camelCase JSON { typeName, memberKind, content } passed as PlanOperation.Metadata — consistent with JsonNamingPolicy.CamelCase used across API serialization
+- [Phase 04-dotnet-add]: memberKind='using' with typeName='' as convention for using directive ops in AddMember
 
 ### Pending Todos
 
@@ -84,5 +87,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 03-01-PLAN.md — dotnet scaffold class/interface/record/enum command group (Phase 3 plan 1 complete)
+Stopped at: Completed 04-02-PLAN.md — DotnetAddCommand and FilePlanEngine AddMember wiring (Phase 4 plan 2 complete)
 Resume file: None
