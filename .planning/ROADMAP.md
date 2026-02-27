@@ -7,7 +7,7 @@ The project already has 17 navigation commands. This milestone adds write capabi
 ## Phases
 
 - [x] **Phase 1: Infrastructure & File Read** - Plan/commit foundation + immediate read commands (completed 2026-02-27)
-- [ ] **Phase 2: File Stage & Commit** - Staged file edits with atomic apply, rollback, and diff preview
+- [x] **Phase 2: File Stage & Commit** - Staged file edits with atomic apply, rollback, and diff preview (completed 2026-02-27)
 - [ ] **Phase 3: Dotnet Scaffold** - Generate new C# files (class, interface, record, enum)
 - [ ] **Phase 4: Dotnet Add** - Insert members (field, property, constructor, method, using) into existing types
 - [ ] **Phase 5: Dotnet Update, Remove & Docs** - Mutate and remove existing members; update CLAUDE.md
@@ -84,7 +84,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Infrastructure & File Read | 2/2 | Complete   | 2026-02-27 |
-| 2. File Stage & Commit | 2/3 | In Progress|  |
+| 2. File Stage & Commit | 3/3 | Complete   | 2026-02-27 |
 | 3. Dotnet Scaffold | 0/? | Not started | - |
 | 4. Dotnet Add | 0/? | Not started | - |
 | 5. Dotnet Update, Remove & Docs | 0/? | Not started | - |
