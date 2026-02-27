@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-27)
 
 **Core value:** AI assistant navigates, creates, and modifies C# code with surgical precision — no full-file reads, no ambiguous edits
-**Current focus:** Phase 4 — DotnetAdd (In progress)
+**Current focus:** Phase 4 — DotnetAdd (Complete)
 
 ## Current Position
 
 Phase: 4 of 5 (dotnet-add)
-Plan: 2 of 3 complete in current phase
-Status: In progress — plan 04-02 complete
-Last activity: 2026-02-27 — Completed 04-02 (DotnetAddCommand and FilePlanEngine AddMember wiring)
+Plan: 3 of 3 complete in current phase
+Status: Phase complete — plan 04-03 complete
+Last activity: 2026-02-27 — Completed 04-03 (dotnet add CLI wiring — 5 leaf commands in Program.cs)
 
 Progress: [████████░░] 80%
 
@@ -38,6 +38,7 @@ Progress: [████████░░] 80%
 | Phase 03-dotnet-scaffold P01 | 2 | 2 tasks | 4 files |
 | Phase 04-dotnet-add P01 | 8 | 2 tasks | 2 files |
 | Phase 04-dotnet-add P02 | 2 | 2 tasks | 3 files |
+| Phase 04-dotnet-add P03 | 3 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,8 @@ Recent decisions affecting current work:
 - [Phase 04-dotnet-add]: AddUsing inserts directives in alphabetical order (Ordinal comparison) for a sorted using block
 - [Phase 04-dotnet-add]: Metadata camelCase JSON { typeName, memberKind, content } passed as PlanOperation.Metadata — consistent with JsonNamingPolicy.CamelCase used across API serialization
 - [Phase 04-dotnet-add]: memberKind='using' with typeName='' as convention for using directive ops in AddMember
+- [Phase 04-dotnet-add]: dotnet add subcommand uses positional Argument<string> variables with unique local names to avoid scope conflicts
+- [Phase 04-dotnet-add]: Field command auto-prepends underscore to name arg — caller provides base name, handler builds _{name}
 
 ### Pending Todos
 
@@ -87,5 +90,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 04-02-PLAN.md — DotnetAddCommand and FilePlanEngine AddMember wiring (Phase 4 plan 2 complete)
+Stopped at: Completed 04-03-PLAN.md — dotnet add CLI wiring (Phase 4 plan 3 complete)
 Resume file: None
