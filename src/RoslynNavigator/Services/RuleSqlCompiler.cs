@@ -133,6 +133,30 @@ public class RuleSqlCompiler
             parameters[paramName] = predicate.HasTryCatch.Value ? 1 : 0;
         }
 
+        // Handle 'accesses_db' predicate - filter on method accesses_db flag
+        if (predicate.AccessesDb.HasValue)
+        {
+            var paramName = $"@p{_paramCounter++}";
+            conditions.Add($"m.accesses_db = {paramName}");
+            parameters[paramName] = predicate.AccessesDb.Value ? 1 : 0;
+        }
+
+        // Handle 'calls_external' predicate - filter on method calls_external flag
+        if (predicate.CallsExternal.HasValue)
+        {
+            var paramName = $"@p{_paramCounter++}";
+            conditions.Add($"m.calls_external = {paramName}");
+            parameters[paramName] = predicate.CallsExternal.Value ? 1 : 0;
+        }
+
+        // Handle 'filters_by_tenant' predicate - filter on method filters_by_tenant flag
+        if (predicate.FiltersByTenant.HasValue)
+        {
+            var paramName = $"@p{_paramCounter++}";
+            conditions.Add($"m.filters_by_tenant = {paramName}");
+            parameters[paramName] = predicate.FiltersByTenant.Value ? 1 : 0;
+        }
+
         // Handle 'not' predicate - wraps nested condition with NOT EXISTS
         if (predicate.Not != null)
         {
@@ -154,15 +178,19 @@ public class RuleSqlCompiler
                 renamedWhere = renamedWhere.Replace(mapping.Key, mapping.Value);
             }
 
-            var notExistsClause = $@"
-                NOT EXISTS (
-                    SELECT 1 FROM calls c2 
-                    JOIN methods m2 ON c2.caller_method_id = m2.id 
-                    JOIN classes cls2 ON m2.class_id = cls2.id 
-                    WHERE {renamedWhere}
-                )";
-            
-            conditions.Add(notExistsClause);
+            // Only add NOT EXISTS if there's a valid nested condition
+            if (!string.IsNullOrEmpty(renamedWhere))
+            {
+                var notExistsClause = $@"
+                    NOT EXISTS (
+                        SELECT 1 FROM calls c2 
+                        JOIN methods m2 ON c2.caller_method_id = m2.id 
+                        JOIN classes cls2 ON m2.class_id = cls2.id 
+                        WHERE {renamedWhere}
+                    )";
+                
+                conditions.Add(notExistsClause);
+            }
         }
 
         var whereClause = conditions.Count > 0 ? string.Join(" AND ", conditions) : "";

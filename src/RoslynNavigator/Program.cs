@@ -369,6 +369,36 @@ snapshotCommand.SetHandler(async (string solution, string? db) =>
     }
 }, solutionOption, snapshotDbOption);
 
+// check command
+var checkCommand = new Command("check", "Evaluate rules against a snapshot and report violations");
+var checkDbOption = new Option<string?>("--db", "Path to the snapshot database (required)");
+var checkSeverityOption = new Option<string?>("--severity", "Filter violations by severity (error, warning, info)");
+var checkRuleIdOption = new Option<string?>("--ruleId", "Filter violations by rule ID (partial match)");
+checkCommand.AddOption(checkDbOption);
+checkCommand.AddOption(checkSeverityOption);
+checkCommand.AddOption(checkRuleIdOption);
+checkCommand.SetHandler(async (string? db, string? severity, string? ruleId) =>
+{
+    try
+    {
+        if (string.IsNullOrEmpty(db))
+        {
+            OutputError("check_error", "The --db option is required. Run 'roslyn-nav snapshot' first to generate a snapshot.");
+            Environment.ExitCode = 1;
+            return;
+        }
+
+        var command = new CheckCommand();
+        var result = await command.ExecuteAsync(db, severity, ruleId);
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("check_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, checkDbOption, checkSeverityOption, checkRuleIdOption);
+
 // ── dotnet command group ────────────────────────────────────────────────────
 var dotnetCommand = new Command("dotnet", "dotnet-specific operations (scaffold, etc.)");
 var dotnetScaffoldCommand = new Command("scaffold", "Scaffold new C# type files");
@@ -961,6 +991,7 @@ rootCommand.AddCommand(findStepDefinitionCommand);
 rootCommand.AddCommand(findInterfaceConsumersCommand);
 rootCommand.AddCommand(listFeatureScenariosCommand);
 rootCommand.AddCommand(snapshotCommand);
+rootCommand.AddCommand(checkCommand);
 rootCommand.AddCommand(dotnetCommand);
 rootCommand.AddCommand(fileCommand);
 
