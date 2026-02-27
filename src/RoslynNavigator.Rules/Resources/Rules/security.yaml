@@ -1,0 +1,37 @@
+# Security Rules - Builtin Rule Pack
+# Defines rules for security best practices
+
+rules:
+  - id: sec-001
+    title: Password should not be hardcoded
+    severity: error
+    message: "Hardcoded passwords are a security risk"
+    predicate:
+      calls: "*"
+
+  - id: sec-002
+    title: SQL injection risk - use parameterized queries
+    severity: error
+    message: "String concatenation in SQL queries can lead to SQL injection"
+    predicate:
+      accesses_db: true
+
+  - id: sec-003
+    title: Sensitive data should not be logged
+    severity: warning
+    message: "Logging sensitive information (passwords, tokens, keys) is a security risk"
+    predicate:
+      calls: "*.Log*"
+
+  - id: sec-004
+    title: Validate input parameters
+    severity: warning
+    method_should_validate_input: true
+    message: "Public methods should validate input parameters"
+
+  - id: sec-005
+    title: Use secure random number generation
+    severity: warning
+    message: "Use Random or RandomNumberGenerator appropriately for security-sensitive contexts"
+    predicate:
+      calls: "System.Random"

@@ -1,6 +1,7 @@
 using Microsoft.Data.Sqlite;
 using RoslynNavigator.Models;
-using RoslynNavigator.Services;
+using RoslynNavigator.Rules.Services;
+using RoslynNavigator.Rules.Models;
 
 namespace RoslynNavigator.Commands;
 

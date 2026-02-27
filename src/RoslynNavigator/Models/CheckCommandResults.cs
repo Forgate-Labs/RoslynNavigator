@@ -1,3 +1,5 @@
+using RoslynNavigator.Rules.Models;
+
 namespace RoslynNavigator.Models;
 
 /// <summary>

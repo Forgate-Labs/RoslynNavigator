@@ -1,4 +1,4 @@
-namespace RoslynNavigator.Services;
+namespace RoslynNavigator.Snapshot.Services;
 
 /// <summary>
 /// Represents a row in the snapshot_classes table.

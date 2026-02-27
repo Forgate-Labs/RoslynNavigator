@@ -20,6 +20,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\RoslynNavigator\RoslynNavigator.csproj" />
+    <ProjectReference Include="..\..\src\RoslynNavigator.Snapshot\RoslynNavigator.Snapshot.csproj" />
+    <ProjectReference Include="..\..\src\RoslynNavigator.Rules\RoslynNavigator.Rules.csproj" />
   </ItemGroup>
 
 </Project>

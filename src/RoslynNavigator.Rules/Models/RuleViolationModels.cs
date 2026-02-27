@@ -1,4 +1,4 @@
-namespace RoslynNavigator.Models;
+namespace RoslynNavigator.Rules.Models;
 
 /// <summary>
 /// Represents a single rule violation found during evaluation.

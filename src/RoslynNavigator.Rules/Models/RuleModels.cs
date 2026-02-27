@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace RoslynNavigator.Models;
+namespace RoslynNavigator.Rules.Models;
 
 /// <summary>
 /// Represents a loaded rule pack containing multiple rule definitions.

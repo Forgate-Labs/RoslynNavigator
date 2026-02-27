@@ -1,5 +1,5 @@
-using RoslynNavigator.Services;
-using RoslynNavigator.Models;
+using RoslynNavigator.Rules.Services;
+using RoslynNavigator.Rules.Models;
 
 namespace RoslynNavigator.Tests;
 

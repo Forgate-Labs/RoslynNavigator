@@ -1,4 +1,4 @@
-using RoslynNavigator.Services;
+using RoslynNavigator.Rules.Services;
 
 namespace RoslynNavigator.Tests;
 

@@ -1,7 +1,9 @@
 using Microsoft.Data.Sqlite;
 using RoslynNavigator.Commands;
 using RoslynNavigator.Models;
-using RoslynNavigator.Services;
+using RoslynNavigator.Rules.Services;
+using RoslynNavigator.Rules.Models;
+using RoslynNavigator.Snapshot.Services;
 
 namespace RoslynNavigator.Tests;
 

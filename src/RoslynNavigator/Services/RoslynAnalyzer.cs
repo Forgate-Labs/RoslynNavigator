@@ -2,6 +2,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RoslynNavigator.Models;
+using RoslynNavigator.Snapshot.Services;
 
 namespace RoslynNavigator.Services;
 

@@ -99,7 +99,11 @@ Plans:
 2. Comandos `snapshot`, `check`, `snapshot query` aparecem em `roslyn-nav --help` e seguem padrão JSON dos comandos existentes
 3. Todos os 41 comandos anteriores (navegação + write/mutation) continuam funcionando exatamente como antes
 
-**Plans:** TBD
+**Plans:** 2 plans
+
+Plans:
+- [x] 04-01-PLAN.md — Split snapshot/rules into dedicated projects and wire solution references
+- [ ] 04-02-PLAN.md — Preserve CLI help/output contracts and run full compatibility regression
 
 ---
 
@@ -110,7 +114,7 @@ Plans:
 | 1. Snapshot Foundation | 3/3 | Complete | 2026-02-27 |
 | 2. Rules Engine | 3/3 | Complete | 2026-02-27 |
 | 3. Query Integration | 2/2 | Complete | 2026-02-27 |
-| 4. Integration & Polish | 0/1 | Not started | - |
+| 4. Integration & Polish | 1/2 | In progress | - |
 
 ---
 
