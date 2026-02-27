@@ -27,3 +27,8 @@ public record FileRollbackResult
     public required string BackupPath { get; init; }
     public int FilesRestored { get; init; }
 }
+
+public record FileClearResult
+{
+    public required string Message { get; init; }
+}

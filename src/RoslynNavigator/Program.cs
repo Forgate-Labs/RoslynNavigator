@@ -511,8 +511,64 @@ fileStatusSubcommand.SetHandler(async (bool json) =>
     }
 }, fileStatusJsonOption);
 
+// file commit
+var fileCommitJsonOption = new Option<bool>("--json", "Output machine-readable JSON");
+var fileCommitSubcommand = new Command("commit", "Apply all staged changes atomically and return a unified diff");
+fileCommitSubcommand.AddOption(fileCommitJsonOption);
+fileCommitSubcommand.SetHandler(async (bool json) =>
+{
+    try
+    {
+        var result = await FileCommitCommand.ExecuteAsync();
+        if (json)
+            Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+        else
+            Console.WriteLine(result.UnifiedDiff);
+    }
+    catch (Exception ex)
+    {
+        OutputError("file_commit_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, fileCommitJsonOption);
+
+// file rollback
+var fileRollbackSubcommand = new Command("rollback", "Restore all files from the last commit backup");
+fileRollbackSubcommand.SetHandler(async () =>
+{
+    try
+    {
+        var result = await FileRollbackCommand.ExecuteAsync();
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("file_rollback_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+});
+
+// file clear
+var fileClearSubcommand = new Command("clear", "Discard all staged operations without touching any file");
+fileClearSubcommand.SetHandler(async () =>
+{
+    try
+    {
+        var result = await FileClearCommand.ExecuteAsync();
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("file_clear_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+});
+
 fileCommand.AddCommand(filePlanCommand);
 fileCommand.AddCommand(fileStatusSubcommand);
+fileCommand.AddCommand(fileCommitSubcommand);
+fileCommand.AddCommand(fileRollbackSubcommand);
+fileCommand.AddCommand(fileClearSubcommand);
 fileCommand.AddCommand(fileReadSubcommand);
 fileCommand.AddCommand(fileGrepSubcommand);
 
