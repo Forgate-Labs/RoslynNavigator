@@ -7,10 +7,10 @@
 
 ### Snapshot
 
-- [ ] **SNAP-01**: Usuário pode gerar snapshot SQLite da solution com `roslyn-nav snapshot --solution <path.sln>`
-- [ ] **SNAP-02**: Snapshot inclui tabelas `classes`, `methods`, `dependencies`, `calls`, `annotations`, `flags`, `snapshot_meta` conforme schema definido
-- [ ] **SNAP-03**: Snapshot persiste sinais de análise (`returns_null`, `cognitive_complexity`, `has_try_catch`, `calls_external`, `accesses_db`, `filters_by_tenant`)
-- [ ] **SNAP-04**: Snapshot usa `Schema.sql` como embedded resource e gera DB com caminho padrão configurado
+- [x] **SNAP-01**: Usuário pode gerar snapshot SQLite da solution com `roslyn-nav snapshot --solution <path.sln>`
+- [x] **SNAP-02**: Snapshot inclui tabelas `classes`, `methods`, `dependencies`, `calls`, `annotations`, `flags`, `snapshot_meta` conforme schema definido
+- [x] **SNAP-03**: Snapshot persiste sinais de análise (`returns_null`, `cognitive_complexity`, `has_try_catch`, `calls_external`, `accesses_db`, `filters_by_tenant`)
+- [x] **SNAP-04**: Snapshot usa `Schema.sql` como embedded resource e gera DB com caminho padrão configurado
 
 ### Rules / Check
 
