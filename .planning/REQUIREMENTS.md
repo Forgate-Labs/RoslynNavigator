@@ -14,8 +14,8 @@
 
 ### File Read
 
-- [ ] **FREAD-01**: `file read <path> [--lines START-END]` — exibe conteúdo do arquivo sempre com números de linha; aceita range opcional
-- [ ] **FREAD-02**: `file grep <pattern> [path] [--ext .cs] [--max-lines 100]` — busca regex com filtro de extensão e limite de resultados
+- [x] **FREAD-01**: `file read <path> [--lines START-END]` — exibe conteúdo do arquivo sempre com números de linha; aceita range opcional
+- [x] **FREAD-02**: `file grep <pattern> [path] [--ext .cs] [--max-lines 100]` — busca regex com filtro de extensão e limite de resultados
 
 ### File Stage (Write)
 
@@ -93,8 +93,8 @@
 | INFRA-02 | Phase 1 | Complete |
 | INFRA-03 | Phase 1 | Complete |
 | INFRA-04 | Phase 1 | Complete |
-| FREAD-01 | Phase 1 | Pending |
-| FREAD-02 | Phase 1 | Pending |
+| FREAD-01 | Phase 1 | Complete |
+| FREAD-02 | Phase 1 | Complete |
 | FSTAGE-01 | Phase 2 | Pending |
 | FSTAGE-02 | Phase 2 | Pending |
 | FSTAGE-03 | Phase 2 | Pending |
