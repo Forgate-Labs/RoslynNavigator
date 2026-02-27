@@ -8,39 +8,93 @@ namespace RoslynNavigator.Services;
 /// </summary>
 public class RuleSqlCompiler
 {
+    private int _paramCounter = 0;
+
     /// <summary>
     /// Compiles a rule predicate into SQL and returns the SQL string and parameters.
     /// </summary>
     public (string Sql, Dictionary<string, object?> Parameters) Compile(RulePredicate predicate)
     {
+        _paramCounter = 0;
         var parameters = new Dictionary<string, object?>();
-        var sql = new StringBuilder();
+        
+        var (whereClause, whereParams) = BuildWhereClause(predicate);
+        foreach (var kvp in whereParams)
+        {
+            parameters[kvp.Key] = kvp.Value;
+        }
 
-        // Build WHERE clause based on predicate
+        string sql;
+        if (string.IsNullOrEmpty(whereClause))
+        {
+            // No conditions - return all classes with methods
+            sql = @"SELECT cls.namespace, cls.name, m.name as method_name, m.start_line as line_number 
+                    FROM classes cls 
+                    JOIN methods m ON m.class_id = cls.id";
+        }
+        else
+        {
+            // Check if this query needs the calls table
+            // If it only has class-level conditions (like fromNamespace alone), 
+            // we can query without the calls table
+            if (whereClause.Contains("c."))
+            {
+                // Query with calls table
+                sql = $@"SELECT DISTINCT cls.namespace, cls.name, m.name as method_name, m.start_line as line_number 
+                        FROM calls c 
+                        JOIN methods m ON c.caller_method_id = m.id 
+                        JOIN classes cls ON m.class_id = cls.id 
+                        WHERE {whereClause}";
+            }
+            else
+            {
+                // Query without calls table - just class/method filtering
+                sql = $@"SELECT DISTINCT cls.namespace, cls.name, m.name as method_name, m.start_line as line_number 
+                        FROM classes cls 
+                        JOIN methods m ON m.class_id = cls.id 
+                        WHERE {whereClause}";
+            }
+        }
+
+        return (sql, parameters);
+    }
+
+    private (string WhereClause, Dictionary<string, object?> Parameters) BuildWhereClause(RulePredicate predicate)
+    {
+        var parameters = new Dictionary<string, object?>();
         var conditions = new List<string>();
 
-        // Handle 'calls' predicate
+        // Handle 'calls' predicate - look for calls matching pattern
         if (!string.IsNullOrEmpty(predicate.Calls))
         {
-            var paramName = $"@{conditions.Count}";
-            var pattern = predicate.Calls.Replace("*", "%");
+            var paramName = $"@p{_paramCounter++}";
             
             if (predicate.Calls.Contains("*"))
             {
-                conditions.Add($"c.target_class LIKE {paramName}");
+                // Convert wildcard to SQL LIKE pattern
+                // For "Controller.*", we want to match:
+                // - "Controller" (just the class)
+                // - "Controller.Save" (class + method)  
+                // - "MyApp.Controller" (namespace.class)
+                // We convert to "Controller%" which matches all of these
+                var pattern = predicate.Calls.Replace(".*", "%").Replace("*", "%");
+                
+                // Match class name or fully qualified name
+                conditions.Add($"(c.target_class LIKE {paramName} OR (c.target_namespace || '.' || c.target_class) LIKE {paramName})");
                 parameters[paramName] = pattern;
             }
             else
             {
-                conditions.Add($"c.target_class = {paramName}");
-                parameters[paramName] = pattern;
+                // Exact match - match either just class or fully qualified
+                conditions.Add($"(c.target_class = {paramName} OR (c.target_namespace || '.' || c.target_class) = {paramName})");
+                parameters[paramName] = predicate.Calls;
             }
         }
 
-        // Handle 'fromNamespace' predicate
+        // Handle 'fromNamespace' predicate - filter caller class namespace
         if (!string.IsNullOrEmpty(predicate.FromNamespace))
         {
-            var paramName = $"@{conditions.Count}";
+            var paramName = $"@p{_paramCounter++}";
             var pattern = predicate.FromNamespace.Replace("*", "%");
             
             if (predicate.FromNamespace.Contains("*"))
@@ -55,18 +109,18 @@ public class RuleSqlCompiler
             }
         }
 
-        // Handle 'returns_null' predicate
+        // Handle 'returns_null' predicate - filter on method returns_null flag
         if (predicate.ReturnsNull.HasValue)
         {
-            var paramName = $"@{conditions.Count}";
+            var paramName = $"@p{_paramCounter++}";
             conditions.Add($"m.returns_null = {paramName}");
             parameters[paramName] = predicate.ReturnsNull.Value ? 1 : 0;
         }
 
-        // Handle 'cognitive_complexity' predicate
+        // Handle 'cognitive_complexity' predicate - filter on complexity threshold
         if (predicate.CognitiveComplexity.HasValue)
         {
-            var paramName = $"@{conditions.Count}";
+            var paramName = $"@p{_paramCounter++}";
             conditions.Add($"m.cognitive_complexity >= {paramName}");
             parameters[paramName] = predicate.CognitiveComplexity.Value;
         }
@@ -74,7 +128,7 @@ public class RuleSqlCompiler
         // Handle 'has_try_catch' predicate
         if (predicate.HasTryCatch.HasValue)
         {
-            var paramName = $"@{conditions.Count}";
+            var paramName = $"@p{_paramCounter++}";
             conditions.Add($"m.has_try_catch = {paramName}");
             parameters[paramName] = predicate.HasTryCatch.Value ? 1 : 0;
         }
@@ -82,43 +136,36 @@ public class RuleSqlCompiler
         // Handle 'not' predicate - wraps nested condition with NOT EXISTS
         if (predicate.Not != null)
         {
-            var (nestedSql, nestedParams) = Compile(predicate.Not);
+            _paramCounter = 0; // Reset counter for nested
+            var (nestedWhere, nestedParams) = BuildWhereClause(predicate.Not);
+            
+            // Build NOT EXISTS subquery
+            var notExistsParamNames = new Dictionary<string, string>();
             foreach (var kvp in nestedParams)
             {
-                parameters[$"not_{kvp.Key}"] = kvp.Value;
+                var newName = $"@not{_paramCounter++}";
+                notExistsParamNames[kvp.Key] = newName;
+                parameters[newName] = kvp.Value;
             }
-            
-            // Wrap with NOT EXISTS subquery
-            var notExistsSql = $@"
+
+            var renamedWhere = nestedWhere;
+            foreach (var mapping in notExistsParamNames)
+            {
+                renamedWhere = renamedWhere.Replace(mapping.Key, mapping.Value);
+            }
+
+            var notExistsClause = $@"
                 NOT EXISTS (
-                    SELECT 1 FROM calls c
-                    JOIN methods m ON c.caller_method_id = m.id
-                    JOIN classes cls ON m.class_id = cls.id
-                    WHERE {nestedSql.Replace("@", "@not_")}
+                    SELECT 1 FROM calls c2 
+                    JOIN methods m2 ON c2.caller_method_id = m2.id 
+                    JOIN classes cls2 ON m2.class_id = cls2.id 
+                    WHERE {renamedWhere}
                 )";
             
-            // If there are other conditions, we need to restructure
-            // For now, return NOT EXISTS with the nested condition
-            return (notExistsSql, parameters);
+            conditions.Add(notExistsClause);
         }
 
-        // Build the final SQL
-        if (conditions.Count > 0)
-        {
-            sql.Append("SELECT DISTINCT cls.namespace, cls.name, m.name, m.start_line ");
-            sql.Append("FROM calls c ");
-            sql.Append("JOIN methods m ON c.caller_method_id = m.id ");
-            sql.Append("JOIN classes cls ON m.class_id = cls.id ");
-            sql.Append("WHERE ");
-            sql.Append(string.Join(" AND ", conditions));
-        }
-        else
-        {
-            // No conditions - return all classes
-            sql.Append("SELECT cls.namespace, cls.name, NULL as method_name, 0 as line_number ");
-            sql.Append("FROM classes cls ");
-        }
-
-        return (sql.ToString(), parameters);
+        var whereClause = conditions.Count > 0 ? string.Join(" AND ", conditions) : "";
+        return (whereClause, parameters);
     }
 }

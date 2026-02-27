@@ -9,13 +9,15 @@ namespace RoslynNavigator.Tests;
 /// </summary>
 public class RuleEvaluatorServiceTests : IDisposable
 {
+    private readonly string _dbPath;
     private readonly string _connectionString;
     private readonly SqliteConnection _connection;
 
     public RuleEvaluatorServiceTests()
     {
-        // Create in-memory database for testing
-        _connectionString = "Data Source=:memory:";
+        // Create a temp file for the database (in-memory doesn't share across connections)
+        _dbPath = Path.Combine(Path.GetTempPath(), $"test_{Guid.NewGuid()}.db");
+        _connectionString = $"Data Source={_dbPath}";
         _connection = new SqliteConnection(_connectionString);
         _connection.Open();
         
@@ -27,6 +29,12 @@ public class RuleEvaluatorServiceTests : IDisposable
     {
         _connection.Close();
         _connection.Dispose();
+        
+        // Clean up temp file
+        if (File.Exists(_dbPath))
+        {
+            File.Delete(_dbPath);
+        }
     }
 
     private void InitializeSchema()
@@ -182,9 +190,13 @@ public class RuleEvaluatorServiceTests : IDisposable
 
         // Act
         var result = evaluator.Evaluate(rule);
-
-        // Assert - should NOT find OrderService because it calls IController (excluded by NOT)
-        Assert.True(result.Success);
+        
+        // Debug: print error if any
+        if (!result.Success)
+        {
+            var ex = new Exception(result.ErrorMessage ?? "Unknown error");
+            Assert.True(result.Success, $"Evaluation failed: {result.ErrorMessage}");
+        }
         // UserRepository calls Controller.Save (not IController) - should be violation
         // OrderService calls IController - should NOT be violation
         Assert.Contains(result.Violations, v => v.ClassName == "UserRepository");
@@ -219,10 +231,12 @@ public class RuleEvaluatorServiceTests : IDisposable
     [Fact]
     public void Evaluate_ReturnsNullPredicate_FindsViolations()
     {
-        // Arrange - add a class with returns_null = 1
+        // Arrange - add a class and method with returns_null = 1
         var seedData = @"
-            INSERT INTO classes (namespace, name, kind, file_path, start_line, end_line, returns_null)
-            VALUES ('MyApp.Services', 'UserService', 'class', 'UserService.cs', 1, 50, 1);
+            INSERT INTO classes (id, namespace, name, kind, file_path, start_line, end_line)
+            VALUES (10, 'MyApp.Services', 'UserService', 'class', 'UserService.cs', 1, 50);
+            INSERT INTO methods (class_id, name, return_type, start_line, end_line, returns_null)
+            VALUES (10, 'GetUser', 'User?', 10, 30, 1);
         ";
         using var cmd = new SqliteCommand(seedData, _connection);
         cmd.ExecuteNonQuery();
@@ -250,10 +264,12 @@ public class RuleEvaluatorServiceTests : IDisposable
     [Fact]
     public void Evaluate_CognitiveComplexity_FindsViolations()
     {
-        // Arrange - add a class with high complexity
+        // Arrange - add a class and method with high complexity
         var seedData = @"
-            INSERT INTO classes (namespace, name, kind, file_path, start_line, end_line, cognitive_complexity)
-            VALUES ('MyApp.Services', 'ComplexService', 'class', 'ComplexService.cs', 1, 100, 25);
+            INSERT INTO classes (id, namespace, name, kind, file_path, start_line, end_line)
+            VALUES (20, 'MyApp.Services', 'ComplexService', 'class', 'ComplexService.cs', 1, 100);
+            INSERT INTO methods (class_id, name, return_type, start_line, end_line, cognitive_complexity)
+            VALUES (20, 'ProcessData', 'void', 10, 90, 25);
         ";
         using var cmd = new SqliteCommand(seedData, _connection);
         cmd.ExecuteNonQuery();
@@ -281,12 +297,16 @@ public class RuleEvaluatorServiceTests : IDisposable
     [Fact]
     public void Evaluate_FromNamespaceFilter_FiltersCorrectly()
     {
-        // Arrange - add classes in different namespaces
+        // Arrange - add classes in different namespaces with methods
         var seedData = @"
-            INSERT INTO classes (namespace, name, kind, file_path, start_line, end_line) 
-            VALUES ('MyApp.Data.Repositories', 'UserRepo', 'class', 'UserRepo.cs', 1, 50);
-            INSERT INTO classes (namespace, name, kind, file_path, start_line, end_line) 
-            VALUES ('MyApp.Services', 'UserService', 'class', 'UserService.cs', 1, 50);
+            INSERT INTO classes (id, namespace, name, kind, file_path, start_line, end_line) 
+            VALUES (30, 'MyApp.Data.Repositories', 'UserRepo', 'class', 'UserRepo.cs', 1, 50);
+            INSERT INTO classes (id, namespace, name, kind, file_path, start_line, end_line) 
+            VALUES (31, 'MyApp.Services', 'UserService', 'class', 'UserService.cs', 1, 50);
+            INSERT INTO methods (class_id, name, return_type, start_line, end_line)
+            VALUES (30, 'GetUser', 'User', 10, 30);
+            INSERT INTO methods (class_id, name, return_type, start_line, end_line)
+            VALUES (31, 'GetService', 'Service', 10, 30);
         ";
         using var cmd = new SqliteCommand(seedData, _connection);
         cmd.ExecuteNonQuery();

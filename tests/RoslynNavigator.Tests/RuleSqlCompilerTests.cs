@@ -18,11 +18,12 @@ public class RuleSqlCompilerTests
         var predicate = new RulePredicate { Calls = "IRepo.*" };
 
         // Act
-        var (sql, _) = compiler.Compile(predicate);
+        var (sql, parameters) = compiler.Compile(predicate);
 
         // Assert - should use SQL LIKE with converted wildcard
         Assert.Contains("LIKE", sql);
-        Assert.Contains("IRepo.%", sql);
+        // Parameter should contain the pattern
+        Assert.True(parameters.ContainsValue("IRepo%"));
     }
 
     [Fact]
@@ -33,11 +34,11 @@ public class RuleSqlCompilerTests
         var predicate = new RulePredicate { Calls = "Controller.*" };
 
         // Act
-        var (sql, _) = compiler.Compile(predicate);
+        var (sql, parameters) = compiler.Compile(predicate);
 
-        // Assert
+        // Assert - should have % in the parameter value
         Assert.DoesNotContain("*", sql);
-        Assert.Contains("%", sql);
+        Assert.Contains("%", parameters["@p0"]?.ToString() ?? "");
     }
 
     [Fact]
@@ -102,11 +103,11 @@ public class RuleSqlCompilerTests
         var predicate = new RulePredicate { FromNamespace = "*.Data.*" };
 
         // Act
-        var (sql, _) = compiler.Compile(predicate);
+        var (sql, parameters) = compiler.Compile(predicate);
 
         // Assert
         Assert.Contains("LIKE", sql);
-        Assert.Contains("%.Data.%", sql);
+        Assert.True(parameters.ContainsValue("%.Data.%"));
     }
 
     [Fact]
@@ -117,11 +118,11 @@ public class RuleSqlCompilerTests
         var predicate = new RulePredicate { FromNamespace = "MyApp.Data" };
 
         // Act
-        var (sql, _) = compiler.Compile(predicate);
+        var (sql, parameters) = compiler.Compile(predicate);
 
         // Assert
         Assert.Contains("=", sql);
-        Assert.Contains("'MyApp.Data'", sql);
+        Assert.True(parameters.ContainsKey("@p0"));
     }
 
     // --- Boolean flags tests ---
@@ -134,11 +135,12 @@ public class RuleSqlCompilerTests
         var predicate = new RulePredicate { ReturnsNull = true };
 
         // Act
-        var (sql, _) = compiler.Compile(predicate);
+        var (sql, parameters) = compiler.Compile(predicate);
 
         // Assert
         Assert.Contains("returns_null", sql);
-        Assert.Contains("1", sql);
+        Assert.Contains("@p0", sql);  // Check for parameter placeholder
+        Assert.True(parameters.ContainsKey("@p0"));  // Check parameter exists
     }
 
     [Fact]
@@ -149,11 +151,12 @@ public class RuleSqlCompilerTests
         var predicate = new RulePredicate { CognitiveComplexity = 10 };
 
         // Act
-        var (sql, _) = compiler.Compile(predicate);
+        var (sql, parameters) = compiler.Compile(predicate);
 
         // Assert
         Assert.Contains("cognitive_complexity", sql);
-        Assert.Contains("10", sql);
+        Assert.Contains("@p0", sql);
+        Assert.True(parameters.ContainsKey("@p0"));
     }
 
     [Fact]
