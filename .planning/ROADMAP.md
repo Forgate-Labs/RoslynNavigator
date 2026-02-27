@@ -3,12 +3,12 @@
 ## Milestones
 
 - ✅ **v1.0 File & Dotnet Commands** — Phases 1-5 (shipped 2026-02-27)
-- 🔄 **v2.0 Snapshot, Rules & Ask** — Phases 1-4 (in progress)
+- ✅ **v2.0 Snapshot, Rules & Ask** — Phases 1-2 (shipped 2026-02-27)
 
 ## Phases
 
-- [ ] **Phase 1: Snapshot Foundation** - Gera banco SQLite com classes, métodos, dependências, chamadas, annotations, flags e metadados
-- [ ] **Phase 2: Rules Engine** - Avalia regras YAML builtin/domain e reporta violações filtráveis
+- [x] **Phase 1: Snapshot Foundation** - Gera banco SQLite com classes, métodos, dependências, chamadas, annotations, flags e metadados
+- [x] **Phase 2: Rules Engine** - Avalia regras YAML builtin/domain e reporta violações filtráveis
 - [ ] **Phase 3: Query Integration** - Consulta SQL arbitrária com output JSON para LLM
 - [ ] **Phase 4: Integration & Polish** - Novos projetos integrados, CLI atualizado, compatibilidade garantida
 
@@ -60,8 +60,8 @@ Plans:
 
 Plans:
 - [x] 02-01-PLAN.md — Add YAML rule contracts and loader for builtin/domain packs
-- [ ] 02-02-PLAN.md — TDD SQL compiler/evaluator semantics for wildcard and `not:`
-- [ ] 02-03-PLAN.md — Expose `check` command with severity/ruleId filters and tests
+- [x] 02-02-PLAN.md — TDD SQL compiler/evaluator semantics for wildcard and `not:`
+- [x] 02-03-PLAN.md — Expose `check` command with severity/ruleId filters and tests
 
 ---
 
@@ -78,7 +78,11 @@ Plans:
 2. Output JSON segue estrutura consistente independente da query (sempre array de objetos)
 3. Operações `check` e `snapshot query` são somente leitura no arquivo `.db` (snapshot permanece imutável)
 
-**Plans:** TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Harden shared read-only SQL enforcement for snapshot safety
+- [ ] 03-02-PLAN.md — Expose `snapshot query` CLI command with stable JSON output
 
 ---
 
@@ -104,8 +108,8 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Snapshot Foundation | 3/3 | Complete | 2026-02-27 |
-| 2. Rules Engine | 1/3 | In progress | 2026-02-27 |
-| 3. Query Integration | 0/1 | Not started | - |
+| 2. Rules Engine | 3/3 | Complete | 2026-02-27 |
+| 3. Query Integration | 0/2 | Not started | - |
 | 4. Integration & Polish | 0/1 | Not started | - |
 
 ---
