@@ -396,6 +396,123 @@ fileGrepSubcommand.SetHandler(async (string pattern, string? path, string? ext, 
     }
 }, fileGrepPatternArg, fileGrepPathArg, fileGrepExtOption, fileGrepMaxLinesOption);
 
+// file plan subgroup
+var filePlanCommand = new Command("plan", "Stage file operations for atomic commit");
+
+// file plan edit
+var planEditPathArg = new Argument<string>("path", "File path to edit");
+var planEditLineArg = new Argument<int>("line", "1-based line number to edit");
+var planEditOldArg = new Argument<string>("old", "Expected current content of the line");
+var planEditNewArg = new Argument<string>("new", "Replacement content for the line");
+var planEditSubcommand = new Command("edit", "Stage a line edit (validates old string before accepting)");
+planEditSubcommand.AddArgument(planEditPathArg);
+planEditSubcommand.AddArgument(planEditLineArg);
+planEditSubcommand.AddArgument(planEditOldArg);
+planEditSubcommand.AddArgument(planEditNewArg);
+planEditSubcommand.SetHandler(async (string path, int line, string old, string newContent) =>
+{
+    try
+    {
+        var result = await FilePlanEditCommand.ExecuteAsync(path, line, old, newContent);
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("file_plan_edit_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, planEditPathArg, planEditLineArg, planEditOldArg, planEditNewArg);
+
+// file plan write
+var planWritePathArg = new Argument<string>("path", "File path to write");
+var planWriteContentArg = new Argument<string>("content", "Full file content");
+var planWriteSubcommand = new Command("write", "Stage a full file write (creates or overwrites)");
+planWriteSubcommand.AddArgument(planWritePathArg);
+planWriteSubcommand.AddArgument(planWriteContentArg);
+planWriteSubcommand.SetHandler(async (string path, string content) =>
+{
+    try
+    {
+        var result = await FilePlanWriteCommand.ExecuteAsync(path, content);
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("file_plan_write_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, planWritePathArg, planWriteContentArg);
+
+// file plan append
+var planAppendPathArg = new Argument<string>("path", "File path to append to");
+var planAppendContentArg = new Argument<string>("content", "Content to append");
+var planAppendSubcommand = new Command("append", "Stage content to append to a file");
+planAppendSubcommand.AddArgument(planAppendPathArg);
+planAppendSubcommand.AddArgument(planAppendContentArg);
+planAppendSubcommand.SetHandler(async (string path, string content) =>
+{
+    try
+    {
+        var result = await FilePlanAppendCommand.ExecuteAsync(path, content);
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("file_plan_append_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, planAppendPathArg, planAppendContentArg);
+
+// file plan delete
+var planDeletePathArg = new Argument<string>("path", "File path");
+var planDeleteLineArg = new Argument<int>("line", "1-based line number to delete");
+var planDeleteOldArg = new Argument<string>("old", "Expected current content of the line");
+var planDeleteSubcommand = new Command("delete", "Stage a line deletion (validates old string before accepting)");
+planDeleteSubcommand.AddArgument(planDeletePathArg);
+planDeleteSubcommand.AddArgument(planDeleteLineArg);
+planDeleteSubcommand.AddArgument(planDeleteOldArg);
+planDeleteSubcommand.SetHandler(async (string path, int line, string old) =>
+{
+    try
+    {
+        var result = await FilePlanDeleteCommand.ExecuteAsync(path, line, old);
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("file_plan_delete_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, planDeletePathArg, planDeleteLineArg, planDeleteOldArg);
+
+filePlanCommand.AddCommand(planEditSubcommand);
+filePlanCommand.AddCommand(planWriteSubcommand);
+filePlanCommand.AddCommand(planAppendSubcommand);
+filePlanCommand.AddCommand(planDeleteSubcommand);
+
+// file status
+var fileStatusJsonOption = new Option<bool>("--json", "Output machine-readable JSON");
+var fileStatusSubcommand = new Command("status", "Preview all staged changes as a unified diff");
+fileStatusSubcommand.AddOption(fileStatusJsonOption);
+fileStatusSubcommand.SetHandler(async (bool json) =>
+{
+    try
+    {
+        var result = await FileStatusCommand.ExecuteAsync();
+        if (json)
+            Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+        else
+            Console.WriteLine(result.UnifiedDiff);
+    }
+    catch (Exception ex)
+    {
+        OutputError("file_status_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, fileStatusJsonOption);
+
+fileCommand.AddCommand(filePlanCommand);
+fileCommand.AddCommand(fileStatusSubcommand);
 fileCommand.AddCommand(fileReadSubcommand);
 fileCommand.AddCommand(fileGrepSubcommand);
 
