@@ -28,32 +28,19 @@ O assistente de IA consegue navegar, criar e modificar código C# com precisão 
 - ✓ `get-hierarchy` — hierarquia de herança de uma classe
 - ✓ `get-constructor-deps` — dependências do construtor para DI
 - ✓ `check-overridable` — verifica modificadores de método (virtual/override/abstract/sealed)
+- ✓ Plan/commit Unit of Work — IPlanStore, FilePlanStore, BackupService — v1.0
+- ✓ `file read` / `file grep` — leitura imediata com line numbers e busca regex — v1.0
+- ✓ `file plan edit/write/append/delete` — staged file mutations com validação — v1.0
+- ✓ `file status/commit/rollback/clear` — atomic apply, unified diff, rollback — v1.0
+- ✓ `dotnet scaffold class/interface/record/enum` — geração de arquivos C# — v1.0
+- ✓ `dotnet add field/property/constructor/method/using` — inserção AST-aware — v1.0
+- ✓ `dotnet update property/field` — substituição de membros existentes — v1.0
+- ✓ `dotnet remove method/property/field` — remoção de membros pelo nome — v1.0
+- ✓ CLAUDE.md documentado com todos os comandos write/mutation — v1.0
 
 ### Active
 
-- [ ] **Grupo `file`**: CRUD de arquivos com padrão plan/commit (Unit of Work)
-  - [ ] `file read` — leitura imediata com line numbers e range opcional
-  - [ ] `file grep` — busca de padrão com filtro de extensão
-  - [ ] `file plan edit` — edição determinística (linha + old string)
-  - [ ] `file plan write` — cria ou sobrescreve arquivo
-  - [ ] `file plan append` — adiciona linha ao final
-  - [ ] `file plan delete` — remove linha com validação por old string
-  - [ ] `file status` — preview das mudanças staged como unified diff
-  - [ ] `file commit` — aplica todas as mudanças atomicamente com backup
-  - [ ] `file rollback` — restaura arquivos do último backup
-  - [ ] `file clear` — descarta todos os planos staged
-- [ ] **Grupo `dotnet`**: Mutações AST-aware via Roslyn SyntaxRewriter
-  - [ ] `dotnet scaffold class/interface/record/enum` — cria arquivo com boilerplate mínimo
-  - [ ] `dotnet add method` — insere método na classe (bottom, before closing })
-  - [ ] `dotnet add property` — insere propriedade com getter/setter gerados
-  - [ ] `dotnet add field` — insere campo com prefixo underscore
-  - [ ] `dotnet add constructor` — insere construtor na posição correta
-  - [ ] `dotnet add using` — adiciona using directive se não presente
-  - [ ] `dotnet update property/field` — atualiza membros existentes
-  - [ ] `dotnet remove method/property/field` — remove membros pelo nome
-- [ ] Persistência de estado dos planos em `.roslyn-nav-plans.json`
-- [ ] Backup automático em `.roslyn-nav-backup/<timestamp>/` no commit
-- [ ] Atualização do CLAUDE.md com os novos comandos, workflows e dicas
+*(Nenhum — próximo milestone a definir)*
 
 ### Out of Scope
 
@@ -66,9 +53,12 @@ O assistente de IA consegue navegar, criar e modificar código C# com precisão 
 
 ## Context
 
-O projeto já tem 17 comandos de navegação implementados em .NET 10 usando `Microsoft.CodeAnalysis.CSharp`, `Microsoft.CodeAnalysis.Workspaces.MSBuild` e `System.CommandLine`. A estrutura é clara: `Commands/`, `Services/`, `Models/`. Os comandos write/edit usarão o padrão plan/commit com `IPlanStore`/`FilePlanStore`.
+**Shipped v1.0** com ~7.165 LOC C#, 122 arquivos modificados em 42 dias.
+Tech stack: .NET 10, C#, `Microsoft.CodeAnalysis.CSharp`, `System.CommandLine`, xUnit.
 
-O principal desafio técnico é o `dotnet add method` — detectar indentação existente, lidar com namespaces file-scoped vs block-scoped, e manter a ordem convencional de membros C# (fields → properties → constructors → methods).
+A superfície de mutação completa está entregue: `file` group (10 subcomandos) + `dotnet` group (scaffold 4 + add 5 + update 2 + remove 3 = 14 subcomandos). Total: 17 navegação + 24 write/mutation = 41 comandos no CLI.
+
+O principal desafio técnico — `dotnet add method` com detecção de indentação e ordem convencional de membros — foi resolvido via `BaseTypeDeclarationSyntax` concrete-type switch expression.
 
 ## Constraints
 
@@ -81,11 +71,16 @@ O principal desafio técnico é o `dotnet add method` — detectar indentação 
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Plan/commit pattern (Unit of Work) | Edições individuais são frágeis; commit atômico garante consistência | — Pending |
-| Validação linha + old string | Evita ambiguidade quando a mesma string aparece múltiplas vezes | — Pending |
-| Grupos `file` e `dotnet` compartilham o mesmo estado de planos | Permite misturar edições raw e AST-aware no mesmo commit | — Pending |
-| `IPlanStore` + `FilePlanStore` | Testabilidade + persistência entre invocações | — Pending |
-| Namespace file-scoped por padrão no scaffold | C# 10+ padrão moderno | — Pending |
+| Plan/commit pattern (Unit of Work) | Edições individuais são frágeis; commit atômico garante consistência | ✓ Good — zero arquivos corrompidos em todos os testes |
+| Validação linha + old string | Evita ambiguidade quando a mesma string aparece múltiplas vezes | ✓ Good — recusa clara antes de staging |
+| Grupos `file` e `dotnet` compartilham o mesmo estado de planos | Permite misturar edições raw e AST-aware no mesmo commit | ✓ Good — pipeline unificado simplifica rollback |
+| `IPlanStore` + `FilePlanStore` | Testabilidade + persistência entre invocações | ✓ Good — testes xUnit usam InMemoryPlanStore |
+| Namespace file-scoped por padrão no scaffold | C# 10+ padrão moderno | ✓ Good — consistente com codebase existente |
+| `BaseTypeDeclarationSyntax` concrete-type switch | `BaseTypeDeclarationSyntax` não expõe `Members`/`WithMembers` diretamente | ✓ Good — dispatch funciona para class, record, struct |
+| `BackupService` skips non-existent files | Seguro para criação de novos arquivos | ✓ Good — sem erros ao criar arquivos via scaffold |
+| Detecção de indentação via `DetectIndentation` helper | Inserção de membros deve respeitar o estilo do arquivo existente | ✓ Good — funciona com tabs e spaces |
+| `dotnet add using` ordena alphabetically | Mantém using block ordenado | ✓ Good — sem duplicatas, inserção limpa |
+| `ParseUpdateRemoveMetadata` usa `TryGetProperty` para `content` | RemoveMember não tem campo content, UpdateMember tem | ✓ Good — comando único trata ambos os casos |
 
 ---
-*Last updated: 2026-02-27 after initialization*
+*Last updated: 2026-02-27 after v1.0 milestone*
