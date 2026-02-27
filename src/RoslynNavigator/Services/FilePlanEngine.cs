@@ -22,6 +22,36 @@ public class FilePlanEngine
             if (op.Type == OperationType.Write || op.Type == OperationType.Append || op.Type == OperationType.ScaffoldFile)
                 continue;
 
+            // AddMember ops validate by running the service and checking for errors
+            if (op.Type == OperationType.AddMember)
+            {
+                var absPath = ToAbsolutePath(op.FilePath, workingDir);
+                if (!File.Exists(absPath))
+                {
+                    errors.Add($"File not found: {absPath}");
+                    continue;
+                }
+                var sourceText = await File.ReadAllTextAsync(absPath);
+                var meta = ParseAddMemberMetadata(op.Metadata);
+                bool success;
+                string? error;
+                if (meta.MemberKind == "using")
+                {
+                    var result = DotnetAddMemberService.AddUsing(sourceText, meta.Content);
+                    success = result.Success;
+                    error = result.Error;
+                }
+                else
+                {
+                    var result = DotnetAddMemberService.AddMember(sourceText, meta.TypeName, meta.MemberKind, meta.Content);
+                    success = result.Success;
+                    error = result.Error;
+                }
+                if (!success)
+                    errors.Add($"dotnet add {meta.MemberKind} on '{absPath}': {error}");
+                continue;
+            }
+
             // Edit and Delete ops must validate that the expected line content matches
             if (op.Type == OperationType.Edit || op.Type == OperationType.Delete)
             {
@@ -248,6 +278,18 @@ public class FilePlanEngine
                         fileLines.AddRange(scaffoldLines.Select(l => l.TrimEnd('\r')));
                     }
                     break;
+
+                case OperationType.AddMember:
+                {
+                    var sourceText = string.Join("\n", fileLines);
+                    var meta = ParseAddMemberMetadata(op.Metadata);
+                    string modifiedSource = meta.MemberKind == "using"
+                        ? DotnetAddMemberService.AddUsing(sourceText, meta.Content).ModifiedSource
+                        : DotnetAddMemberService.AddMember(sourceText, meta.TypeName, meta.MemberKind, meta.Content).ModifiedSource;
+                    fileLines.Clear();
+                    fileLines.AddRange(modifiedSource.Split('\n').Select(l => l.TrimEnd('\r')));
+                    break;
+                }
             }
         }
 
@@ -379,6 +421,19 @@ public class FilePlanEngine
     private enum EditKind { Equal, Insert, Delete }
 
     private record EditEntry(EditKind Kind, string Content, int OrigLineNo, int NewLineNo);
+
+    private static (string TypeName, string MemberKind, string Content) ParseAddMemberMetadata(string? metadata)
+    {
+        if (string.IsNullOrEmpty(metadata))
+            throw new InvalidOperationException("AddMember op is missing Metadata JSON");
+        using var doc = System.Text.Json.JsonDocument.Parse(metadata);
+        var root = doc.RootElement;
+        return (
+            root.GetProperty("typeName").GetString() ?? "",
+            root.GetProperty("memberKind").GetString() ?? "",
+            root.GetProperty("content").GetString() ?? ""
+        );
+    }
 
     private static List<EditEntry> BuildEditScript(string[] original, string[] modified)
     {
