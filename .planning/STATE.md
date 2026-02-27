@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 
 ## Current Position
 
-Phase: 2 of 5 (File Stage & Commit)
-Plan: 3 of 3 in current phase (phase complete)
-Status: Phase complete — ready for Phase 3
-Last activity: 2026-02-27 — Completed 02-03 (file commit/rollback/clear — atomic edit cycle complete)
+Phase: 3 of 5 (dotnet-scaffold)
+Plan: 1 of ? in current phase
+Status: In progress — plan 03-01 complete
+Last activity: 2026-02-27 — Completed 03-01 (dotnet scaffold class/interface/record/enum command group)
 
-Progress: [█████░░░░░] 50%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 
@@ -35,6 +35,7 @@ Progress: [█████░░░░░] 50%
 - Trend: Stable
 
 *Updated after each plan completion*
+| Phase 03-dotnet-scaffold P01 | 2 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -63,6 +64,10 @@ Recent decisions affecting current work:
 - [Phase 02-file-stage-commit]: file commit stores LastBackupPath in plan file after clearing Operations so rollback still works
 - [Phase 02-file-stage-commit]: file rollback does NOT clear LastBackupPath — allows multiple rollbacks or re-inspection
 - [Phase 02-file-stage-commit]: file commit with no staged ops exits 0 with informative message rather than error
+- [03-01]: ScaffoldFile treated identically to Write in ApplyOpsInMemory — reuses existing diff/commit/rollback pipeline
+- [03-01]: ScaffoldFile skips ValidateAsync alongside Write and Append — always valid since it creates/overwrites
+- [03-01]: DotnetScaffoldResult includes Namespace field to confirm the staged content's namespace to the caller
+- [03-01]: dotnet scaffold templates use file-scoped namespace pattern: namespace X;\n\npublic TYPE Name\n{\n}\n
 
 ### Pending Todos
 
@@ -75,5 +80,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 02-03-PLAN.md — file commit, rollback, and clear commands (Phase 2 complete)
+Stopped at: Completed 03-01-PLAN.md — dotnet scaffold class/interface/record/enum command group (Phase 3 plan 1 complete)
 Resume file: None

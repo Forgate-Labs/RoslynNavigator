@@ -33,10 +33,10 @@
 
 ### Dotnet Scaffold
 
-- [ ] **SCAF-01**: `dotnet scaffold class <path> <namespace> <className>` — gera arquivo com `namespace <ns>; public class <name> { }` (file-scoped namespace)
-- [ ] **SCAF-02**: `dotnet scaffold interface <path> <namespace> <interfaceName>` — gera `public interface <name> { }`
-- [ ] **SCAF-03**: `dotnet scaffold record <path> <namespace> <recordName>` — gera `public record <name> { }`
-- [ ] **SCAF-04**: `dotnet scaffold enum <path> <namespace> <enumName>` — gera `public enum <name> { }`
+- [x] **SCAF-01**: `dotnet scaffold class <path> <namespace> <className>` — gera arquivo com `namespace <ns>; public class <name> { }` (file-scoped namespace)
+- [x] **SCAF-02**: `dotnet scaffold interface <path> <namespace> <interfaceName>` — gera `public interface <name> { }`
+- [x] **SCAF-03**: `dotnet scaffold record <path> <namespace> <recordName>` — gera `public record <name> { }`
+- [x] **SCAF-04**: `dotnet scaffold enum <path> <namespace> <enumName>` — gera `public enum <name> { }`
 
 ### Dotnet Add
 
@@ -103,10 +103,10 @@
 | FCOMMIT-02 | Phase 2 | Complete |
 | FCOMMIT-03 | Phase 2 | Complete |
 | FCOMMIT-04 | Phase 2 | Complete |
-| SCAF-01 | Phase 3 | Pending |
-| SCAF-02 | Phase 3 | Pending |
-| SCAF-03 | Phase 3 | Pending |
-| SCAF-04 | Phase 3 | Pending |
+| SCAF-01 | Phase 3 | Complete |
+| SCAF-02 | Phase 3 | Complete |
+| SCAF-03 | Phase 3 | Complete |
+| SCAF-04 | Phase 3 | Complete |
 | DADD-01 | Phase 4 | Pending |
 | DADD-02 | Phase 4 | Pending |
 | DADD-03 | Phase 4 | Pending |
