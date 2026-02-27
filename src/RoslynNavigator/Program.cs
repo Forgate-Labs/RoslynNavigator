@@ -349,6 +349,26 @@ listFeatureScenariosCommand.SetHandler(async (string path) =>
     }
 }, pathOption);
 
+// snapshot command
+var snapshotCommand = new Command("snapshot", "Generate a SQLite snapshot of the solution structure");
+var snapshotDbOption = new Option<string?>("--db", "Optional path for the snapshot database (default: .roslyn-nav/snapshots/<solution>.snapshot.db)");
+snapshotCommand.AddOption(solutionOption);
+snapshotCommand.AddOption(snapshotDbOption);
+snapshotCommand.SetHandler(async (string solution, string? db) =>
+{
+    try
+    {
+        var command = new SnapshotCommand();
+        var result = await command.ExecuteAsync(solution, db);
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("snapshot_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, solutionOption, snapshotDbOption);
+
 // ── dotnet command group ────────────────────────────────────────────────────
 var dotnetCommand = new Command("dotnet", "dotnet-specific operations (scaffold, etc.)");
 var dotnetScaffoldCommand = new Command("scaffold", "Scaffold new C# type files");
@@ -940,6 +960,7 @@ rootCommand.AddCommand(findByAttributeCommand);
 rootCommand.AddCommand(findStepDefinitionCommand);
 rootCommand.AddCommand(findInterfaceConsumersCommand);
 rootCommand.AddCommand(listFeatureScenariosCommand);
+rootCommand.AddCommand(snapshotCommand);
 rootCommand.AddCommand(dotnetCommand);
 rootCommand.AddCommand(fileCommand);
 
