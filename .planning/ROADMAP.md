@@ -6,7 +6,7 @@ The project already has 17 navigation commands. This milestone adds write capabi
 
 ## Phases
 
-- [ ] **Phase 1: Infrastructure & File Read** - Plan/commit foundation + immediate read commands
+- [x] **Phase 1: Infrastructure & File Read** - Plan/commit foundation + immediate read commands (completed 2026-02-27)
 - [ ] **Phase 2: File Stage & Commit** - Staged file edits with atomic apply, rollback, and diff preview
 - [ ] **Phase 3: Dotnet Scaffold** - Generate new C# files (class, interface, record, enum)
 - [ ] **Phase 4: Dotnet Add** - Insert members (field, property, constructor, method, using) into existing types
@@ -78,7 +78,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Infrastructure & File Read | 0/2 | Not started | - |
+| 1. Infrastructure & File Read | 2/2 | Complete   | 2026-02-27 |
 | 2. File Stage & Commit | 0/? | Not started | - |
 | 3. Dotnet Scaffold | 0/? | Not started | - |
 | 4. Dotnet Add | 0/? | Not started | - |

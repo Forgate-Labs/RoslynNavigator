@@ -7,10 +7,10 @@
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: Sistema de plan/commit (Unit of Work) — planos são staged em memória e `.roslyn-nav-plans.json` persiste entre invocações
-- [ ] **INFRA-02**: `IPlanStore` interface com `FilePlanStore` implementation que lê/escreve `.roslyn-nav-plans.json` no diretório de trabalho
-- [ ] **INFRA-03**: Backup automático em `.roslyn-nav-backup/<timestamp>/` criado antes de qualquer `file commit`
-- [ ] **INFRA-04**: Atomicidade — `file commit` aplica todas as mudanças ou nenhuma; se qualquer validação falhar, nenhum arquivo é tocado
+- [x] **INFRA-01**: Sistema de plan/commit (Unit of Work) — planos são staged em memória e `.roslyn-nav-plans.json` persiste entre invocações
+- [x] **INFRA-02**: `IPlanStore` interface com `FilePlanStore` implementation que lê/escreve `.roslyn-nav-plans.json` no diretório de trabalho
+- [x] **INFRA-03**: Backup automático em `.roslyn-nav-backup/<timestamp>/` criado antes de qualquer `file commit`
+- [x] **INFRA-04**: Atomicidade — `file commit` aplica todas as mudanças ou nenhuma; se qualquer validação falhar, nenhum arquivo é tocado
 
 ### File Read
 
@@ -57,7 +57,7 @@
 
 ### Cross-cutting
 
-- [ ] **CROSS-01**: Todos os comandos `dotnet` write/edit são staged (compartilham o mesmo `IPlanStore` dos comandos `file`)
+- [x] **CROSS-01**: Todos os comandos `dotnet` write/edit são staged (compartilham o mesmo `IPlanStore` dos comandos `file`)
 - [ ] **CROSS-02**: Mensagens de erro específicas: linha errada, old string não encontrada, classe não encontrada, erro de parse no conteúdo
 - [ ] **CROSS-03**: `dotnet add`, `update` e `remove` resolvem o tipo alvo buscando em `ClassDeclarationSyntax`, `RecordDeclarationSyntax` e `StructDeclarationSyntax`
 - [ ] **CROSS-04**: CLAUDE.md atualizado com todos os novos comandos, workflows e dicas
@@ -89,10 +89,10 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 1 | Pending |
-| INFRA-02 | Phase 1 | Pending |
-| INFRA-03 | Phase 1 | Pending |
-| INFRA-04 | Phase 1 | Pending |
+| INFRA-01 | Phase 1 | Complete |
+| INFRA-02 | Phase 1 | Complete |
+| INFRA-03 | Phase 1 | Complete |
+| INFRA-04 | Phase 1 | Complete |
 | FREAD-01 | Phase 1 | Pending |
 | FREAD-02 | Phase 1 | Pending |
 | FSTAGE-01 | Phase 2 | Pending |
@@ -118,7 +118,7 @@
 | DREM-01 | Phase 5 | Pending |
 | DREM-02 | Phase 5 | Pending |
 | DREM-03 | Phase 5 | Pending |
-| CROSS-01 | Phase 1 | Pending |
+| CROSS-01 | Phase 1 | Complete |
 | CROSS-02 | Phase 2 | Pending |
 | CROSS-03 | Phase 4 | Pending |
 | CROSS-04 | Phase 5 | Pending |
