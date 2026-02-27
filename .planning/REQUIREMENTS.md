@@ -1,0 +1,133 @@
+# Requirements: RoslynNavigator — File & Dotnet Commands
+
+**Defined:** 2026-02-27
+**Core Value:** O assistente de IA consegue navegar, criar e modificar código C# com precisão cirúrgica sem precisar ler arquivos inteiros — reduzindo tokens e eliminando edições ambíguas.
+
+## v1 Requirements
+
+### Infrastructure
+
+- [ ] **INFRA-01**: Sistema de plan/commit (Unit of Work) — planos são staged em memória e `.roslyn-nav-plans.json` persiste entre invocações
+- [ ] **INFRA-02**: `IPlanStore` interface com `FilePlanStore` implementation que lê/escreve `.roslyn-nav-plans.json` no diretório de trabalho
+- [ ] **INFRA-03**: Backup automático em `.roslyn-nav-backup/<timestamp>/` criado antes de qualquer `file commit`
+- [ ] **INFRA-04**: Atomicidade — `file commit` aplica todas as mudanças ou nenhuma; se qualquer validação falhar, nenhum arquivo é tocado
+
+### File Read
+
+- [ ] **FREAD-01**: `file read <path> [--lines START-END]` — exibe conteúdo do arquivo sempre com números de linha; aceita range opcional
+- [ ] **FREAD-02**: `file grep <pattern> [path] [--ext .cs] [--max-lines 100]` — busca regex com filtro de extensão e limite de resultados
+
+### File Stage (Write)
+
+- [ ] **FSTAGE-01**: `file plan edit <path> <line> <old> <new>` — edição determinística: valida que a linha `<line>` contém `<old>` antes de aceitar; recusa se não bater
+- [ ] **FSTAGE-02**: `file plan write <path> <content>` — staged: cria ou sobrescreve o arquivo inteiro com `<content>`
+- [ ] **FSTAGE-03**: `file plan append <path> <content>` — staged: adiciona `<content>` ao final do arquivo
+- [ ] **FSTAGE-04**: `file plan delete <path> <line> <old>` — staged: remove a linha `<line>`, validando que contém `<old>`
+
+### File Commit / Rollback
+
+- [ ] **FCOMMIT-01**: `file status` — exibe todas as mudanças staged como unified diff preview; aceita `--json` para saída machine-readable
+- [ ] **FCOMMIT-02**: `file commit` — cria backup, valida todas as operações (falha rápido se qualquer validação falhar), aplica atomicamente, retorna unified diff; aceita `--json`
+- [ ] **FCOMMIT-03**: `file rollback` — restaura todos os arquivos modificados do último backup em `.roslyn-nav-backup/`
+- [ ] **FCOMMIT-04**: `file clear` — descarta todos os planos staged sem aplicar, deleta `.roslyn-nav-plans.json`
+
+### Dotnet Scaffold
+
+- [ ] **SCAF-01**: `dotnet scaffold class <path> <namespace> <className>` — gera arquivo com `namespace <ns>; public class <name> { }` (file-scoped namespace)
+- [ ] **SCAF-02**: `dotnet scaffold interface <path> <namespace> <interfaceName>` — gera `public interface <name> { }`
+- [ ] **SCAF-03**: `dotnet scaffold record <path> <namespace> <recordName>` — gera `public record <name> { }`
+- [ ] **SCAF-04**: `dotnet scaffold enum <path> <namespace> <enumName>` — gera `public enum <name> { }`
+
+### Dotnet Add
+
+- [ ] **DADD-01**: `dotnet add using <path> <namespace>` — adiciona `using <namespace>;` no topo do arquivo se não estiver presente
+- [ ] **DADD-02**: `dotnet add field <path> <className> <access> <type> <name>` — insere `<access> <type> _<name>;` na posição correta (top of class body, after last field)
+- [ ] **DADD-03**: `dotnet add property <path> <className> <access> <type> <name>` — insere `<access> <type> <Name> { get; set; }` na posição correta (after fields)
+- [ ] **DADD-04**: `dotnet add constructor <path> <className> <content>` — insere construtor na posição correta (after properties/fields)
+- [ ] **DADD-05**: `dotnet add method <path> <className> <content>` — insere método antes do `}` de fechamento da classe; detecta indentação existente; valida que o conteúdo parsa sem erros
+- [ ] **DADD-06**: Ordem convencional de membros C# respeitada em todos os `dotnet add`: fields → properties → constructors → methods
+
+### Dotnet Update & Remove
+
+- [ ] **DUPD-01**: `dotnet update property <path> <className> <propertyName> <content>` — substitui a propriedade existente pelo `<content>` fornecido
+- [ ] **DUPD-02**: `dotnet update field <path> <className> <fieldName> <content>` — substitui o campo existente pelo `<content>` fornecido
+- [ ] **DREM-01**: `dotnet remove method <path> <className> <methodName>` — remove método pelo nome
+- [ ] **DREM-02**: `dotnet remove property <path> <className> <propertyName>` — remove propriedade pelo nome
+- [ ] **DREM-03**: `dotnet remove field <path> <className> <fieldName>` — remove campo pelo nome
+
+### Cross-cutting
+
+- [ ] **CROSS-01**: Todos os comandos `dotnet` write/edit são staged (compartilham o mesmo `IPlanStore` dos comandos `file`)
+- [ ] **CROSS-02**: Mensagens de erro específicas: linha errada, old string não encontrada, classe não encontrada, erro de parse no conteúdo
+- [ ] **CROSS-03**: `dotnet add`, `update` e `remove` resolvem o tipo alvo buscando em `ClassDeclarationSyntax`, `RecordDeclarationSyntax` e `StructDeclarationSyntax`
+- [ ] **CROSS-04**: CLAUDE.md atualizado com todos os novos comandos, workflows e dicas
+
+## v2 Requirements
+
+### Dotnet Advanced
+
+- **DADV-01**: `dotnet add interface-implementation <path> <className> <interfaceName>` — adiciona interface ao tipo e gera stubs dos métodos
+- **DADV-02**: `dotnet scaffold controller <path> <namespace> <name>` — boilerplate de controller ASP.NET com atributos
+- **DADV-03**: Suporte a namespaces block-scoped (além do file-scoped já suportado no scaffold)
+
+### File Advanced
+
+- **FADV-01**: `file diff` — compara estado atual com o staged antes do commit
+- **FADV-02**: `file plan move <src> <dst>` — move/renomeia arquivo
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Geração de código por IA | A ferramenta executa; a IA decide — sem overlap |
+| Suporte a VB.NET ou F# | C# only, mesma decisão do projeto base |
+| Servidor HTTP / daemon | CLI one-shot, mesma decisão do projeto base |
+| Upgrade de pacotes NuGet | Estabilidade da ferramenta existente |
+| Modificação de comandos de navegação existentes | Não quebrar o que já funciona |
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| INFRA-01 | Phase 1 | Pending |
+| INFRA-02 | Phase 1 | Pending |
+| INFRA-03 | Phase 1 | Pending |
+| INFRA-04 | Phase 1 | Pending |
+| FREAD-01 | Phase 1 | Pending |
+| FREAD-02 | Phase 1 | Pending |
+| FSTAGE-01 | Phase 2 | Pending |
+| FSTAGE-02 | Phase 2 | Pending |
+| FSTAGE-03 | Phase 2 | Pending |
+| FSTAGE-04 | Phase 2 | Pending |
+| FCOMMIT-01 | Phase 2 | Pending |
+| FCOMMIT-02 | Phase 2 | Pending |
+| FCOMMIT-03 | Phase 2 | Pending |
+| FCOMMIT-04 | Phase 2 | Pending |
+| SCAF-01 | Phase 3 | Pending |
+| SCAF-02 | Phase 3 | Pending |
+| SCAF-03 | Phase 3 | Pending |
+| SCAF-04 | Phase 3 | Pending |
+| DADD-01 | Phase 4 | Pending |
+| DADD-02 | Phase 4 | Pending |
+| DADD-03 | Phase 4 | Pending |
+| DADD-04 | Phase 4 | Pending |
+| DADD-05 | Phase 4 | Pending |
+| DADD-06 | Phase 4 | Pending |
+| DUPD-01 | Phase 5 | Pending |
+| DUPD-02 | Phase 5 | Pending |
+| DREM-01 | Phase 5 | Pending |
+| DREM-02 | Phase 5 | Pending |
+| DREM-03 | Phase 5 | Pending |
+| CROSS-01 | Phase 1 | Pending |
+| CROSS-02 | Phase 2 | Pending |
+| CROSS-03 | Phase 4 | Pending |
+| CROSS-04 | Phase 5 | Pending |
+
+**Coverage:**
+- v1 requirements: 32 total
+- Mapped to phases: 32
+- Unmapped: 0 ✓
+
+---
+*Requirements defined: 2026-02-27*
+*Last updated: 2026-02-27 after initial definition*
