@@ -40,7 +40,12 @@ Plans:
   3. `file commit` applies all staged changes and returns a unified diff; if any validation fails, zero files are modified
   4. `file rollback` restores all files touched by the last commit from the backup directory
   5. `file clear` removes `.roslyn-nav-plans.json` and discards all staged operations without touching any file
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — TDD: FilePlanEngine (validate, diff, atomic apply, rollback)
+- [ ] 02-02-PLAN.md — file plan edit/write/append/delete commands + file status
+- [ ] 02-03-PLAN.md — file commit, file rollback, file clear commands
 
 ### Phase 3: Dotnet Scaffold
 **Goal**: AI can create new, correctly structured C# files for class, interface, record, and enum types without reading any existing file
