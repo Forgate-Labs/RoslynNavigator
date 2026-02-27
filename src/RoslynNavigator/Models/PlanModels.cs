@@ -10,7 +10,9 @@ public enum OperationType
     Append,
     Delete,
     ScaffoldFile,
-    AddMember
+    AddMember,
+    UpdateMember,
+    RemoveMember
 }
 
 public record PlanOperation
