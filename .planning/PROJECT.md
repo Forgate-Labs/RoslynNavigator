@@ -8,6 +8,17 @@ Uma ferramenta CLI .NET global (`roslyn-nav`) que usa Roslyn para navegação se
 
 O assistente de IA consegue navegar, criar e modificar código C# com precisão cirúrgica sem precisar ler arquivos inteiros — reduzindo tokens e eliminando edições ambíguas.
 
+## Current Milestone: v2.0 Snapshot, Rules & Ask
+
+**Goal:** Expandir o Roslyn Navigator para análise completa de solution via snapshot SQLite, avaliação de regras YAML e consulta SQL direta para suporte a perguntas em linguagem natural.
+
+**Target features:**
+- Comando `snapshot` para gerar banco SQLite com classes, métodos, dependências, chamadas, annotations, flags e metadados
+- Comando `check` para aplicar regras builtin/domain e reportar violações filtráveis por severidade/regra
+- Comando `snapshot query` para executar SQL arbitrário no snapshot e retornar JSON para consumo da LLM
+- Novos projetos `RoslynNavigator.Snapshot` e `RoslynNavigator.Rules` integrados à solution existente
+- Registro dos novos comandos no CLI mantendo padrões existentes de output JSON e arquitetura
+
 ## Requirements
 
 ### Validated
@@ -40,7 +51,10 @@ O assistente de IA consegue navegar, criar e modificar código C# com precisão 
 
 ### Active
 
-*(Nenhum — próximo milestone a definir)*
+- [ ] Entregar `snapshot` com Walker estrutural/semântico, detector de padrões e persistência SQLite
+- [ ] Entregar `check` com RuleLoader, QueryBuilder e RuleEvaluator genéricos para YAML
+- [ ] Entregar `snapshot query` para consulta SQL direta com output JSON consistente
+- [ ] Integrar os novos projetos/comandos sem quebrar os 41 comandos atuais
 
 ### Out of Scope
 
@@ -83,4 +97,4 @@ O principal desafio técnico — `dotnet add method` com detecção de indentaç
 | `ParseUpdateRemoveMetadata` usa `TryGetProperty` para `content` | RemoveMember não tem campo content, UpdateMember tem | ✓ Good — comando único trata ambos os casos |
 
 ---
-*Last updated: 2026-02-27 after v1.0 milestone*
+*Last updated: 2026-02-27 after starting milestone v2.0 Snapshot, Rules & Ask*

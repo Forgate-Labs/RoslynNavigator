@@ -5,42 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-27)
 
 **Core value:** O assistente de IA consegue navegar, criar e modificar código C# com precisão cirúrgica sem precisar ler arquivos inteiros — reduzindo tokens e eliminando edições ambíguas.
-**Current focus:** Planejando próximo milestone
+**Current focus:** Milestone v2.0 Snapshot, Rules & Ask
 
 ## Current Position
 
-Status: v1.0 shipped — planejando próximo milestone
-Last activity: 2026-02-27 — Milestone v1.0 completo e arquivado
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-27 — Milestone v2.0 started
 
-Progress: [██████████] 100%
-
-## Performance Metrics
-
-**Velocity:**
-- Total plans completed: 5
-- Average duration: 2.8 min
-- Total execution time: 14 min
-
-**By Phase:**
-
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| 01-infrastructure-file-read | 2 | 4 min | 2 min |
-| 02-file-stage-commit | 3 | 10 min | 3.3 min |
-
-**Recent Trend:**
-- Last 5 plans: 01-01 (2 min), 01-02 (2 min), 02-01 (3 min), 02-02 (2 min), 02-03 (5 min)
-- Trend: Stable
-
-*Updated after each plan completion*
-| Phase 03-dotnet-scaffold P01 | 2 | 2 tasks | 4 files |
-| Phase 04-dotnet-add P01 | 8 | 2 tasks | 2 files |
-| Phase 04-dotnet-add P02 | 2 | 2 tasks | 3 files |
-| Phase 04-dotnet-add P03 | 3 | 1 tasks | 1 files |
-| Phase 05-dotnet-update-remove-docs P01 | 4 | 2 tasks | 2 files |
-| Phase 05-dotnet-update-remove-docs P04 | 1 | 1 tasks | 1 files |
-| Phase 05-dotnet-update-remove-docs P02 | 1 | 2 tasks | 5 files |
-| Phase 05-dotnet-update-remove-docs P03 | 3 | 1 tasks | 1 files |
+Progress: [░░░░░░░░░░] 0%
 
 ## Accumulated Context
 
