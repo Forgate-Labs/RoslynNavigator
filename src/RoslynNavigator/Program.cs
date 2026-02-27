@@ -349,12 +349,15 @@ listFeatureScenariosCommand.SetHandler(async (string path) =>
     }
 }, pathOption);
 
-// snapshot command
-var snapshotCommand = new Command("snapshot", "Generate a SQLite snapshot of the solution structure");
+// snapshot command group
+var snapshotCommand = new Command("snapshot", "Generate or query a SQLite snapshot of the solution structure");
+
+// snapshot generate subcommand
+var snapshotGenerateCommand = new Command("generate", "Generate a SQLite snapshot of the solution structure");
 var snapshotDbOption = new Option<string?>("--db", "Optional path for the snapshot database (default: .roslyn-nav/snapshots/<solution>.snapshot.db)");
-snapshotCommand.AddOption(solutionOption);
-snapshotCommand.AddOption(snapshotDbOption);
-snapshotCommand.SetHandler(async (string solution, string? db) =>
+snapshotGenerateCommand.AddOption(solutionOption);
+snapshotGenerateCommand.AddOption(snapshotDbOption);
+snapshotGenerateCommand.SetHandler(async (string solution, string? db) =>
 {
     try
     {
@@ -368,6 +371,32 @@ snapshotCommand.SetHandler(async (string solution, string? db) =>
         Environment.ExitCode = 1;
     }
 }, solutionOption, snapshotDbOption);
+
+// snapshot query subcommand
+var snapshotQueryCommand = new Command("query", "Execute a read-only SQL query against a snapshot database");
+var snapshotQuerySqlOption = new Option<string>("--sql", "SQL query to execute (SELECT only)") { IsRequired = true };
+var snapshotQueryDbOption = new Option<string?>("--db", "Path to the snapshot database (optional if --solution provided)");
+var snapshotQuerySolutionOption = new Option<string?>("--solution", "Path to .sln file (used to resolve default DB path if --db not provided)");
+snapshotQueryCommand.AddOption(snapshotQuerySqlOption);
+snapshotQueryCommand.AddOption(snapshotQueryDbOption);
+snapshotQueryCommand.AddOption(snapshotQuerySolutionOption);
+snapshotQueryCommand.SetHandler(async (string sql, string? db, string? solution) =>
+{
+    try
+    {
+        var command = new SnapshotQueryCommand();
+        var result = await command.ExecuteAsync(sql, db, solution);
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("snapshot_query_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, snapshotQuerySqlOption, snapshotQueryDbOption, snapshotQuerySolutionOption);
+
+snapshotCommand.AddCommand(snapshotGenerateCommand);
+snapshotCommand.AddCommand(snapshotQueryCommand);
 
 // check command
 var checkCommand = new Command("check", "Evaluate rules against a snapshot and report violations");
