@@ -1,18 +1,20 @@
 # Roslyn Navigator
 
-A .NET global tool for semantic C# code navigation using Roslyn. Designed to reduce token usage by 75%+ when AI assistants explore C# codebases.
+A .NET global tool for semantic C# code navigation **and mutation** using Roslyn. Designed to reduce token usage by 85%+ when AI assistants explore and modify C# codebases.
 
 ## Why?
 
-When AI assistants (Claude, GPT, Copilot) explore C# code, they typically read entire files. A 500-line file costs ~2000 tokens just to understand one method.
+When AI assistants (Claude, GPT, Copilot) explore C# code, they typically read entire files. A 500-line file costs ~2000 tokens just to understand one method. And editing? Even worse — the AI rewrites the whole file to change one line.
 
-Roslyn Navigator provides targeted commands that extract only what you need:
+Roslyn Navigator provides targeted commands that extract and mutate only what you need:
 - Get class structure without reading the file
 - Extract specific methods by name
 - Find symbol definitions and usages semantically
 - Navigate namespaces and project structure
+- **Stage file edits atomically** with diff preview and rollback
+- **Insert, update, and remove C# members** via Roslyn AST — no regex, no full rewrites
 
-**Result:** Read 18 lines instead of 500. Use 100 tokens instead of 2000.
+**Result:** Read 18 lines instead of 500. Edit one method without touching the rest.
 
 ## Installation
 
@@ -27,6 +29,8 @@ roslyn-nav --help
 
 ## Quick Start
 
+### Navigation
+
 ```bash
 # Get overview of a class
 roslyn-nav list-class --solution MyApp.sln --file Services/UserService.cs --class UserService
@@ -37,50 +41,67 @@ roslyn-nav find-symbol --solution MyApp.sln --name UserRepository --kind class
 # Extract a specific method's source code
 roslyn-nav get-method --solution MyApp.sln --method CreateUser --class UserService
 
-# Extract multiple methods at once
-roslyn-nav get-methods --solution MyApp.sln --class UserService --methods "CreateUser,GetUser,DeleteUser"
-
 # Find all usages of a method
 roslyn-nav find-usages --solution MyApp.sln --symbol "UserService.CreateUser"
+```
 
-# Find methods that call another method
-roslyn-nav find-callers --solution MyApp.sln --symbol "UserService.CreateUser"
+### Write & Mutation (v1.1)
 
-# Find all implementations of an interface
-roslyn-nav find-implementations --solution MyApp.sln --interface IUserRepository
+All write commands are **staged** — nothing touches disk until `file commit`.
 
-# Find where a class is instantiated
-roslyn-nav find-instantiations --solution MyApp.sln --class UserService
+```bash
+# Read a file with line numbers
+roslyn-nav file read Services/UserService.cs --lines 10-30
 
-# Find members with a specific attribute
-roslyn-nav find-by-attribute --solution MyApp.sln --attribute "Obsolete"
+# Search across files
+roslyn-nav file grep "ILogger" src/ --ext .cs
 
-# Find Reqnroll/SpecFlow step definitions by pattern
-roslyn-nav find-step-definition --solution MyApp.sln --pattern "user is logged in"
+# Stage a line edit (validates old content before accepting)
+roslyn-nav file plan edit Services/UserService.cs 12 "    private int _count;" "    private long _count;"
 
-# Find all implementations and injection points of an interface
-roslyn-nav find-interface-consumers --solution MyApp.sln --interface IUserRepository
+# Preview all staged changes as unified diff
+roslyn-nav file status
 
-# List all classes in a namespace
-roslyn-nav list-classes --solution MyApp.sln --namespace MyApp.Services
+# Apply atomically (backup created first)
+roslyn-nav file commit
 
-# Get project namespace structure
-roslyn-nav get-namespace-structure --solution MyApp.sln --project MyApp.Api
+# Undo last commit
+roslyn-nav file rollback
 
-# Get class hierarchy (base types, interfaces, derived)
-roslyn-nav get-hierarchy --solution MyApp.sln --class BaseController
+# Discard staged ops without writing anything
+roslyn-nav file clear
 
-# Analyze constructor dependencies
-roslyn-nav get-constructor-deps --solution MyApp.sln --class UserService
+# Scaffold new C# files
+roslyn-nav dotnet scaffold class src/Services/UserService.cs MyApp.Services UserService
+roslyn-nav dotnet scaffold interface src/Services/IUserService.cs MyApp.Services IUserService
+roslyn-nav file commit
 
-# Check if a method is virtual/override
-roslyn-nav check-overridable --solution MyApp.sln --class UserService --method GetUser
+# Insert members into existing types (respects fields → properties → constructors → methods order)
+roslyn-nav dotnet add using src/Services/UserService.cs Microsoft.Extensions.Logging
+roslyn-nav dotnet add field src/Services/UserService.cs UserService private ILogger logger
+roslyn-nav dotnet add property src/Services/UserService.cs UserService public string Name
+roslyn-nav dotnet add constructor src/Services/UserService.cs UserService \
+  "public UserService(ILogger<UserService> logger) { _logger = logger; }"
+roslyn-nav dotnet add method src/Services/UserService.cs UserService \
+  "public async Task<User> GetByIdAsync(int id) { return await _repo.FindAsync(id); }"
+roslyn-nav file commit
 
-# List scenarios from Gherkin .feature files
-roslyn-nav list-feature-scenarios --path tests/Features
+# Replace existing members
+roslyn-nav dotnet update property src/Models/User.cs User Name \
+  "public string Name { get; init; } = string.Empty;"
+roslyn-nav dotnet update field src/Services/UserService.cs UserService _logger \
+  "private readonly ILogger<UserService> _logger;"
+roslyn-nav file commit
+
+# Remove members by name
+roslyn-nav dotnet remove method src/Services/UserService.cs UserService ObsoleteHelper
+roslyn-nav dotnet remove property src/Models/User.cs User DeprecatedField
+roslyn-nav file commit
 ```
 
 ## Commands
+
+### Navigation
 
 | Command | Description |
 |---------|-------------|
@@ -102,9 +123,68 @@ roslyn-nav list-feature-scenarios --path tests/Features
 | `get-constructor-deps` | Analyze constructor dependencies for DI |
 | `check-overridable` | Check if a method is virtual/override/abstract/sealed |
 
+### File Read
+
+| Command | Description |
+|---------|-------------|
+| `file read <path> [--lines START-END]` | File content with line numbers; optional range filter |
+| `file grep <pattern> [path] [--ext .cs] [--max-lines N]` | Regex search with extension filter |
+
+### File Stage / Commit
+
+| Command | Description |
+|---------|-------------|
+| `file plan edit <path> <line> <old> <new>` | Stage a line edit — validates old content before accepting |
+| `file plan write <path> <content>` | Stage a full file overwrite (creates if missing) |
+| `file plan append <path> <content>` | Stage an append to end of file |
+| `file plan delete <path> <line> <old>` | Stage a line deletion — validates old content |
+| `file status [--json]` | Preview all staged changes as unified diff |
+| `file commit [--json]` | Create backup, validate, apply atomically |
+| `file rollback` | Restore all files from last backup |
+| `file clear` | Discard all staged ops without writing anything |
+
+### Dotnet Scaffold
+
+| Command | Description |
+|---------|-------------|
+| `dotnet scaffold class <path> <ns> <name>` | New class file with file-scoped namespace |
+| `dotnet scaffold interface <path> <ns> <name>` | New interface file |
+| `dotnet scaffold record <path> <ns> <name>` | New record file |
+| `dotnet scaffold enum <path> <ns> <name>` | New enum file |
+
+### Dotnet Add
+
+| Command | Description |
+|---------|-------------|
+| `dotnet add using <path> <namespace>` | Add using directive (idempotent) |
+| `dotnet add field <path> <class> <access> <type> <name>` | Insert field (auto-prepends `_`) |
+| `dotnet add property <path> <class> <access> <type> <name>` | Insert `{ get; set; }` property |
+| `dotnet add constructor <path> <class> <content>` | Insert constructor at correct position |
+| `dotnet add method <path> <class> <content>` | Insert method before closing `}` |
+
+### Dotnet Update & Remove
+
+| Command | Description |
+|---------|-------------|
+| `dotnet update property <path> <class> <name> <content>` | Replace existing property declaration |
+| `dotnet update field <path> <class> <name> <content>` | Replace existing field declaration |
+| `dotnet remove method <path> <class> <name>` | Delete method by name |
+| `dotnet remove property <path> <class> <name>` | Delete property by name |
+| `dotnet remove field <path> <class> <name>` | Delete field by name (accepts `_name` or `name`) |
+
+## Plan / Commit Workflow
+
+Write and dotnet mutation commands accumulate in `.roslyn-nav-plans.json`. Nothing is written to disk until `file commit`.
+
+```
+stage ops  →  file status  →  file commit  →  (file rollback if needed)
+```
+
+`file commit` always creates a timestamped backup in `.roslyn-nav-backup/<timestamp>/` before touching any file. If any validation fails, zero files are modified.
+
 ## Output
 
-All commands output JSON for easy parsing:
+All commands output JSON:
 
 ```json
 {
@@ -124,11 +204,11 @@ All commands output JSON for easy parsing:
 
 ## AI Assistant Integration
 
-This tool is designed for AI assistants. **Ready-to-use instruction files are included** - just copy them to your solution:
+This tool is designed for AI assistants. **Ready-to-use instruction files are included** — copy them to your solution root:
 
 ### For Claude Code
 
-Copy [`CLAUDE.md`](./CLAUDE.md) to your solution root. It teaches Claude how to use roslyn-nav effectively with workflows and examples.
+Copy [`CLAUDE.md`](./CLAUDE.md) to your solution root. It teaches Claude how to use roslyn-nav effectively with workflows, examples, and write command tips.
 
 ### For Other AI Agents (GPT, Copilot, etc.)
 
@@ -142,30 +222,14 @@ cp /path/to/RoslynNavigator/CLAUDE.md .
 cp /path/to/RoslynNavigator/AGENTS.md .
 ```
 
-Now any AI assistant working on your codebase will know how to use roslyn-nav for efficient navigation.
-
-## Typical Workflow
-
-1. **Explore structure first:**
-   ```bash
-   roslyn-nav get-namespace-structure --solution app.sln --project MyProject
-   ```
-
-2. **Get class overview:**
-   ```bash
-   roslyn-nav list-class --solution app.sln --file Services/UserService.cs --class UserService
-   ```
-
-3. **Read specific lines** (using the lineRange from step 2):
-   ```bash
-   # The AI reads only lines 45-62 instead of the entire file
-   ```
+Now any AI assistant working on your codebase will know how to use roslyn-nav for efficient navigation and mutation.
 
 ## Performance
 
 - **Cold start:** 2-5 seconds (loading MSBuild workspace)
 - **Warm cache:** <500ms (solution cached in memory)
 - **Token savings:** 85-98% reduction on navigation tasks
+- **Edit safety:** atomic commit + automatic backup on every `file commit`
 
 ## Requirements
 
