@@ -36,8 +36,8 @@
 
 Plans:
 - [x] 01-01-PLAN.md — Build SQLite schema foundation (embedded resource + bootstrap/path services)
-- [ ] 01-02-PLAN.md — TDD snapshot extraction and analysis signal persistence
-- [ ] 01-03-PLAN.md — Expose `snapshot` CLI command and verify end-to-end behavior
+- [x] 01-02-PLAN.md — TDD snapshot extraction and analysis signal persistence
+- [x] 01-03-PLAN.md — Expose `snapshot` CLI command and verify end-to-end behavior
 
 ---
 
