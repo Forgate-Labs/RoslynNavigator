@@ -3,18 +3,18 @@
 ## Milestones
 
 - ✅ **v1.0 File & Dotnet Commands** — Phases 1-5 (shipped 2026-02-27)
-- 🔄 **v2.0 Snapshot, Rules & Ask** — Phases 6-9 (in progress)
+- 🔄 **v2.0 Snapshot, Rules & Ask** — Phases 1-4 (in progress)
 
 ## Phases
 
-- [ ] **Phase 6: Snapshot Foundation** - Gera banco SQLite com classes, métodos, dependências, chamadas, annotations, flags e metadados
-- [ ] **Phase 7: Rules Engine** - Avalia regras YAML builtin/domain e reporta violações filtráveis
-- [ ] **Phase 8: Query Integration** - Consulta SQL arbitrária com output JSON para LLM
-- [ ] **Phase 9: Integration & Polish** - Novos projetos integrados, CLI atualizado, compatibilidade garantida
+- [ ] **Phase 1: Snapshot Foundation** - Gera banco SQLite com classes, métodos, dependências, chamadas, annotations, flags e metadados
+- [ ] **Phase 2: Rules Engine** - Avalia regras YAML builtin/domain e reporta violações filtráveis
+- [ ] **Phase 3: Query Integration** - Consulta SQL arbitrária com output JSON para LLM
+- [ ] **Phase 4: Integration & Polish** - Novos projetos integrados, CLI atualizado, compatibilidade garantida
 
 ## Phase Details
 
-### Phase 6: Snapshot Foundation
+### Phase 1: Snapshot Foundation
 
 **Goal:** Usuário pode gerar snapshot SQLite da solution com estrutura completa de tabelas e sinais de análise
 
@@ -32,11 +32,15 @@
 
 
 
-**Plans:**### Phase 7: Rules Engine
+**Plans:** TBD
+
+---
+
+### Phase 2: Rules Engine
 
 **Goal:** Usuário pode avaliar regras sobre snapshot existente e reportar violações filtráveis
 
-**Depends on:** Phase 6 (Snapshot Foundation)
+**Depends on:** Phase 1 (Snapshot Foundation)
 
 **Requirements:** RULE-01, RULE-02, RULE-03, RULE-04, RULE-05
 
@@ -51,11 +55,11 @@
 
 ---
 
-### Phase 8: Query Integration
+### Phase 3: Query Integration
 
 **Goal:** Usuário pode executar SQL arbitrário no snapshot e receber JSON para consumo por LLM externa
 
-**Depends on:** Phase 6 (Snapshot Foundation)
+**Depends on:** Phase 1 (Snapshot Foundation)
 
 **Requirements:** ASK-01, ASK-02, ASK-03
 
@@ -68,11 +72,11 @@
 
 ---
 
-### Phase 9: Integration & Polish
+### Phase 4: Integration & Polish
 
 **Goal:** Novos projetos integrados à solution CLI, comandos aparecem no help, compatibilidade mantida
 
-**Depends on:** Phase 7, Phase 8
+**Depends on:** Phase 2, Phase 3
 
 **Requirements:** INT-01, INT-02, INT-03
 
@@ -89,10 +93,10 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 6. Snapshot Foundation | 0/1 | Not started | - |
-| 7. Rules Engine | 0/1 | Not started | - |
-| 8. Query Integration | 0/1 | Not started | - |
-| 9. Integration & Polish | 0/1 | Not started | - |
+| 1. Snapshot Foundation | 0/1 | Not started | - |
+| 2. Rules Engine | 0/1 | Not started | - |
+| 3. Query Integration | 0/1 | Not started | - |
+| 4. Integration & Polish | 0/1 | Not started | - |
 
 ---
 
@@ -104,21 +108,21 @@
 
 | Requirement | Phase |
 |-------------|-------|
-| SNAP-01 | Phase 6 |
-| SNAP-02 | Phase 6 |
-| SNAP-03 | Phase 6 |
-| SNAP-04 | Phase 6 |
-| RULE-01 | Phase 7 |
-| RULE-02 | Phase 7 |
-| RULE-03 | Phase 7 |
-| RULE-04 | Phase 7 |
-| RULE-05 | Phase 7 |
-| ASK-01 | Phase 8 |
-| ASK-02 | Phase 8 |
-| ASK-03 | Phase 8 |
-| INT-01 | Phase 9 |
-| INT-02 | Phase 9 |
-| INT-03 | Phase 9 |
+| SNAP-01 | Phase 1 |
+| SNAP-02 | Phase 1 |
+| SNAP-03 | Phase 1 |
+| SNAP-04 | Phase 1 |
+| RULE-01 | Phase 2 |
+| RULE-02 | Phase 2 |
+| RULE-03 | Phase 2 |
+| RULE-04 | Phase 2 |
+| RULE-05 | Phase 2 |
+| ASK-01 | Phase 3 |
+| ASK-02 | Phase 3 |
+| ASK-03 | Phase 3 |
+| INT-01 | Phase 4 |
+| INT-02 | Phase 4 |
+| INT-03 | Phase 4 |
 
 ---
 

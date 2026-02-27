@@ -48,21 +48,21 @@ Nenhum item adicional mapeado para este milestone.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SNAP-01 | Phase 6 - Snapshot Foundation | Pending |
-| SNAP-02 | Phase 6 - Snapshot Foundation | Pending |
-| SNAP-03 | Phase 6 - Snapshot Foundation | Pending |
-| SNAP-04 | Phase 6 - Snapshot Foundation | Pending |
-| RULE-01 | Phase 7 - Rules Engine | Pending |
-| RULE-02 | Phase 7 - Rules Engine | Pending |
-| RULE-03 | Phase 7 - Rules Engine | Pending |
-| RULE-04 | Phase 7 - Rules Engine | Pending |
-| RULE-05 | Phase 7 - Rules Engine | Pending |
-| ASK-01 | Phase 8 - Query Integration | Pending |
-| ASK-02 | Phase 8 - Query Integration | Pending |
-| ASK-03 | Phase 8 - Query Integration | Pending |
-| INT-01 | Phase 9 - Integration & Polish | Pending |
-| INT-02 | Phase 9 - Integration & Polish | Pending |
-| INT-03 | Phase 9 - Integration & Polish | Pending |
+| SNAP-01 | Phase 1 - Snapshot Foundation | Pending |
+| SNAP-02 | Phase 1 - Snapshot Foundation | Pending |
+| SNAP-03 | Phase 1 - Snapshot Foundation | Pending |
+| SNAP-04 | Phase 1 - Snapshot Foundation | Pending |
+| RULE-01 | Phase 2 - Rules Engine | Pending |
+| RULE-02 | Phase 2 - Rules Engine | Pending |
+| RULE-03 | Phase 2 - Rules Engine | Pending |
+| RULE-04 | Phase 2 - Rules Engine | Pending |
+| RULE-05 | Phase 2 - Rules Engine | Pending |
+| ASK-01 | Phase 3 - Query Integration | Pending |
+| ASK-02 | Phase 3 - Query Integration | Pending |
+| ASK-03 | Phase 3 - Query Integration | Pending |
+| INT-01 | Phase 4 - Integration & Polish | Pending |
+| INT-02 | Phase 4 - Integration & Polish | Pending |
+| INT-03 | Phase 4 - Integration & Polish | Pending |
 
 **Coverage:**
 - Milestone requirements: 15 total
