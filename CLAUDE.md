@@ -331,3 +331,390 @@ Read(file="Services/BigService.cs", offset=45, limit=18)
 ```
 
 This reduces token usage from ~2000 tokens to ~200 tokens.
+
+## Write & Mutation Commands
+
+These commands stage operations in `.roslyn-nav-plans.json` (in the current working directory). Nothing is written to disk until `file commit` is called.
+
+### Plan / Commit Workflow
+
+All write and dotnet mutation commands are **staged** — they accumulate in a local plan file. Apply them atomically with `file commit`.
+
+```bash
+# Stage one or more operations
+roslyn-nav dotnet add field MyClass.cs MyClass private string name
+roslyn-nav dotnet add property MyClass.cs MyClass public string Name
+
+# Preview the diff before committing
+roslyn-nav file status
+
+# Apply atomically (creates backup in .roslyn-nav-backup/ first)
+roslyn-nav file commit
+
+# Undo the last commit if something went wrong
+roslyn-nav file rollback
+
+# Discard staged ops without applying
+roslyn-nav file clear
+```
+
+---
+
+### `file read` — Read File with Line Numbers
+
+```bash
+roslyn-nav file read <path> [--lines START-END]
+```
+
+Returns file content with 1-based line numbers. Use `--lines` to extract a range (output from `roslyn-nav list-class` provides `lineRange` values).
+
+```bash
+# Read entire file
+roslyn-nav file read src/MyService.cs
+
+# Read only lines 45 to 62
+roslyn-nav file read src/MyService.cs --lines 45-62
+```
+
+---
+
+### `file grep` — Search File Content
+
+```bash
+roslyn-nav file grep <pattern> [path] [--ext <.ext>] [--max-lines <N>]
+```
+
+Regex search. Returns matching lines with file path and line number. Defaults to current directory, `.cs` extension, 100 max results.
+
+```bash
+# Find all usages of ILogger in .cs files
+roslyn-nav file grep "ILogger" src/ --ext .cs
+
+# Search for TODO comments, limit to 20 results
+roslyn-nav file grep "TODO" --max-lines 20
+```
+
+---
+
+### `file plan edit` — Stage a Line Edit
+
+```bash
+roslyn-nav file plan edit <path> <lineNumber> <oldContent> <newContent>
+```
+
+Deterministic edit: validates that line `<lineNumber>` contains exactly `<oldContent>` before staging. Fails fast if the line does not match (prevents silent wrong-line edits).
+
+```bash
+# Replace line 12 — must contain the exact string shown
+roslyn-nav file plan edit src/MyService.cs 12 "    private int _count;" "    private long _count;"
+```
+
+---
+
+### `file plan write` — Stage a Full File Overwrite
+
+```bash
+roslyn-nav file plan write <path> <content>
+```
+
+Stages a full file overwrite. Creates the file if it does not exist. No validation required — always accepted.
+
+```bash
+roslyn-nav file plan write src/Generated.cs "namespace MyApp;\npublic class Generated { }"
+```
+
+---
+
+### `file plan append` — Stage Content Append
+
+```bash
+roslyn-nav file plan append <path> <content>
+```
+
+Stages appending `<content>` to the end of the file. Always accepted.
+
+```bash
+roslyn-nav file plan append src/MyClass.cs "\n    // end of file marker"
+```
+
+---
+
+### `file plan delete` — Stage a Line Deletion
+
+```bash
+roslyn-nav file plan delete <path> <lineNumber> <oldContent>
+```
+
+Stages deletion of line `<lineNumber>`. Validates the line contains `<oldContent>` before accepting.
+
+```bash
+roslyn-nav file plan delete src/MyClass.cs 15 "    private int _unused;"
+```
+
+---
+
+### `file status` — Preview Staged Changes
+
+```bash
+roslyn-nav file status [--json]
+```
+
+Shows a unified diff of all staged operations without touching any file. Use `--json` for machine-readable output.
+
+```bash
+roslyn-nav file status
+```
+
+---
+
+### `file commit` — Apply All Staged Operations
+
+```bash
+roslyn-nav file commit [--json]
+```
+
+Creates a timestamped backup in `.roslyn-nav-backup/`, validates all staged operations (fails fast if any validation fails — zero files modified), then applies all changes atomically. Returns a unified diff. Use `--json` for structured output.
+
+```bash
+roslyn-nav file commit
+```
+
+---
+
+### `file rollback` — Restore Last Commit
+
+```bash
+roslyn-nav file rollback
+```
+
+Restores all files touched by the last `file commit` from the backup directory. Does not clear the backup path — multiple rollbacks are safe.
+
+```bash
+roslyn-nav file rollback
+```
+
+---
+
+### `file clear` — Discard All Staged Operations
+
+```bash
+roslyn-nav file clear
+```
+
+Deletes `.roslyn-nav-plans.json` and discards all staged operations without touching any file.
+
+```bash
+roslyn-nav file clear
+```
+
+---
+
+### `dotnet scaffold class` — Generate a New Class File
+
+```bash
+roslyn-nav dotnet scaffold class <path> <namespace> <className>
+```
+
+Stages creation of a new `.cs` file with file-scoped namespace and a minimal `public class` body.
+
+```bash
+roslyn-nav dotnet scaffold class src/Services/UserService.cs MyApp.Services UserService
+roslyn-nav file commit
+```
+
+---
+
+### `dotnet scaffold interface` — Generate a New Interface File
+
+```bash
+roslyn-nav dotnet scaffold interface <path> <namespace> <interfaceName>
+```
+
+```bash
+roslyn-nav dotnet scaffold interface src/Services/IUserService.cs MyApp.Services IUserService
+```
+
+---
+
+### `dotnet scaffold record` — Generate a New Record File
+
+```bash
+roslyn-nav dotnet scaffold record <path> <namespace> <recordName>
+```
+
+```bash
+roslyn-nav dotnet scaffold record src/Models/UserDto.cs MyApp.Models UserDto
+```
+
+---
+
+### `dotnet scaffold enum` — Generate a New Enum File
+
+```bash
+roslyn-nav dotnet scaffold enum <path> <namespace> <enumName>
+```
+
+```bash
+roslyn-nav dotnet scaffold enum src/Models/UserRole.cs MyApp.Models UserRole
+```
+
+---
+
+### `dotnet add using` — Add a Using Directive
+
+```bash
+roslyn-nav dotnet add using <path> <namespace>
+```
+
+Adds `using <namespace>;` to the top of the file (sorted alphabetically). No-op if the directive already exists — safe to call unconditionally.
+
+```bash
+roslyn-nav dotnet add using src/Services/UserService.cs System.Collections.Generic
+```
+
+---
+
+### `dotnet add field` — Add a Field to a Type
+
+```bash
+roslyn-nav dotnet add field <path> <className> <access> <type> <name>
+```
+
+Inserts `<access> <type> _<name>;` after the last existing field in the target class/record/struct. Leading underscore is added automatically — provide the base name without it.
+
+```bash
+roslyn-nav dotnet add field src/Services/UserService.cs UserService private ILogger logger
+# Inserts: private ILogger _logger;
+```
+
+---
+
+### `dotnet add property` — Add a Property to a Type
+
+```bash
+roslyn-nav dotnet add property <path> <className> <access> <type> <name>
+```
+
+Inserts `<access> <type> <name> { get; set; }` after the last existing property.
+
+```bash
+roslyn-nav dotnet add property src/Models/User.cs User public string Email
+# Inserts: public string Email { get; set; }
+```
+
+---
+
+### `dotnet add constructor` — Add a Constructor to a Type
+
+```bash
+roslyn-nav dotnet add constructor <path> <className> <content>
+```
+
+Inserts the full constructor source (signature + body) at the correct position (after properties/fields). Validates syntax before staging.
+
+```bash
+roslyn-nav dotnet add constructor src/Services/UserService.cs UserService \
+  "public UserService(ILogger<UserService> logger) { _logger = logger; }"
+```
+
+---
+
+### `dotnet add method` — Add a Method to a Type
+
+```bash
+roslyn-nav dotnet add method <path> <className> <content>
+```
+
+Inserts the full method source (signature + body) before the closing brace of the type body. Detects existing indentation. Validates syntax before staging.
+
+```bash
+roslyn-nav dotnet add method src/Services/UserService.cs UserService \
+  "public async Task<User> GetByIdAsync(int id) { return await _repo.FindAsync(id); }"
+```
+
+---
+
+### `dotnet update property` — Replace a Property
+
+```bash
+roslyn-nav dotnet update property <path> <className> <propertyName> <content>
+```
+
+Replaces the named property's entire declaration with `<content>`. Validates that the member exists and that `<content>` is syntactically valid. Returns an error if the property is not found.
+
+```bash
+roslyn-nav dotnet update property src/Models/User.cs User Name \
+  "public string Name { get; init; } = string.Empty;"
+roslyn-nav file commit
+```
+
+---
+
+### `dotnet update field` — Replace a Field
+
+```bash
+roslyn-nav dotnet update field <path> <className> <fieldName> <content>
+```
+
+Replaces the named field's entire declaration. Accepts the field name with or without leading underscore (e.g., `_count` or `count` both match `private int _count;`).
+
+```bash
+roslyn-nav dotnet update field src/Services/UserService.cs UserService _logger \
+  "private readonly ILogger<UserService> _logger;"
+roslyn-nav file commit
+```
+
+---
+
+### `dotnet remove method` — Delete a Method
+
+```bash
+roslyn-nav dotnet remove method <path> <className> <methodName>
+```
+
+Removes the named method from the type body. Returns an error if the method is not found.
+
+```bash
+roslyn-nav dotnet remove method src/Services/UserService.cs UserService ObsoleteHelper
+roslyn-nav file commit
+```
+
+---
+
+### `dotnet remove property` — Delete a Property
+
+```bash
+roslyn-nav dotnet remove property <path> <className> <propertyName>
+```
+
+```bash
+roslyn-nav dotnet remove property src/Models/User.cs User DeprecatedField
+```
+
+---
+
+### `dotnet remove field` — Delete a Field
+
+```bash
+roslyn-nav dotnet remove field <path> <className> <fieldName>
+```
+
+Accepts the field name with or without leading underscore.
+
+```bash
+roslyn-nav dotnet remove field src/Services/UserService.cs UserService _oldCache
+roslyn-nav file commit
+```
+
+---
+
+## Write Command Tips for Claude
+
+1. **Stage first, inspect, then commit** — use `file status` to preview the unified diff before `file commit`
+2. **`file plan edit` is safest for small changes** — validates the old content matches before accepting, preventing wrong-line edits
+3. **`dotnet add/update/remove` go through the same commit pipeline** — mix AST mutations and raw edits in a single `file commit`
+4. **Prefer `dotnet update property/field`** over `file plan edit` for member replacement — Roslyn finds the exact node regardless of line number changes
+5. **`dotnet add using` is idempotent** — safe to call even if the directive already exists
+6. **Field name underscore** — `dotnet add field` auto-prepends `_`; `dotnet update field` and `dotnet remove field` accept both `name` and `_name`
+7. **Syntax validation happens at commit time** — `dotnet add/update` with invalid content will fail `file commit` validation and leave all files untouched
+8. **`file rollback` after a bad commit** — restores all files from the pre-commit backup; safe to call multiple times
