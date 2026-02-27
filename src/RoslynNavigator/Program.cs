@@ -349,6 +349,56 @@ listFeatureScenariosCommand.SetHandler(async (string path) =>
     }
 }, pathOption);
 
+// ── file command group ──────────────────────────────────────────────────────
+var fileCommand = new Command("file", "File read and staged-edit operations");
+
+// file read
+var fileReadPathArg = new Argument<string>("path", "Path to the file to read");
+var fileReadLinesOption = new Option<string?>("--lines", "Line range to read (e.g., 10-20)");
+var fileReadSubcommand = new Command("read", "Read a file with line numbers");
+fileReadSubcommand.AddArgument(fileReadPathArg);
+fileReadSubcommand.AddOption(fileReadLinesOption);
+fileReadSubcommand.SetHandler(async (string path, string? lines) =>
+{
+    try
+    {
+        var result = await FileReadCommand.ExecuteAsync(path, lines);
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("file_read_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, fileReadPathArg, fileReadLinesOption);
+
+// file grep
+var fileGrepPatternArg = new Argument<string>("pattern", "Regex pattern to search for");
+var fileGrepPathArg = new Argument<string?>("path", "File or directory to search (default: current directory)") { Arity = ArgumentArity.ZeroOrOne };
+var fileGrepExtOption = new Option<string?>("--ext", "File extension filter (e.g., .cs)");
+var fileGrepMaxLinesOption = new Option<int>("--max-lines", () => 100, "Maximum number of matching lines to return");
+var fileGrepSubcommand = new Command("grep", "Search for a regex pattern in files");
+fileGrepSubcommand.AddArgument(fileGrepPatternArg);
+fileGrepSubcommand.AddArgument(fileGrepPathArg);
+fileGrepSubcommand.AddOption(fileGrepExtOption);
+fileGrepSubcommand.AddOption(fileGrepMaxLinesOption);
+fileGrepSubcommand.SetHandler(async (string pattern, string? path, string? ext, int maxLines) =>
+{
+    try
+    {
+        var result = await FileGrepCommand.ExecuteAsync(pattern, path, ext, maxLines);
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("file_grep_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, fileGrepPatternArg, fileGrepPathArg, fileGrepExtOption, fileGrepMaxLinesOption);
+
+fileCommand.AddCommand(fileReadSubcommand);
+fileCommand.AddCommand(fileGrepSubcommand);
+
 // Add all commands to root
 rootCommand.AddCommand(listClassCommand);
 rootCommand.AddCommand(findSymbolCommand);
@@ -367,6 +417,7 @@ rootCommand.AddCommand(findByAttributeCommand);
 rootCommand.AddCommand(findStepDefinitionCommand);
 rootCommand.AddCommand(findInterfaceConsumersCommand);
 rootCommand.AddCommand(listFeatureScenariosCommand);
+rootCommand.AddCommand(fileCommand);
 
 return await rootCommand.InvokeAsync(args);
 
