@@ -56,7 +56,12 @@ Plans:
 4. Bloco `not:` em regras é avaliado com semântica NOT EXISTS
 5. Output JSON inclui filtros por severidade e ruleId, permitindo `roslyn-nav check --severity error --ruleId no-naked-strings`
 
-**Plans:** TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Add YAML rule contracts and loader for builtin/domain packs
+- [ ] 02-02-PLAN.md — TDD SQL compiler/evaluator semantics for wildcard and `not:`
+- [ ] 02-03-PLAN.md — Expose `check` command with severity/ruleId filters and tests
 
 ---
 
@@ -99,7 +104,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Snapshot Foundation | 1/3 | In progress | 2026-02-27 |
-| 2. Rules Engine | 0/1 | Not started | - |
+| 2. Rules Engine | 0/3 | Not started | - |
 | 3. Query Integration | 0/1 | Not started | - |
 | 4. Integration & Polish | 0/1 | Not started | - |
 
