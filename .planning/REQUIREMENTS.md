@@ -60,7 +60,7 @@
 - [x] **CROSS-01**: Todos os comandos `dotnet` write/edit são staged (compartilham o mesmo `IPlanStore` dos comandos `file`)
 - [x] **CROSS-02**: Mensagens de erro específicas: linha errada, old string não encontrada, classe não encontrada, erro de parse no conteúdo
 - [x] **CROSS-03**: `dotnet add`, `update` e `remove` resolvem o tipo alvo buscando em `ClassDeclarationSyntax`, `RecordDeclarationSyntax` e `StructDeclarationSyntax`
-- [ ] **CROSS-04**: CLAUDE.md atualizado com todos os novos comandos, workflows e dicas
+- [x] **CROSS-04**: CLAUDE.md atualizado com todos os novos comandos, workflows e dicas
 
 ## v2 Requirements
 
@@ -121,7 +121,7 @@
 | CROSS-01 | Phase 1 | Complete |
 | CROSS-02 | Phase 2 | Complete |
 | CROSS-03 | Phase 4 | Complete |
-| CROSS-04 | Phase 5 | Pending |
+| CROSS-04 | Phase 5 | Complete |
 
 **Coverage:**
 - v1 requirements: 32 total

@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-27)
 
 **Core value:** AI assistant navigates, creates, and modifies C# code with surgical precision — no full-file reads, no ambiguous edits
-**Current focus:** Phase 5 — DotnetUpdateRemoveDocs (In Progress)
+**Current focus:** Phase 5 — DotnetUpdateRemoveDocs (Complete)
 
 ## Current Position
 
 Phase: 5 of 5 (dotnet-update-remove-docs)
-Plan: 1 of 4 complete in current phase
-Status: In progress — plan 05-01 complete
-Last activity: 2026-02-27 — Completed 05-01 (DotnetUpdateRemoveService TDD — UpdateMember and RemoveMember)
+Plan: 4 of 4 complete in current phase
+Status: Complete — all phases and plans done
+Last activity: 2026-02-27 — Completed 05-04 (Write & Mutation Commands documentation in CLAUDE.md)
 
-Progress: [████████░░] 80%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -40,6 +40,7 @@ Progress: [████████░░] 80%
 | Phase 04-dotnet-add P02 | 2 | 2 tasks | 3 files |
 | Phase 04-dotnet-add P03 | 3 | 1 tasks | 1 files |
 | Phase 05-dotnet-update-remove-docs P01 | 4 | 2 tasks | 2 files |
+| Phase 05-dotnet-update-remove-docs P04 | 1 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -82,6 +83,7 @@ Recent decisions affecting current work:
 - [Phase 05-dotnet-update-remove-docs]: DetectIndentation/ApplyIndentation helpers duplicated privately from DotnetAddMemberService (not imported) per plan constraint
 - [Phase 05-dotnet-update-remove-docs]: Underscore-tolerant field matching normalizes both sides: strip leading underscore from stored name and memberName before comparing
 - [Phase 05-dotnet-update-remove-docs]: RemoveMember uses WithMembers(Members.Remove(found)) via concrete-type switch expression — same dispatch pattern as AddMember
+- [Phase 05-dotnet-update-remove-docs]: Appended Write & Mutation Commands section to CLAUDE.md after existing navigation docs to preserve existing content
 
 ### Pending Todos
 
@@ -94,5 +96,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 05-01-PLAN.md — DotnetUpdateRemoveService TDD (Phase 5 plan 1 complete)
+Stopped at: Completed 05-04-PLAN.md — Write & Mutation Commands documentation in CLAUDE.md (Phase 5 complete)
 Resume file: None
