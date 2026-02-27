@@ -1,461 +1,165 @@
-# AGENTS.md - Roslyn Navigator for AI Agents
+# roslyn-nav — Complete Reference
 
-This file provides instructions for AI agents (Claude, GPT, Copilot, etc.) on how to use the `roslyn-nav` tool for efficient C# codebase navigation.
+`roslyn-nav` is a .NET CLI that uses Roslyn to navigate and mutate C# code without reading entire files. All commands return JSON. Use `--solution <path.sln>` on all navigation commands.
 
-## Tool Overview
+---
 
-`roslyn-nav` is a .NET global tool that provides semantic C# code analysis. It reduces token consumption by 85%+ by enabling targeted code extraction instead of full-file reads.
+## Navigation
 
-## Prerequisites
-
-The tool must be installed:
 ```bash
-dotnet tool install --global RoslynNavigator
-```
+# Class structure (members + lineRanges) — use ALWAYS before reading a file
+roslyn-nav list-class --solution app.sln --file path/to/File.cs --class ClassName
 
-## Command Reference
+# Locate a symbol in the solution
+roslyn-nav find-symbol --solution app.sln --name SymbolName --kind class|method|property
 
-| Command | Purpose | Key Options |
-|---------|---------|-------------|
-| `list-class` | Get class structure overview | `--solution`, `--file`, `--class` |
-| `find-symbol` | Locate symbol definition | `--solution`, `--name`, `--kind` |
-| `get-method` | Extract method source code | `--solution`, `--file`, `--method`, `--class` |
-| `get-methods` | Extract multiple methods at once | `--solution`, `--class`, `--methods` |
-| `find-usages` | Find all references | `--solution`, `--symbol` |
-| `find-callers` | Find methods that call another method | `--solution`, `--symbol` |
-| `find-implementations` | Find interface implementations | `--solution`, `--interface` |
-| `find-instantiations` | Find class instantiations | `--solution`, `--class` |
-| `find-by-attribute` | Find by attribute decoration | `--solution`, `--attribute`, `--pattern` |
-| `find-step-definition` | Find Reqnroll/SpecFlow step definitions | `--solution`, `--pattern` |
-| `find-interface-consumers` | Find implementations and injections | `--solution`, `--interface` |
-| `list-classes` | List classes in namespace | `--solution`, `--namespace` |
-| `list-feature-scenarios` | List Gherkin feature scenarios | `--path` |
-| `get-namespace-structure` | Get project structure | `--solution`, `--project` |
-| `get-hierarchy` | Get inheritance hierarchy | `--solution`, `--class` |
-| `get-constructor-deps` | Analyze constructor dependencies | `--solution`, `--class` |
-| `check-overridable` | Check method modifiers | `--solution`, `--class`, `--method` |
+# Extract a method's source code
+roslyn-nav get-method --solution app.sln --method MethodName --class ClassName
 
-## Agent Decision Tree
+# Extract multiple methods at once
+roslyn-nav get-methods --solution app.sln --class ClassName --methods "M1,M2,M3"
 
-```
-Need to understand a codebase?
-├── Don't know the structure → get-namespace-structure
-├── Know the namespace → list-classes
-├── Know the class → list-class
-├── Need specific method → get-method
-├── Need multiple methods → get-methods
-├── Need to find something → find-symbol
-├── Need to understand usage → find-usages
-└── Need to find callers → find-callers
+# All references to a symbol
+roslyn-nav find-usages --solution app.sln --symbol "ClassName.MethodName"
 
-Working with interfaces?
-├── Find implementations → find-implementations
-├── Find implementations + injections → find-interface-consumers
-└── Check hierarchy → get-hierarchy
+# Who calls a method
+roslyn-nav find-callers --solution app.sln --symbol "ClassName.MethodName"
 
-Working with BDD/Reqnroll?
-├── Find step definitions → find-step-definition
-└── List feature scenarios → list-feature-scenarios
+# Implementations of an interface
+roslyn-nav find-implementations --solution app.sln --interface IInterfaceName
 
-Refactoring a class?
-├── Find instantiations → find-instantiations
-├── Analyze constructor → get-constructor-deps
-└── Check if overridable → check-overridable
+# Implementations + injection points of an interface
+roslyn-nav find-interface-consumers --solution app.sln --interface IInterfaceName
 
-Finding specific code?
-├── By attribute → find-by-attribute
-├── By name → find-symbol
-└── By usage → find-usages
-```
+# Where a class is instantiated (new)
+roslyn-nav find-instantiations --solution app.sln --class ClassName
 
-## Efficient Patterns
+# Members decorated with a specific attribute
+roslyn-nav find-by-attribute --solution app.sln --attribute AttributeName
 
-### Pattern 1: Targeted Reading
-```bash
-# Instead of reading entire file:
-# BAD: Read("Services/UserService.cs")  # 500 lines, ~2000 tokens
+# Reqnroll/SpecFlow step definitions by text pattern
+roslyn-nav find-step-definition --solution app.sln --pattern "user is logged in"
 
-# Get structure first:
-roslyn-nav list-class --solution app.sln --file Services/UserService.cs --class UserService
-# Output: { "members": [{ "name": "GetUser", "lineRange": [45, 62] }] }
+# Classes in a namespace
+roslyn-nav list-classes --solution app.sln --namespace My.Namespace
 
-# GOOD: Read("Services/UserService.cs", offset=45, limit=18)  # 18 lines, ~100 tokens
-```
+# Namespace hierarchy of a project
+roslyn-nav get-namespace-structure --solution app.sln --project ProjectName
 
-### Pattern 2: Symbol Discovery
-```bash
-# When asked "where is X defined?"
-roslyn-nav find-symbol --solution app.sln --name UserRepository --kind class
-# Returns file path and line range
-```
+# Class inheritance hierarchy (base types, interfaces, derived)
+roslyn-nav get-hierarchy --solution app.sln --class ClassName
 
-### Pattern 3: Impact Analysis
-```bash
-# Before modifying a method, find all callers:
-roslyn-nav find-usages --solution app.sln --symbol "UserService.CreateUser"
-# Returns all files and lines where it's called
-```
+# Constructor dependencies (DI)
+roslyn-nav get-constructor-deps --solution app.sln --class ClassName
 
-### Pattern 4: Interface Analysis
-```bash
-# Find all implementations of an interface:
-roslyn-nav find-implementations --solution app.sln --interface IUserRepository
-# Returns all classes/structs implementing the interface
+# Check if a method is virtual/override/abstract/sealed
+roslyn-nav check-overridable --solution app.sln --class ClassName --method MethodName
 
-# Then analyze each implementation:
-roslyn-nav get-constructor-deps --solution app.sln --class SqlUserRepository
-```
-
-### Pattern 5: Constructor Analysis
-```bash
-# Understand DI dependencies:
-roslyn-nav get-constructor-deps --solution app.sln --class UserService
-# Returns all constructors with parameter types
-
-# Find where the class is instantiated:
-roslyn-nav find-instantiations --solution app.sln --class UserService
-```
-
-### Pattern 6: Attribute-Based Search
-```bash
-# Find deprecated code:
-roslyn-nav find-by-attribute --solution app.sln --attribute "Obsolete"
-
-# Find API endpoints:
-roslyn-nav find-by-attribute --solution app.sln --attribute "HttpGet"
-```
-
-### Pattern 7: BDD/Reqnroll Step Discovery
-```bash
-# Find step definitions by pattern (searches all step types):
-roslyn-nav find-step-definition --solution app.sln --pattern "user logged in"
-
-# List all scenarios in feature files:
+# Scenarios from Gherkin .feature files
 roslyn-nav list-feature-scenarios --path tests/Features
 ```
 
-### Pattern 8: Complete Interface Analysis
+---
+
+## Write & Mutation — Stage → Commit Pipeline
+
+**Rule:** all write/dotnet commands are *staged* in `.roslyn-nav-plans.json`. Nothing touches disk until `file commit`.
+
+```
+stage ops  →  file status  →  file commit  →  (file rollback if needed)
+```
+
+### File Read (immediate, no staging)
+
 ```bash
-# Find all implementations AND injection points:
-roslyn-nav find-interface-consumers --solution app.sln --interface IUserRepository
-# Returns: implementations + constructor params, fields, properties using the interface
+roslyn-nav file read path/to/File.cs                  # whole file with line numbers
+roslyn-nav file read path/to/File.cs --lines 10-30    # range only
+roslyn-nav file grep "pattern" src/ --ext .cs --max-lines 50
 ```
 
-### Pattern 9: Hierarchy Analysis
+### File Stage
+
 ```bash
-# Understand class relationships:
-roslyn-nav get-hierarchy --solution app.sln --class BaseController
-# Returns base types, interfaces, and derived types
+# Edit: validates that line N contains <old> before accepting — fails fast if mismatch
+roslyn-nav file plan edit path/File.cs <lineN> "<old content>" "<new content>"
+
+# Write: creates or overwrites the entire file
+roslyn-nav file plan write path/File.cs "<full content>"
+
+# Append: adds content to end of file
+roslyn-nav file plan append path/File.cs "<content>"
+
+# Delete: removes line N, validates <old>
+roslyn-nav file plan delete path/File.cs <lineN> "<old content>"
 ```
 
-## JSON Output Structure
+### File Commit / Rollback
 
-### list-class
-```json
-{
-  "className": "string",
-  "namespace": "string",
-  "lineRange": [startLine, endLine],
-  "filePath": "relative/path.cs",
-  "members": [
-    {
-      "kind": "field|property|method|constructor",
-      "name": "string",
-      "lineRange": [start, end],
-      "signature": "string",
-      "accessibility": "public|private|protected|internal"
-    }
-  ]
-}
+```bash
+roslyn-nav file status           # unified diff of all staged ops (preview)
+roslyn-nav file commit           # creates backup in .roslyn-nav-backup/<ts>/, validates all, applies atomically
+roslyn-nav file rollback         # restores all files from last backup
+roslyn-nav file clear            # discards all staged ops without touching files
 ```
 
-### find-symbol
-```json
-{
-  "symbolName": "string",
-  "kind": "class|method|property",
-  "results": [
-    {
-      "filePath": "string",
-      "lineRange": [start, end],
-      "namespace": "string",
-      "fullName": "string"
-    }
-  ]
-}
+### Dotnet Scaffold (staged)
+
+```bash
+roslyn-nav dotnet scaffold class     path/ClassName.cs     My.Namespace ClassName
+roslyn-nav dotnet scaffold interface path/IName.cs         My.Namespace IName
+roslyn-nav dotnet scaffold record    path/RecordName.cs    My.Namespace RecordName
+roslyn-nav dotnet scaffold enum      path/EnumName.cs      My.Namespace EnumName
+# then: roslyn-nav file commit
 ```
 
-### find-usages
-```json
-{
-  "symbolName": "string",
-  "totalUsages": number,
-  "usages": [
-    {
-      "filePath": "string",
-      "line": number,
-      "column": number,
-      "contextCode": "the line of code",
-      "methodContext": "containing method name"
-    }
-  ]
-}
+### Dotnet Add (staged)
+
+```bash
+# using: idempotent, inserted in alphabetical order
+roslyn-nav dotnet add using path/File.cs My.Namespace
+
+# field: auto-prepends _ (pass name without _)
+roslyn-nav dotnet add field path/File.cs ClassName private ILogger logger
+# → inserts: private ILogger _logger;
+
+# property
+roslyn-nav dotnet add property path/File.cs ClassName public string Name
+
+# constructor: pass full signature + body
+roslyn-nav dotnet add constructor path/File.cs ClassName \
+  "public ClassName(ILogger<ClassName> logger) { _logger = logger; }"
+
+# method: pass full signature + body
+roslyn-nav dotnet add method path/File.cs ClassName \
+  "public async Task<User> GetByIdAsync(int id) { return await _repo.FindAsync(id); }"
+
+# insertion order enforced: fields → properties → constructors → methods
 ```
 
-### find-implementations
-```json
-{
-  "interface": "string",
-  "implementations": [
-    {
-      "name": "string",
-      "kind": "class|struct|record",
-      "filePath": "string",
-      "line": number,
-      "namespace": "string"
-    }
-  ],
-  "totalCount": number
-}
+### Dotnet Update / Remove (staged)
+
+```bash
+# update: replaces the entire member declaration
+roslyn-nav dotnet update property path/File.cs ClassName PropName \
+  "public string PropName { get; init; } = string.Empty;"
+
+roslyn-nav dotnet update field path/File.cs ClassName _fieldName \
+  "private readonly ILogger<ClassName> _fieldName;"
+
+# remove: deletes member by name
+roslyn-nav dotnet remove method   path/File.cs ClassName MethodName
+roslyn-nav dotnet remove property path/File.cs ClassName PropName
+roslyn-nav dotnet remove field    path/File.cs ClassName _fieldName  # accepts with or without _
 ```
 
-### find-instantiations
-```json
-{
-  "className": "string",
-  "instantiations": [
-    {
-      "filePath": "string",
-      "line": number,
-      "containingMethod": "string",
-      "containingClass": "string",
-      "contextCode": "the line of code"
-    }
-  ],
-  "totalCount": number
-}
-```
+---
 
-### find-callers
-```json
-{
-  "symbol": "string",
-  "callers": [
-    {
-      "callerClass": "string",
-      "callerMethod": "string",
-      "filePath": "string",
-      "line": number,
-      "contextCode": "the line of code"
-    }
-  ],
-  "totalCount": number
-}
-```
+## Essential Rules
 
-### find-by-attribute
-```json
-{
-  "attribute": "string",
-  "pattern": "string|null",
-  "matches": [
-    {
-      "memberType": "method|class|property|field|parameter",
-      "name": "string",
-      "attributeArguments": "[Attribute(args)]",
-      "filePath": "string",
-      "line": number,
-      "containingClass": "string",
-      "namespace": "string"
-    }
-  ],
-  "totalCount": number
-}
-```
-
-### get-hierarchy
-```json
-{
-  "className": "string",
-  "filePath": "string",
-  "namespace": "string",
-  "baseTypes": ["string"],
-  "interfaces": ["string"],
-  "derivedTypes": [
-    {
-      "name": "string",
-      "kind": "class|record",
-      "filePath": "string",
-      "line": number,
-      "namespace": "string"
-    }
-  ]
-}
-```
-
-### get-constructor-deps
-```json
-{
-  "className": "string",
-  "filePath": "string",
-  "namespace": "string",
-  "constructors": [
-    {
-      "parameters": [
-        {
-          "name": "string",
-          "type": "string",
-          "fullTypeName": "string"
-        }
-      ],
-      "lineRange": [start, end],
-      "signature": "string"
-    }
-  ]
-}
-```
-
-### check-overridable
-```json
-{
-  "className": "string",
-  "methodName": "string",
-  "isVirtual": boolean,
-  "isOverride": boolean,
-  "isAbstract": boolean,
-  "isSealed": boolean,
-  "canBeOverridden": boolean,
-  "baseMethod": "string|null",
-  "filePath": "string",
-  "line": number
-}
-```
-
-### get-methods
-```json
-{
-  "className": "string",
-  "filePath": "string",
-  "methods": [
-    {
-      "name": "string",
-      "signature": "string",
-      "lineRange": [start, end],
-      "sourceCode": "string",
-      "returnType": "string",
-      "parameters": [{"name": "string", "type": "string"}],
-      "accessibility": "string",
-      "isAsync": boolean
-    }
-  ]
-}
-```
-
-### find-step-definition
-```json
-{
-  "pattern": "string",
-  "matches": [
-    {
-      "type": "Given|When|Then|And|But",
-      "regex": "the step regex pattern",
-      "filePath": "string",
-      "className": "string",
-      "methodName": "string",
-      "startLine": number,
-      "endLine": number,
-      "lineCount": number,
-      "scope": "derived from class name"
-    }
-  ],
-  "totalCount": number
-}
-```
-
-### find-interface-consumers
-```json
-{
-  "interface": "string",
-  "definedIn": "string",
-  "definitionLine": number,
-  "implementations": [
-    {
-      "name": "string",
-      "kind": "class|struct|record",
-      "filePath": "string",
-      "line": number,
-      "namespace": "string"
-    }
-  ],
-  "injections": [
-    {
-      "className": "string",
-      "memberName": "string",
-      "memberType": "constructor-parameter|field|property",
-      "filePath": "string",
-      "line": number
-    }
-  ]
-}
-```
-
-### list-feature-scenarios
-```json
-{
-  "path": "string",
-  "features": [
-    {
-      "file": "relative/path.feature",
-      "name": "Feature name",
-      "scenarios": [
-        {
-          "line": number,
-          "name": "Scenario name"
-        }
-      ]
-    }
-  ],
-  "summary": {
-    "totalFeatures": number,
-    "totalScenarios": number
-  }
-}
-```
-
-## Best Practices for Agents
-
-1. **Always use roslyn-nav before reading C# files** - Get the structure first
-2. **Use lineRange for targeted reads** - The output tells you exactly which lines to read
-3. **Prefer find-symbol over grep** - Semantic search is more accurate
-4. **Use find-usages before refactoring** - Understand the impact first
-5. **Use find-implementations before modifying interfaces** - Know all affected code
-6. **Use find-interface-consumers for complete interface analysis** - Shows both implementations and injections
-7. **Use get-constructor-deps for DI analysis** - Understand dependencies
-8. **Use find-callers to understand method impact** - Different from find-usages (callers vs all references)
-9. **Use find-step-definition for BDD step discovery** - More targeted than find-by-attribute
-10. **Use list-feature-scenarios for BDD test overview** - Quick scan of all scenarios
-11. **Cache the solution path** - Reuse it across multiple commands in the same session
-
-## Error Handling
-
-All errors return JSON:
-```json
-{
-  "success": false,
-  "error": {
-    "code": "error_code",
-    "message": "Human readable message"
-  }
-}
-```
-
-Common errors:
-- `File not found` - Check the file path relative to solution
-- `Class not found` - Verify class name spelling
-- `Project not found` - Check project name (without .csproj extension)
-
-## Performance Notes
-
-- First command on a solution takes 2-5 seconds (loading workspace)
-- Subsequent commands on same solution are <500ms (cached)
-- The cache persists for the tool's process lifetime
+1. **Navigate before reading:** use `list-class` to get member `lineRange`; then `file read --lines` only that range.
+2. **Stage → status → commit:** always run `file status` before `file commit` on critical changes.
+3. **`file plan edit` fails fast:** if line N does not contain `<old>`, the op is rejected immediately — no file is touched.
+4. **Atomicity:** if any validation fails during `file commit`, zero files are modified.
+5. **`dotnet add using` is idempotent:** call it without checking whether the directive already exists.
+6. **`dotnet update/remove` finds by name:** current line number doesn't matter, Roslyn locates the node.
+7. **Mix raw and AST:** `file plan edit` and `dotnet add/update/remove` share the same store — a single `file commit` applies everything.
