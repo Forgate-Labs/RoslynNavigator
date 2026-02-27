@@ -14,3 +14,16 @@ public record FileStatusResult
     public int StagedOps { get; init; }
     public required List<string> Files { get; init; }
 }
+
+public record FileCommitResult
+{
+    public required string UnifiedDiff { get; init; }
+    public required string BackupPath { get; init; }
+    public int FilesModified { get; init; }
+}
+
+public record FileRollbackResult
+{
+    public required string BackupPath { get; init; }
+    public int FilesRestored { get; init; }
+}
