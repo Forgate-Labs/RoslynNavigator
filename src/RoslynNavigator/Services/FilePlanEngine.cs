@@ -18,8 +18,8 @@ public class FilePlanEngine
 
         foreach (var op in ops)
         {
-            // Write and Append ops require no pre-validation
-            if (op.Type == OperationType.Write || op.Type == OperationType.Append)
+            // Write, Append, and ScaffoldFile ops require no pre-validation
+            if (op.Type == OperationType.Write || op.Type == OperationType.Append || op.Type == OperationType.ScaffoldFile)
                 continue;
 
             // Edit and Delete ops must validate that the expected line content matches
@@ -237,6 +237,15 @@ public class FilePlanEngine
                     {
                         var appendLines = op.NewContent.Split('\n');
                         fileLines.AddRange(appendLines.Select(l => l.TrimEnd('\r')));
+                    }
+                    break;
+
+                case OperationType.ScaffoldFile:
+                    fileLines.Clear();
+                    if (op.NewContent != null)
+                    {
+                        var scaffoldLines = op.NewContent.Split('\n');
+                        fileLines.AddRange(scaffoldLines.Select(l => l.TrimEnd('\r')));
                     }
                     break;
             }
