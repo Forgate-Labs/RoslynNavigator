@@ -441,11 +441,137 @@ scaffoldEnumSubcommand.SetHandler(async (string path, string ns, string typeName
     }
 }, scaffoldEnumPathArg, scaffoldEnumNamespaceArg, scaffoldEnumNameArg);
 
+// dotnet add using
+var addUsingPathArg = new Argument<string>("path", "Path to the C# file");
+var addUsingNamespaceArg = new Argument<string>("namespace", "Namespace to add as using directive");
+var addUsingSubcommand = new Command("using", "Add a using directive (no-op if already present)");
+addUsingSubcommand.AddArgument(addUsingPathArg);
+addUsingSubcommand.AddArgument(addUsingNamespaceArg);
+addUsingSubcommand.SetHandler(async (string path, string ns) =>
+{
+    try
+    {
+        var result = await DotnetAddCommand.ExecuteUsingAsync(path, ns);
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("dotnet_add_using_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, addUsingPathArg, addUsingNamespaceArg);
+
+// dotnet add field
+var addFieldPathArg = new Argument<string>("path", "Path to the C# file");
+var addFieldClassArg = new Argument<string>("className", "Name of the target class/record/struct");
+var addFieldAccessArg = new Argument<string>("access", "Access modifier (e.g., private, public)");
+var addFieldTypeArg = new Argument<string>("type", "Field type (e.g., int, string, ILogger)");
+var addFieldNameArg = new Argument<string>("name", "Field name (underscore prefix added automatically)");
+var addFieldSubcommand = new Command("field", "Add a field to a class/record/struct");
+addFieldSubcommand.AddArgument(addFieldPathArg);
+addFieldSubcommand.AddArgument(addFieldClassArg);
+addFieldSubcommand.AddArgument(addFieldAccessArg);
+addFieldSubcommand.AddArgument(addFieldTypeArg);
+addFieldSubcommand.AddArgument(addFieldNameArg);
+addFieldSubcommand.SetHandler(async (string path, string className, string access, string type, string name) =>
+{
+    try
+    {
+        var content = $"{access} {type} _{name};";
+        var result = await DotnetAddCommand.ExecuteMemberAsync(path, className, "field", content);
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("dotnet_add_field_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, addFieldPathArg, addFieldClassArg, addFieldAccessArg, addFieldTypeArg, addFieldNameArg);
+
+// dotnet add property
+var addPropertyPathArg = new Argument<string>("path", "Path to the C# file");
+var addPropertyClassArg = new Argument<string>("className", "Name of the target class/record/struct");
+var addPropertyAccessArg = new Argument<string>("access", "Access modifier (e.g., private, public)");
+var addPropertyTypeArg = new Argument<string>("type", "Property type (e.g., int, string)");
+var addPropertyNameArg = new Argument<string>("name", "Property name (caller provides casing)");
+var addPropertySubcommand = new Command("property", "Add an auto-property to a class/record/struct");
+addPropertySubcommand.AddArgument(addPropertyPathArg);
+addPropertySubcommand.AddArgument(addPropertyClassArg);
+addPropertySubcommand.AddArgument(addPropertyAccessArg);
+addPropertySubcommand.AddArgument(addPropertyTypeArg);
+addPropertySubcommand.AddArgument(addPropertyNameArg);
+addPropertySubcommand.SetHandler(async (string path, string className, string access, string type, string name) =>
+{
+    try
+    {
+        var content = $"{access} {type} {name} {{ get; set; }}";
+        var result = await DotnetAddCommand.ExecuteMemberAsync(path, className, "property", content);
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("dotnet_add_property_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, addPropertyPathArg, addPropertyClassArg, addPropertyAccessArg, addPropertyTypeArg, addPropertyNameArg);
+
+// dotnet add constructor
+var addCtorPathArg = new Argument<string>("path", "Path to the C# file");
+var addCtorClassArg = new Argument<string>("className", "Name of the target class/record/struct");
+var addCtorContentArg = new Argument<string>("content", "Full constructor source (signature + body)");
+var addCtorSubcommand = new Command("constructor", "Add a constructor to a class/record/struct");
+addCtorSubcommand.AddArgument(addCtorPathArg);
+addCtorSubcommand.AddArgument(addCtorClassArg);
+addCtorSubcommand.AddArgument(addCtorContentArg);
+addCtorSubcommand.SetHandler(async (string path, string className, string content) =>
+{
+    try
+    {
+        var result = await DotnetAddCommand.ExecuteMemberAsync(path, className, "constructor", content);
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("dotnet_add_constructor_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, addCtorPathArg, addCtorClassArg, addCtorContentArg);
+
+// dotnet add method
+var addMethodPathArg = new Argument<string>("path", "Path to the C# file");
+var addMethodClassArg = new Argument<string>("className", "Name of the target class/record/struct");
+var addMethodContentArg = new Argument<string>("content", "Full method source (signature + body)");
+var addMethodSubcommand = new Command("method", "Add a method to a class/record/struct");
+addMethodSubcommand.AddArgument(addMethodPathArg);
+addMethodSubcommand.AddArgument(addMethodClassArg);
+addMethodSubcommand.AddArgument(addMethodContentArg);
+addMethodSubcommand.SetHandler(async (string path, string className, string content) =>
+{
+    try
+    {
+        var result = await DotnetAddCommand.ExecuteMemberAsync(path, className, "method", content);
+        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+    }
+    catch (Exception ex)
+    {
+        OutputError("dotnet_add_method_error", ex.Message);
+        Environment.ExitCode = 1;
+    }
+}, addMethodPathArg, addMethodClassArg, addMethodContentArg);
+
+var dotnetAddCommand = new Command("add", "Add members to existing C# types");
+dotnetAddCommand.AddCommand(addUsingSubcommand);
+dotnetAddCommand.AddCommand(addFieldSubcommand);
+dotnetAddCommand.AddCommand(addPropertySubcommand);
+dotnetAddCommand.AddCommand(addCtorSubcommand);
+dotnetAddCommand.AddCommand(addMethodSubcommand);
+
 dotnetScaffoldCommand.AddCommand(scaffoldClassSubcommand);
 dotnetScaffoldCommand.AddCommand(scaffoldInterfaceSubcommand);
 dotnetScaffoldCommand.AddCommand(scaffoldRecordSubcommand);
 dotnetScaffoldCommand.AddCommand(scaffoldEnumSubcommand);
 dotnetCommand.AddCommand(dotnetScaffoldCommand);
+dotnetCommand.AddCommand(dotnetAddCommand);
 
 // ── file command group ──────────────────────────────────────────────────────
 var fileCommand = new Command("file", "File read and staged-edit operations");
