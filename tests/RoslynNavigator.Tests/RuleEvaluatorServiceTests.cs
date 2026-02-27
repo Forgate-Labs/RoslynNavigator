@@ -359,4 +359,60 @@ public class RuleEvaluatorServiceTests : IDisposable
         
         Assert.Equal(initialCount, finalCount);
     }
+
+    // --- Guard integration tests ---
+
+    [Fact]
+    public void Evaluate_WithSqlReadOnlyGuard_RejectsMutatingSql()
+    {
+        // Arrange - test the guard directly by using reflection or by verifying
+        // the guard is used in the evaluation path
+        var guard = new SqlReadOnlyGuard();
+        
+        // Act - verify guard rejects mutating SQL
+        var insertResult = guard.Validate("INSERT INTO classes (name) VALUES ('x')");
+        var updateResult = guard.Validate("UPDATE classes SET name = 'x'");
+        var deleteResult = guard.Validate("DELETE FROM classes");
+        var selectResult = guard.Validate("SELECT * FROM classes");
+
+        // Assert
+        Assert.False(insertResult.IsValid);
+        Assert.Contains("INSERT", insertResult.Reason);
+        
+        Assert.False(updateResult.IsValid);
+        Assert.Contains("UPDATE", updateResult.Reason);
+        
+        Assert.False(deleteResult.IsValid);
+        Assert.Contains("DELETE", deleteResult.Reason);
+        
+        Assert.True(selectResult.IsValid);
+    }
+
+    [Fact]
+    public void Evaluate_WithSqlReadOnlyGuard_RejectsMultiStatementSql()
+    {
+        // Arrange
+        var guard = new SqlReadOnlyGuard();
+
+        // Act
+        var multiStatementResult = guard.Validate("SELECT 1; SELECT 2");
+
+        // Assert
+        Assert.False(multiStatementResult.IsValid);
+        Assert.Contains("Multiple statements", multiStatementResult.Reason);
+    }
+
+    [Fact]
+    public void Evaluate_WithSqlReadOnlyGuard_RejectsPragma()
+    {
+        // Arrange
+        var guard = new SqlReadOnlyGuard();
+
+        // Act
+        var pragmaResult = guard.Validate("PRAGMA journal_mode=WAL");
+
+        // Assert
+        Assert.False(pragmaResult.IsValid);
+        Assert.Contains("PRAGMA", pragmaResult.Reason);
+    }
 }

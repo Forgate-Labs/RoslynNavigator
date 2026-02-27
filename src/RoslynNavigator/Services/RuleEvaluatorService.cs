@@ -10,11 +10,13 @@ public class RuleEvaluatorService
 {
     private readonly string _connectionString;
     private readonly RuleSqlCompiler _compiler;
+    private readonly SqlReadOnlyGuard _readOnlyGuard;
 
     public RuleEvaluatorService(string connectionString)
     {
         _connectionString = connectionString;
         _compiler = new RuleSqlCompiler();
+        _readOnlyGuard = new SqlReadOnlyGuard();
     }
 
     /// <summary>
@@ -38,11 +40,12 @@ public class RuleEvaluatorService
             // Compile the predicate to SQL
             var (sql, parameters) = _compiler.Compile(rule.Predicate);
 
-            // Ensure query is read-only (SELECT only)
-            if (!IsReadOnlyQuery(sql))
+            // Validate SQL is read-only using shared guard
+            var validation = _readOnlyGuard.Validate(sql);
+            if (!validation.IsValid)
             {
                 result.Success = false;
-                result.ErrorMessage = "Generated query is not read-only. Only SELECT queries are allowed.";
+                result.ErrorMessage = validation.Reason;
                 return result;
             }
 
@@ -112,14 +115,5 @@ public class RuleEvaluatorService
 
         result.Success = true;
         return result;
-    }
-
-    /// <summary>
-    /// Verifies that the SQL query is read-only (SELECT only).
-    /// </summary>
-    private bool IsReadOnlyQuery(string sql)
-    {
-        var trimmed = sql.TrimStart().ToUpperInvariant();
-        return trimmed.StartsWith("SELECT") || trimmed.StartsWith("WITH");
     }
 }
