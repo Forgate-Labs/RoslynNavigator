@@ -3,13 +3,13 @@
 ## Milestones
 
 - ✅ **v1.0 File & Dotnet Commands** — Phases 1-5 (shipped 2026-02-27)
-- ✅ **v2.0 Snapshot, Rules & Ask** — Phases 1-2 (shipped 2026-02-27)
+- ✅ **v2.0 Snapshot, Rules & Ask** — Phases 1-3 (shipped 2026-02-27)
 
 ## Phases
 
 - [x] **Phase 1: Snapshot Foundation** - Gera banco SQLite com classes, métodos, dependências, chamadas, annotations, flags e metadados
 - [x] **Phase 2: Rules Engine** - Avalia regras YAML builtin/domain e reporta violações filtráveis
-- [ ] **Phase 3: Query Integration** - Consulta SQL arbitrária com output JSON para LLM
+- [x] **Phase 3: Query Integration** - Consulta SQL arbitrária com output JSON para LLM
 - [ ] **Phase 4: Integration & Polish** - Novos projetos integrados, CLI atualizado, compatibilidade garantida
 
 ## Phase Details
@@ -81,8 +81,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Harden shared read-only SQL enforcement for snapshot safety
-- [ ] 03-02-PLAN.md — Expose `snapshot query` CLI command with stable JSON output
+- [x] 03-01-PLAN.md — Harden shared read-only SQL enforcement for snapshot safety
+- [x] 03-02-PLAN.md — Expose `snapshot query` CLI command with stable JSON output
 
 ---
 
@@ -109,7 +109,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Snapshot Foundation | 3/3 | Complete | 2026-02-27 |
 | 2. Rules Engine | 3/3 | Complete | 2026-02-27 |
-| 3. Query Integration | 0/2 | Not started | - |
+| 3. Query Integration | 2/2 | Complete | 2026-02-27 |
 | 4. Integration & Polish | 0/1 | Not started | - |
 
 ---
