@@ -48,26 +48,26 @@ Nenhum item adicional mapeado para este milestone.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SNAP-01 | TDB | Pending |
-| SNAP-02 | TDB | Pending |
-| SNAP-03 | TDB | Pending |
-| SNAP-04 | TDB | Pending |
-| RULE-01 | TDB | Pending |
-| RULE-02 | TDB | Pending |
-| RULE-03 | TDB | Pending |
-| RULE-04 | TDB | Pending |
-| RULE-05 | TDB | Pending |
-| ASK-01 | TDB | Pending |
-| ASK-02 | TDB | Pending |
-| ASK-03 | TDB | Pending |
-| INT-01 | TDB | Pending |
-| INT-02 | TDB | Pending |
-| INT-03 | TDB | Pending |
+| SNAP-01 | Phase 6 - Snapshot Foundation | Pending |
+| SNAP-02 | Phase 6 - Snapshot Foundation | Pending |
+| SNAP-03 | Phase 6 - Snapshot Foundation | Pending |
+| SNAP-04 | Phase 6 - Snapshot Foundation | Pending |
+| RULE-01 | Phase 7 - Rules Engine | Pending |
+| RULE-02 | Phase 7 - Rules Engine | Pending |
+| RULE-03 | Phase 7 - Rules Engine | Pending |
+| RULE-04 | Phase 7 - Rules Engine | Pending |
+| RULE-05 | Phase 7 - Rules Engine | Pending |
+| ASK-01 | Phase 8 - Query Integration | Pending |
+| ASK-02 | Phase 8 - Query Integration | Pending |
+| ASK-03 | Phase 8 - Query Integration | Pending |
+| INT-01 | Phase 9 - Integration & Polish | Pending |
+| INT-02 | Phase 9 - Integration & Polish | Pending |
+| INT-03 | Phase 9 - Integration & Polish | Pending |
 
 **Coverage:**
 - Milestone requirements: 15 total
-- Mapped to phases: 0
-- Unmapped: 15 ⚠
+- Mapped to phases: 15 ✓
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-02-27*
