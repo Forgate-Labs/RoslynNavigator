@@ -40,12 +40,12 @@
 
 ### Dotnet Add
 
-- [ ] **DADD-01**: `dotnet add using <path> <namespace>` — adiciona `using <namespace>;` no topo do arquivo se não estiver presente
-- [ ] **DADD-02**: `dotnet add field <path> <className> <access> <type> <name>` — insere `<access> <type> _<name>;` na posição correta (top of class body, after last field)
-- [ ] **DADD-03**: `dotnet add property <path> <className> <access> <type> <name>` — insere `<access> <type> <Name> { get; set; }` na posição correta (after fields)
-- [ ] **DADD-04**: `dotnet add constructor <path> <className> <content>` — insere construtor na posição correta (after properties/fields)
-- [ ] **DADD-05**: `dotnet add method <path> <className> <content>` — insere método antes do `}` de fechamento da classe; detecta indentação existente; valida que o conteúdo parsa sem erros
-- [ ] **DADD-06**: Ordem convencional de membros C# respeitada em todos os `dotnet add`: fields → properties → constructors → methods
+- [x] **DADD-01**: `dotnet add using <path> <namespace>` — adiciona `using <namespace>;` no topo do arquivo se não estiver presente
+- [x] **DADD-02**: `dotnet add field <path> <className> <access> <type> <name>` — insere `<access> <type> _<name>;` na posição correta (top of class body, after last field)
+- [x] **DADD-03**: `dotnet add property <path> <className> <access> <type> <name>` — insere `<access> <type> <Name> { get; set; }` na posição correta (after fields)
+- [x] **DADD-04**: `dotnet add constructor <path> <className> <content>` — insere construtor na posição correta (after properties/fields)
+- [x] **DADD-05**: `dotnet add method <path> <className> <content>` — insere método antes do `}` de fechamento da classe; detecta indentação existente; valida que o conteúdo parsa sem erros
+- [x] **DADD-06**: Ordem convencional de membros C# respeitada em todos os `dotnet add`: fields → properties → constructors → methods
 
 ### Dotnet Update & Remove
 
@@ -59,7 +59,7 @@
 
 - [x] **CROSS-01**: Todos os comandos `dotnet` write/edit são staged (compartilham o mesmo `IPlanStore` dos comandos `file`)
 - [x] **CROSS-02**: Mensagens de erro específicas: linha errada, old string não encontrada, classe não encontrada, erro de parse no conteúdo
-- [ ] **CROSS-03**: `dotnet add`, `update` e `remove` resolvem o tipo alvo buscando em `ClassDeclarationSyntax`, `RecordDeclarationSyntax` e `StructDeclarationSyntax`
+- [x] **CROSS-03**: `dotnet add`, `update` e `remove` resolvem o tipo alvo buscando em `ClassDeclarationSyntax`, `RecordDeclarationSyntax` e `StructDeclarationSyntax`
 - [ ] **CROSS-04**: CLAUDE.md atualizado com todos os novos comandos, workflows e dicas
 
 ## v2 Requirements
@@ -107,12 +107,12 @@
 | SCAF-02 | Phase 3 | Complete |
 | SCAF-03 | Phase 3 | Complete |
 | SCAF-04 | Phase 3 | Complete |
-| DADD-01 | Phase 4 | Pending |
-| DADD-02 | Phase 4 | Pending |
-| DADD-03 | Phase 4 | Pending |
-| DADD-04 | Phase 4 | Pending |
-| DADD-05 | Phase 4 | Pending |
-| DADD-06 | Phase 4 | Pending |
+| DADD-01 | Phase 4 | Complete |
+| DADD-02 | Phase 4 | Complete |
+| DADD-03 | Phase 4 | Complete |
+| DADD-04 | Phase 4 | Complete |
+| DADD-05 | Phase 4 | Complete |
+| DADD-06 | Phase 4 | Complete |
 | DUPD-01 | Phase 5 | Pending |
 | DUPD-02 | Phase 5 | Pending |
 | DREM-01 | Phase 5 | Pending |
@@ -120,7 +120,7 @@
 | DREM-03 | Phase 5 | Pending |
 | CROSS-01 | Phase 1 | Complete |
 | CROSS-02 | Phase 2 | Complete |
-| CROSS-03 | Phase 4 | Pending |
+| CROSS-03 | Phase 4 | Complete |
 | CROSS-04 | Phase 5 | Pending |
 
 **Coverage:**

@@ -94,5 +94,5 @@ Plans:
 | 1. Infrastructure & File Read | 2/2 | Complete   | 2026-02-27 |
 | 2. File Stage & Commit | 3/3 | Complete   | 2026-02-27 |
 | 3. Dotnet Scaffold | 1/1 | Complete   | 2026-02-27 |
-| 4. Dotnet Add | 0/3 | Not started | - |
+| 4. Dotnet Add | 1/3 | In Progress|  |
 | 5. Dotnet Update, Remove & Docs | 0/? | Not started | - |

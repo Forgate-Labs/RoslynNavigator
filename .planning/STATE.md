@@ -36,6 +36,7 @@ Progress: [██████░░░░] 60%
 
 *Updated after each plan completion*
 | Phase 03-dotnet-scaffold P01 | 2 | 2 tasks | 4 files |
+| Phase 04-dotnet-add P01 | 8 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,9 @@ Recent decisions affecting current work:
 - [03-01]: ScaffoldFile skips ValidateAsync alongside Write and Append — always valid since it creates/overwrites
 - [03-01]: DotnetScaffoldResult includes Namespace field to confirm the staged content's namespace to the caller
 - [03-01]: dotnet scaffold templates use file-scoped namespace pattern: namespace X;\n\npublic TYPE Name\n{\n}\n
+- [Phase 04-dotnet-add]: BaseTypeDeclarationSyntax lacks Members/WithMembers — requires concrete-type switch expression for dispatch (ClassDeclarationSyntax, RecordDeclarationSyntax, StructDeclarationSyntax)
+- [Phase 04-dotnet-add]: SyntaxFactory.UsingDirective requires explicit SyntaxFactory.Space leading trivia on the name node to produce 'using X;'
+- [Phase 04-dotnet-add]: AddUsing inserts directives in alphabetical order (Ordinal comparison) for a sorted using block
 
 ### Pending Todos
 
