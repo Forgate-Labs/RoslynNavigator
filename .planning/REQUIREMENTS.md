@@ -49,11 +49,11 @@
 
 ### Dotnet Update & Remove
 
-- [ ] **DUPD-01**: `dotnet update property <path> <className> <propertyName> <content>` — substitui a propriedade existente pelo `<content>` fornecido
-- [ ] **DUPD-02**: `dotnet update field <path> <className> <fieldName> <content>` — substitui o campo existente pelo `<content>` fornecido
-- [ ] **DREM-01**: `dotnet remove method <path> <className> <methodName>` — remove método pelo nome
-- [ ] **DREM-02**: `dotnet remove property <path> <className> <propertyName>` — remove propriedade pelo nome
-- [ ] **DREM-03**: `dotnet remove field <path> <className> <fieldName>` — remove campo pelo nome
+- [x] **DUPD-01**: `dotnet update property <path> <className> <propertyName> <content>` — substitui a propriedade existente pelo `<content>` fornecido
+- [x] **DUPD-02**: `dotnet update field <path> <className> <fieldName> <content>` — substitui o campo existente pelo `<content>` fornecido
+- [x] **DREM-01**: `dotnet remove method <path> <className> <methodName>` — remove método pelo nome
+- [x] **DREM-02**: `dotnet remove property <path> <className> <propertyName>` — remove propriedade pelo nome
+- [x] **DREM-03**: `dotnet remove field <path> <className> <fieldName>` — remove campo pelo nome
 
 ### Cross-cutting
 
@@ -113,11 +113,11 @@
 | DADD-04 | Phase 4 | Complete |
 | DADD-05 | Phase 4 | Complete |
 | DADD-06 | Phase 4 | Complete |
-| DUPD-01 | Phase 5 | Pending |
-| DUPD-02 | Phase 5 | Pending |
-| DREM-01 | Phase 5 | Pending |
-| DREM-02 | Phase 5 | Pending |
-| DREM-03 | Phase 5 | Pending |
+| DUPD-01 | Phase 5 | Complete |
+| DUPD-02 | Phase 5 | Complete |
+| DREM-01 | Phase 5 | Complete |
+| DREM-02 | Phase 5 | Complete |
+| DREM-03 | Phase 5 | Complete |
 | CROSS-01 | Phase 1 | Complete |
 | CROSS-02 | Phase 2 | Complete |
 | CROSS-03 | Phase 4 | Complete |

@@ -101,4 +101,4 @@ Plans:
 | 2. File Stage & Commit | 3/3 | Complete   | 2026-02-27 |
 | 3. Dotnet Scaffold | 1/1 | Complete   | 2026-02-27 |
 | 4. Dotnet Add | 3/3 | Complete   | 2026-02-27 |
-| 5. Dotnet Update, Remove & Docs | 0/4 | Not started | - |
+| 5. Dotnet Update, Remove & Docs | 1/4 | In Progress|  |

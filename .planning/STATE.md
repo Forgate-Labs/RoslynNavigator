@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-27)
 
 **Core value:** AI assistant navigates, creates, and modifies C# code with surgical precision — no full-file reads, no ambiguous edits
-**Current focus:** Phase 4 — DotnetAdd (Complete)
+**Current focus:** Phase 5 — DotnetUpdateRemoveDocs (In Progress)
 
 ## Current Position
 
-Phase: 4 of 5 (dotnet-add)
-Plan: 3 of 3 complete in current phase
-Status: Phase complete — plan 04-03 complete
-Last activity: 2026-02-27 — Completed 04-03 (dotnet add CLI wiring — 5 leaf commands in Program.cs)
+Phase: 5 of 5 (dotnet-update-remove-docs)
+Plan: 1 of 4 complete in current phase
+Status: In progress — plan 05-01 complete
+Last activity: 2026-02-27 — Completed 05-01 (DotnetUpdateRemoveService TDD — UpdateMember and RemoveMember)
 
 Progress: [████████░░] 80%
 
@@ -39,6 +39,7 @@ Progress: [████████░░] 80%
 | Phase 04-dotnet-add P01 | 8 | 2 tasks | 2 files |
 | Phase 04-dotnet-add P02 | 2 | 2 tasks | 3 files |
 | Phase 04-dotnet-add P03 | 3 | 1 tasks | 1 files |
+| Phase 05-dotnet-update-remove-docs P01 | 4 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,9 @@ Recent decisions affecting current work:
 - [Phase 04-dotnet-add]: memberKind='using' with typeName='' as convention for using directive ops in AddMember
 - [Phase 04-dotnet-add]: dotnet add subcommand uses positional Argument<string> variables with unique local names to avoid scope conflicts
 - [Phase 04-dotnet-add]: Field command auto-prepends underscore to name arg — caller provides base name, handler builds _{name}
+- [Phase 05-dotnet-update-remove-docs]: DetectIndentation/ApplyIndentation helpers duplicated privately from DotnetAddMemberService (not imported) per plan constraint
+- [Phase 05-dotnet-update-remove-docs]: Underscore-tolerant field matching normalizes both sides: strip leading underscore from stored name and memberName before comparing
+- [Phase 05-dotnet-update-remove-docs]: RemoveMember uses WithMembers(Members.Remove(found)) via concrete-type switch expression — same dispatch pattern as AddMember
 
 ### Pending Todos
 
@@ -90,5 +94,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 04-03-PLAN.md — dotnet add CLI wiring (Phase 4 plan 3 complete)
+Stopped at: Completed 05-01-PLAN.md — DotnetUpdateRemoveService TDD (Phase 5 plan 1 complete)
 Resume file: None
