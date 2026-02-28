@@ -1,4 +1,3 @@
-using System.Text.Json;
 using RoslynNavigator.Models;
 using RoslynNavigator.Services;
 
@@ -6,32 +5,24 @@ namespace RoslynNavigator.Commands;
 
 public static class DotnetUpdateCommand
 {
-    private static readonly JsonSerializerOptions _metaOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
-
     /// <summary>
-    /// Stages an UpdateMember operation for a property or field.
+    /// Immediately replaces an existing member (property or field) in the file on disk.
     /// </summary>
     public static async Task<DotnetUpdateResult> ExecuteAsync(
         string path, string typeName, string memberKind, string memberName, string newContent)
     {
-        var metadata = JsonSerializer.Serialize(
-            new { typeName, memberKind, memberName, content = newContent },
-            _metaOptions);
+        var absPath = ToAbsolutePath(path);
 
-        var op = new PlanOperation
-        {
-            Type = OperationType.UpdateMember,
-            FilePath = path,
-            Metadata = metadata
-        };
+        if (!File.Exists(absPath))
+            throw new FileNotFoundException($"File not found: {absPath}");
 
-        var store = FilePlanStore.CreateDefault();
-        var state = await store.LoadAsync();
-        state.Operations.Add(op);
-        await store.SaveAsync(state);
+        var sourceText = await File.ReadAllTextAsync(absPath);
+        var result = DotnetUpdateRemoveService.UpdateMember(sourceText, typeName, memberKind, memberName, newContent);
+
+        if (!result.Success)
+            throw new InvalidOperationException($"dotnet update {memberKind}: {result.Error}");
+
+        await File.WriteAllTextAsync(absPath, result.ModifiedSource);
 
         return new DotnetUpdateResult
         {
@@ -40,7 +31,14 @@ public static class DotnetUpdateCommand
             TypeName = typeName,
             MemberKind = memberKind,
             MemberName = memberName,
-            TotalStagedOps = state.Operations.Count
+            Applied = true
         };
+    }
+
+    private static string ToAbsolutePath(string path)
+    {
+        return Path.IsPathRooted(path)
+            ? path
+            : Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), path));
     }
 }

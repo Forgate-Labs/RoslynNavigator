@@ -455,8 +455,8 @@ scaffoldClassSubcommand.SetHandler(async (string path, string ns, string typeNam
 {
     try
     {
-        var result = await DotnetScaffoldCommand.ExecuteAsync(path, ns, typeName, "class");
-        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+        await DotnetScaffoldCommand.ExecuteAsync(path, ns, typeName, "class");
+        Console.WriteLine("DONE");
     }
     catch (Exception ex)
     {
@@ -477,8 +477,8 @@ scaffoldInterfaceSubcommand.SetHandler(async (string path, string ns, string typ
 {
     try
     {
-        var result = await DotnetScaffoldCommand.ExecuteAsync(path, ns, typeName, "interface");
-        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+        await DotnetScaffoldCommand.ExecuteAsync(path, ns, typeName, "interface");
+        Console.WriteLine("DONE");
     }
     catch (Exception ex)
     {
@@ -499,8 +499,8 @@ scaffoldRecordSubcommand.SetHandler(async (string path, string ns, string typeNa
 {
     try
     {
-        var result = await DotnetScaffoldCommand.ExecuteAsync(path, ns, typeName, "record");
-        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+        await DotnetScaffoldCommand.ExecuteAsync(path, ns, typeName, "record");
+        Console.WriteLine("DONE");
     }
     catch (Exception ex)
     {
@@ -521,8 +521,8 @@ scaffoldEnumSubcommand.SetHandler(async (string path, string ns, string typeName
 {
     try
     {
-        var result = await DotnetScaffoldCommand.ExecuteAsync(path, ns, typeName, "enum");
-        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+        await DotnetScaffoldCommand.ExecuteAsync(path, ns, typeName, "enum");
+        Console.WriteLine("DONE");
     }
     catch (Exception ex)
     {
@@ -541,8 +541,8 @@ addUsingSubcommand.SetHandler(async (string path, string ns) =>
 {
     try
     {
-        var result = await DotnetAddCommand.ExecuteUsingAsync(path, ns);
-        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+        await DotnetAddCommand.ExecuteUsingAsync(path, ns);
+        Console.WriteLine("DONE");
     }
     catch (Exception ex)
     {
@@ -568,8 +568,8 @@ addFieldSubcommand.SetHandler(async (string path, string className, string acces
     try
     {
         var content = $"{access} {type} _{name};";
-        var result = await DotnetAddCommand.ExecuteMemberAsync(path, className, "field", content);
-        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+        await DotnetAddCommand.ExecuteMemberAsync(path, className, "field", content);
+        Console.WriteLine("DONE");
     }
     catch (Exception ex)
     {
@@ -595,8 +595,8 @@ addPropertySubcommand.SetHandler(async (string path, string className, string ac
     try
     {
         var content = $"{access} {type} {name} {{ get; set; }}";
-        var result = await DotnetAddCommand.ExecuteMemberAsync(path, className, "property", content);
-        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+        await DotnetAddCommand.ExecuteMemberAsync(path, className, "property", content);
+        Console.WriteLine("DONE");
     }
     catch (Exception ex)
     {
@@ -617,8 +617,8 @@ addCtorSubcommand.SetHandler(async (string path, string className, string conten
 {
     try
     {
-        var result = await DotnetAddCommand.ExecuteMemberAsync(path, className, "constructor", content);
-        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+        await DotnetAddCommand.ExecuteMemberAsync(path, className, "constructor", content);
+        Console.WriteLine("DONE");
     }
     catch (Exception ex)
     {
@@ -639,8 +639,8 @@ addMethodSubcommand.SetHandler(async (string path, string className, string cont
 {
     try
     {
-        var result = await DotnetAddCommand.ExecuteMemberAsync(path, className, "method", content);
-        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+        await DotnetAddCommand.ExecuteMemberAsync(path, className, "method", content);
+        Console.WriteLine("DONE");
     }
     catch (Exception ex)
     {
@@ -677,8 +677,8 @@ updPropertySubcommand.SetHandler(async (string path, string className, string na
 {
     try
     {
-        var result = await DotnetUpdateCommand.ExecuteAsync(path, className, "property", name, content);
-        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+        await DotnetUpdateCommand.ExecuteAsync(path, className, "property", name, content);
+        Console.WriteLine("DONE");
     }
     catch (Exception ex)
     {
@@ -701,8 +701,8 @@ updFieldSubcommand.SetHandler(async (string path, string className, string name,
 {
     try
     {
-        var result = await DotnetUpdateCommand.ExecuteAsync(path, className, "field", name, content);
-        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+        await DotnetUpdateCommand.ExecuteAsync(path, className, "field", name, content);
+        Console.WriteLine("DONE");
     }
     catch (Exception ex)
     {
@@ -723,8 +723,8 @@ remMethodSubcommand.SetHandler(async (string path, string className, string name
 {
     try
     {
-        var result = await DotnetRemoveCommand.ExecuteAsync(path, className, "method", name);
-        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+        await DotnetRemoveCommand.ExecuteAsync(path, className, "method", name);
+        Console.WriteLine("DONE");
     }
     catch (Exception ex)
     {
@@ -745,8 +745,8 @@ remPropertySubcommand.SetHandler(async (string path, string className, string na
 {
     try
     {
-        var result = await DotnetRemoveCommand.ExecuteAsync(path, className, "property", name);
-        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+        await DotnetRemoveCommand.ExecuteAsync(path, className, "property", name);
+        Console.WriteLine("DONE");
     }
     catch (Exception ex)
     {
@@ -767,8 +767,8 @@ remFieldSubcommand.SetHandler(async (string path, string className, string name)
 {
     try
     {
-        var result = await DotnetRemoveCommand.ExecuteAsync(path, className, "field", name);
-        Console.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+        await DotnetRemoveCommand.ExecuteAsync(path, className, "field", name);
+        Console.WriteLine("DONE");
     }
     catch (Exception ex)
     {

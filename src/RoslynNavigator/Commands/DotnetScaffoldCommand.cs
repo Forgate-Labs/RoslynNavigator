@@ -1,5 +1,4 @@
 using RoslynNavigator.Models;
-using RoslynNavigator.Services;
 
 namespace RoslynNavigator.Commands;
 
@@ -20,17 +19,15 @@ public static class DotnetScaffoldCommand
             _ => throw new ArgumentException($"Unknown scaffold type: {scaffoldType}. Must be class, interface, record, or enum.")
         };
 
-        var op = new PlanOperation
-        {
-            Type = OperationType.ScaffoldFile,
-            FilePath = path,
-            NewContent = content
-        };
+        var absPath = Path.IsPathRooted(path)
+            ? path
+            : Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), path));
 
-        var store = FilePlanStore.CreateDefault();
-        var state = await store.LoadAsync();
-        state.Operations.Add(op);
-        await store.SaveAsync(state);
+        var dir = Path.GetDirectoryName(absPath);
+        if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+            Directory.CreateDirectory(dir);
+
+        await File.WriteAllTextAsync(absPath, content);
 
         return new DotnetScaffoldResult
         {
@@ -38,7 +35,7 @@ public static class DotnetScaffoldCommand
             FilePath = path,
             TypeName = typeName,
             Namespace = ns,
-            TotalStagedOps = state.Operations.Count
+            Applied = true
         };
     }
 }

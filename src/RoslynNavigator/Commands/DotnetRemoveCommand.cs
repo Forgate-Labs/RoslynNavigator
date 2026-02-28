@@ -1,4 +1,3 @@
-using System.Text.Json;
 using RoslynNavigator.Models;
 using RoslynNavigator.Services;
 
@@ -6,32 +5,24 @@ namespace RoslynNavigator.Commands;
 
 public static class DotnetRemoveCommand
 {
-    private static readonly JsonSerializerOptions _metaOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
-
     /// <summary>
-    /// Stages a RemoveMember operation for a method, property, or field.
+    /// Immediately removes a member (method, property, or field) from the file on disk.
     /// </summary>
     public static async Task<DotnetRemoveResult> ExecuteAsync(
         string path, string typeName, string memberKind, string memberName)
     {
-        var metadata = JsonSerializer.Serialize(
-            new { typeName, memberKind, memberName },
-            _metaOptions);
+        var absPath = ToAbsolutePath(path);
 
-        var op = new PlanOperation
-        {
-            Type = OperationType.RemoveMember,
-            FilePath = path,
-            Metadata = metadata
-        };
+        if (!File.Exists(absPath))
+            throw new FileNotFoundException($"File not found: {absPath}");
 
-        var store = FilePlanStore.CreateDefault();
-        var state = await store.LoadAsync();
-        state.Operations.Add(op);
-        await store.SaveAsync(state);
+        var sourceText = await File.ReadAllTextAsync(absPath);
+        var result = DotnetUpdateRemoveService.RemoveMember(sourceText, typeName, memberKind, memberName);
+
+        if (!result.Success)
+            throw new InvalidOperationException($"dotnet remove {memberKind}: {result.Error}");
+
+        await File.WriteAllTextAsync(absPath, result.ModifiedSource);
 
         return new DotnetRemoveResult
         {
@@ -40,7 +31,14 @@ public static class DotnetRemoveCommand
             TypeName = typeName,
             MemberKind = memberKind,
             MemberName = memberName,
-            TotalStagedOps = state.Operations.Count
+            Applied = true
         };
+    }
+
+    private static string ToAbsolutePath(string path)
+    {
+        return Path.IsPathRooted(path)
+            ? path
+            : Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), path));
     }
 }

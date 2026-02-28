@@ -1,4 +1,3 @@
-using System.Text.Json;
 using RoslynNavigator.Models;
 using RoslynNavigator.Services;
 
@@ -6,32 +5,24 @@ namespace RoslynNavigator.Commands;
 
 public static class DotnetAddCommand
 {
-    private static readonly JsonSerializerOptions _metaOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
-
     /// <summary>
-    /// Stages an AddMember operation for a field, property, constructor, or method.
+    /// Immediately adds a member (field, property, constructor, or method) to the file on disk.
     /// </summary>
     public static async Task<DotnetAddResult> ExecuteMemberAsync(
         string path, string typeName, string memberKind, string content)
     {
-        var metadata = JsonSerializer.Serialize(
-            new { typeName, memberKind, content },
-            _metaOptions);
+        var absPath = ToAbsolutePath(path);
 
-        var op = new PlanOperation
-        {
-            Type = OperationType.AddMember,
-            FilePath = path,
-            Metadata = metadata
-        };
+        if (!File.Exists(absPath))
+            throw new FileNotFoundException($"File not found: {absPath}");
 
-        var store = FilePlanStore.CreateDefault();
-        var state = await store.LoadAsync();
-        state.Operations.Add(op);
-        await store.SaveAsync(state);
+        var sourceText = await File.ReadAllTextAsync(absPath);
+        var result = DotnetAddMemberService.AddMember(sourceText, typeName, memberKind, content);
+
+        if (!result.Success)
+            throw new InvalidOperationException($"dotnet add {memberKind}: {result.Error}");
+
+        await File.WriteAllTextAsync(absPath, result.ModifiedSource);
 
         return new DotnetAddResult
         {
@@ -39,35 +30,28 @@ public static class DotnetAddCommand
             FilePath = path,
             TypeName = typeName,
             MemberKind = memberKind,
-            TotalStagedOps = state.Operations.Count
+            Applied = true
         };
     }
 
     /// <summary>
-    /// Stages an AddMember operation for a using directive.
+    /// Immediately adds a using directive to the file on disk. No-op if already present.
     /// </summary>
     public static async Task<DotnetAddResult> ExecuteUsingAsync(
         string path, string namespaceName)
     {
-        var typeName = "";
-        var memberKind = "using";
-        var content = namespaceName;
+        var absPath = ToAbsolutePath(path);
 
-        var metadata = JsonSerializer.Serialize(
-            new { typeName, memberKind, content },
-            _metaOptions);
+        if (!File.Exists(absPath))
+            throw new FileNotFoundException($"File not found: {absPath}");
 
-        var op = new PlanOperation
-        {
-            Type = OperationType.AddMember,
-            FilePath = path,
-            Metadata = metadata
-        };
+        var sourceText = await File.ReadAllTextAsync(absPath);
+        var result = DotnetAddMemberService.AddUsing(sourceText, namespaceName);
 
-        var store = FilePlanStore.CreateDefault();
-        var state = await store.LoadAsync();
-        state.Operations.Add(op);
-        await store.SaveAsync(state);
+        if (!result.Success)
+            throw new InvalidOperationException($"dotnet add using: {result.Error}");
+
+        await File.WriteAllTextAsync(absPath, result.ModifiedSource);
 
         return new DotnetAddResult
         {
@@ -75,7 +59,14 @@ public static class DotnetAddCommand
             FilePath = path,
             TypeName = "",
             MemberKind = "using",
-            TotalStagedOps = state.Operations.Count
+            Applied = true
         };
+    }
+
+    private static string ToAbsolutePath(string path)
+    {
+        return Path.IsPathRooted(path)
+            ? path
+            : Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), path));
     }
 }

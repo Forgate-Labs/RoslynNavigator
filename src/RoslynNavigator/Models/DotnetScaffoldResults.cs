@@ -6,5 +6,5 @@ public record DotnetScaffoldResult
     public required string FilePath { get; init; }
     public required string TypeName { get; init; }
     public required string Namespace { get; init; }
-    public int TotalStagedOps { get; init; }
+    public bool Applied { get; init; }
 }

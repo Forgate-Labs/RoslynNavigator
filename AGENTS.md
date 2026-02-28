@@ -61,58 +61,25 @@ roslyn-nav list-feature-scenarios --path tests/Features
 
 ---
 
-## Write & Mutation — Stage → Commit Pipeline
+## Write & Mutation
 
-**Rule:** all write/dotnet commands are *staged* in `.roslyn-nav-plans.json`. Nothing touches disk until `file commit`.
+There are two independent write mechanisms:
 
-```
-stage ops  →  file status  →  file commit  →  (file rollback if needed)
-```
+### 1. Dotnet Commands — Immediate Execution (no staging)
 
-### File Read (immediate, no staging)
+All `dotnet scaffold`, `dotnet add`, `dotnet update`, and `dotnet remove` commands write to disk **immediately** when called. No `file commit` is needed.
 
-```bash
-roslyn-nav file read path/to/File.cs                  # whole file with line numbers
-roslyn-nav file read path/to/File.cs --lines 10-30    # range only
-roslyn-nav file grep "pattern" src/ --ext .cs --max-lines 50
-```
-
-### File Stage
-
-```bash
-# Edit: stage replacement at line N (supports sequential multi-line via \n)
-roslyn-nav file plan edit path/File.cs <lineN> "<new content>"
-
-# Write: creates or overwrites the entire file
-roslyn-nav file plan write path/File.cs "<full content>"
-
-# Append: adds content to end of file
-roslyn-nav file plan append path/File.cs "<content>"
-
-# Delete: removes line N, validates <old>
-roslyn-nav file plan delete path/File.cs <lineN> "<old content>"
-```
-
-### File Commit / Rollback
-
-```bash
-roslyn-nav file status           # unified diff of all staged ops (preview)
-roslyn-nav file commit           # creates backup in .roslyn-nav-backup/<ts>/, validates all, applies atomically
-roslyn-nav file rollback         # restores all files from last backup
-roslyn-nav file clear            # discards all staged ops without touching files
-```
-
-### Dotnet Scaffold (staged)
+#### Dotnet Scaffold (immediate)
 
 ```bash
 roslyn-nav dotnet scaffold class     path/ClassName.cs     My.Namespace ClassName
 roslyn-nav dotnet scaffold interface path/IName.cs         My.Namespace IName
 roslyn-nav dotnet scaffold record    path/RecordName.cs    My.Namespace RecordName
 roslyn-nav dotnet scaffold enum      path/EnumName.cs      My.Namespace EnumName
-# then: roslyn-nav file commit
+# File is created on disk immediately
 ```
 
-### Dotnet Add (staged)
+#### Dotnet Add (immediate)
 
 ```bash
 # using: idempotent, inserted in alphabetical order
@@ -136,7 +103,7 @@ roslyn-nav dotnet add method path/File.cs ClassName \
 # insertion order enforced: fields → properties → constructors → methods
 ```
 
-### Dotnet Update / Remove (staged)
+#### Dotnet Update / Remove (immediate)
 
 ```bash
 # update: replaces the entire member declaration
@@ -152,14 +119,55 @@ roslyn-nav dotnet remove property path/File.cs ClassName PropName
 roslyn-nav dotnet remove field    path/File.cs ClassName _fieldName  # accepts with or without _
 ```
 
+### 2. File Plan — Stage → Commit Pipeline
+
+Raw text edits are staged in `.roslyn-nav-plans.json`. Nothing touches disk until `file commit`.
+
+```
+stage ops  →  file status  →  file commit  →  (file rollback if needed)
+```
+
+#### File Read (immediate, no staging)
+
+```bash
+roslyn-nav file read path/to/File.cs                  # whole file with line numbers
+roslyn-nav file read path/to/File.cs --lines 10-30    # range only
+roslyn-nav file grep "pattern" src/ --ext .cs --max-lines 50
+```
+
+#### File Stage
+
+```bash
+# Edit: stage replacement at line N (supports sequential multi-line via \n)
+roslyn-nav file plan edit path/File.cs <lineN> "<new content>"
+
+# Write: creates or overwrites the entire file
+roslyn-nav file plan write path/File.cs "<full content>"
+
+# Append: adds content to end of file
+roslyn-nav file plan append path/File.cs "<content>"
+
+# Delete: removes line N, validates <old>
+roslyn-nav file plan delete path/File.cs <lineN> "<old content>"
+```
+
+#### File Commit / Rollback
+
+```bash
+roslyn-nav file status           # unified diff of all staged ops (preview)
+roslyn-nav file commit           # creates backup in .roslyn-nav-backup/<ts>/, validates all, applies atomically
+roslyn-nav file rollback         # restores all files from last backup
+roslyn-nav file clear            # discards all staged ops without touching files
+```
+
 ---
 
 ## Essential Rules
 
 1. **Navigate before reading:** use `list-class` to get member `lineRange`; then `file read --lines` only that range.
-2. **Stage → status → commit:** always run `file status` before `file commit` on critical changes.
-3. **`file plan edit` supports sequential replacement:** pass `\n` inside `<new content>` to replace multiple consecutive lines starting at line N.
-4. **Atomicity:** if any validation fails during `file commit`, zero files are modified.
-5. **`dotnet add using` is idempotent:** call it without checking whether the directive already exists.
-6. **`dotnet update/remove` finds by name:** current line number doesn't matter, Roslyn locates the node.
-7. **Mix raw and AST:** `file plan edit` and `dotnet add/update/remove` share the same store — a single `file commit` applies everything.
+2. **Dotnet commands are immediate:** `scaffold`, `add`, `update`, `remove` write to disk right away — no staging or commit needed.
+3. **File plan ops require commit:** `file plan edit/write/append/delete` are staged; run `file status` then `file commit`.
+4. **`file plan edit` supports sequential replacement:** pass `\n` inside `<new content>` to replace multiple consecutive lines starting at line N.
+5. **Atomicity:** if any validation fails during `file commit`, zero files are modified.
+6. **`dotnet add using` is idempotent:** call it without checking whether the directive already exists.
+7. **`dotnet update/remove` finds by name:** current line number doesn't matter, Roslyn locates the node.
