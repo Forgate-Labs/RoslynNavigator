@@ -22,7 +22,9 @@ public record AddUsingResult
 public static class DotnetAddMemberService
 {
     /// <summary>
-    /// Inserts a member (field, property, constructor, or method) into the named type.
+    /// Inserts one or more members (field, property, constructor, or method) into the named type.
+    /// Multiple members may be provided in <paramref name="content"/> separated by blank lines or
+    /// simply concatenated — all top-level members found in the content block are inserted in order.
     /// </summary>
     public static AddMemberResult AddMember(string sourceText, string typeName, string memberKind, string content)
     {
@@ -68,16 +70,20 @@ public static class DotnetAddMemberService
         // 5. Apply indentation to each line of the content
         var indentedContent = ApplyIndentation(content, indentation);
 
-        // 6. Parse the member from the indented content
-        MemberDeclarationSyntax parsedMember;
+        // 6. Parse ALL members from the indented content
+        List<MemberDeclarationSyntax> parsedMembers;
         try
         {
             var memberSrc = $"class __T__ {{\n{indentedContent}\n}}";
             var memberTree = CSharpSyntaxTree.ParseText(memberSrc);
             var memberRoot = memberTree.GetRoot();
-            parsedMember = memberRoot.DescendantNodes()
+            parsedMembers = memberRoot.DescendantNodes()
                 .OfType<MemberDeclarationSyntax>()
-                .First(n => !(n is ClassDeclarationSyntax));
+                .Where(n => !(n is ClassDeclarationSyntax))
+                .ToList();
+
+            if (parsedMembers.Count == 0)
+                throw new InvalidOperationException("No members found in provided content.");
         }
         catch (Exception ex)
         {
@@ -89,23 +95,33 @@ public static class DotnetAddMemberService
             };
         }
 
-        // 7. Determine insertion index based on member kind
-        var insertIndex = ComputeInsertIndex(typeDecl, memberKind);
-
-        // 8. Insert the member and reconstruct the source
-        SyntaxNode newTypeDecl = typeDecl switch
+        // 7. Insert all members in order, recomputing the index after each insertion
+        //    so that members are appended sequentially in the correct position.
+        var currentRoot = root;
+        foreach (var parsedMember in parsedMembers)
         {
-            ClassDeclarationSyntax cls => cls.WithMembers(cls.Members.Insert(insertIndex, parsedMember)),
-            RecordDeclarationSyntax rec => rec.WithMembers(rec.Members.Insert(insertIndex, parsedMember)),
-            StructDeclarationSyntax str => str.WithMembers(str.Members.Insert(insertIndex, parsedMember)),
-            _ => throw new InvalidOperationException($"Unsupported type declaration kind: {typeDecl.Kind()}")
-        };
-        var newRoot = root.ReplaceNode(typeDecl, newTypeDecl);
+            // Re-locate the type declaration in the (possibly updated) root
+            var currentTypeDecl = currentRoot.DescendantNodes()
+                .OfType<BaseTypeDeclarationSyntax>()
+                .First(t => t.Identifier.Text == typeName);
+
+            var insertIndex = ComputeInsertIndex(currentTypeDecl, memberKind);
+
+            SyntaxNode newTypeDecl = currentTypeDecl switch
+            {
+                ClassDeclarationSyntax cls => cls.WithMembers(cls.Members.Insert(insertIndex, parsedMember)),
+                RecordDeclarationSyntax rec => rec.WithMembers(rec.Members.Insert(insertIndex, parsedMember)),
+                StructDeclarationSyntax str => str.WithMembers(str.Members.Insert(insertIndex, parsedMember)),
+                _ => throw new InvalidOperationException($"Unsupported type declaration kind: {currentTypeDecl.Kind()}")
+            };
+
+            currentRoot = currentRoot.ReplaceNode(currentTypeDecl, newTypeDecl);
+        }
 
         return new AddMemberResult
         {
             Success = true,
-            ModifiedSource = newRoot.ToFullString()
+            ModifiedSource = currentRoot.ToFullString()
         };
     }
 

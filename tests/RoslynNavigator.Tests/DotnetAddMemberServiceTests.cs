@@ -195,6 +195,79 @@ public class DotnetAddMemberServiceTests
         Assert.Contains("public int Id", result.ModifiedSource);
     }
 
+    // --- AddMember: multiple members in one call ---
+
+    [Fact]
+    public void AddMember_MultipleMethodsInContent_AllMethodsInserted()
+    {
+        const string twoMethods = """
+            private static ValidationResult ValidateCNPJ(string cnpj)
+            {
+                return ValidationResult.Success();
+            }
+
+            private static bool IsValidCNPJChecksum(string cnpj)
+            {
+                return true;
+            }
+            """;
+
+        var result = DotnetAddMemberService.AddMember(ClassSourceNoMembers, "MyClass", "method", twoMethods);
+
+        Assert.True(result.Success, result.Error);
+        Assert.Contains("ValidateCNPJ", result.ModifiedSource);
+        Assert.Contains("IsValidCNPJChecksum", result.ModifiedSource);
+        // Order must be preserved: ValidateCNPJ before IsValidCNPJChecksum
+        var pos1 = result.ModifiedSource.IndexOf("ValidateCNPJ");
+        var pos2 = result.ModifiedSource.IndexOf("IsValidCNPJChecksum");
+        Assert.True(pos1 < pos2, "ValidateCNPJ should appear before IsValidCNPJChecksum");
+    }
+
+    [Fact]
+    public void AddMember_MultipleFieldsInContent_AllFieldsInserted()
+    {
+        const string twoFields = """
+            private int _count;
+            private string _name;
+            """;
+
+        var result = DotnetAddMemberService.AddMember(ClassSourceNoMembers, "MyClass", "field", twoFields);
+
+        Assert.True(result.Success, result.Error);
+        Assert.Contains("_count", result.ModifiedSource);
+        Assert.Contains("_name", result.ModifiedSource);
+    }
+
+    [Fact]
+    public void AddMember_MultiplePropertiesInContent_AllPropertiesInserted()
+    {
+        const string twoProps = """
+            public int Id { get; set; }
+            public string Name { get; set; }
+            """;
+
+        var result = DotnetAddMemberService.AddMember(ClassSourceNoMembers, "MyClass", "property", twoProps);
+
+        Assert.True(result.Success, result.Error);
+        Assert.Contains("public int Id", result.ModifiedSource);
+        Assert.Contains("public string Name", result.ModifiedSource);
+    }
+
+    [Fact]
+    public void AddMember_MultipleConstructorsInContent_AllConstructorsInserted()
+    {
+        const string twoCtors = """
+            public MyClass() { }
+            public MyClass(int x) { }
+            """;
+
+        var result = DotnetAddMemberService.AddMember(ClassSourceNoMembers, "MyClass", "constructor", twoCtors);
+
+        Assert.True(result.Success, result.Error);
+        Assert.Contains("public MyClass()", result.ModifiedSource);
+        Assert.Contains("public MyClass(int x)", result.ModifiedSource);
+    }
+
     // --- AddMember: error cases ---
 
     [Fact]
