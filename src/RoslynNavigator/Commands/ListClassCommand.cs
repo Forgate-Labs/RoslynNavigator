@@ -1,6 +1,5 @@
 using RoslynNavigator.Models;
 using RoslynNavigator.Services;
-using RoslynNavigator.Snapshot.Services;
 
 namespace RoslynNavigator.Commands;
 

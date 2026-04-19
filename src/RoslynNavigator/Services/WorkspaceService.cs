@@ -3,7 +3,7 @@ using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 
-namespace RoslynNavigator.Snapshot.Services;
+namespace RoslynNavigator.Services;
 
 public static class WorkspaceService
 {
@@ -23,13 +23,11 @@ public static class WorkspaceService
         await _lock.WaitAsync();
         try
         {
-            // Double-check after acquiring lock
             if (_cache.TryGetValue(absolutePath, out cached))
             {
                 return cached.Solution;
             }
 
-            // Register MSBuild once
             if (!_msBuildRegistered)
             {
                 MSBuildLocator.RegisterDefaults();
@@ -37,9 +35,8 @@ public static class WorkspaceService
             }
 
             var workspace = MSBuildWorkspace.Create();
-            workspace.WorkspaceFailed += (sender, e) =>
+            workspace.WorkspaceFailed += (_, e) =>
             {
-                // Log workspace failures but continue processing
                 if (e.Diagnostic.Kind == WorkspaceDiagnosticKind.Failure)
                 {
                     Console.Error.WriteLine($"Workspace warning: {e.Diagnostic.Message}");
@@ -72,7 +69,6 @@ public static class WorkspaceService
             }
         }
 
-        // Fallback: search by filename
         var fileName = Path.GetFileName(filePath);
         foreach (var project in solution.Projects)
         {
@@ -92,18 +88,16 @@ public static class WorkspaceService
     {
         return solution.Projects.FirstOrDefault(p =>
             p.Name.Equals(projectName, StringComparison.OrdinalIgnoreCase) ||
-            Path.GetFileNameWithoutExtension(p.FilePath ?? "").Equals(projectName, StringComparison.OrdinalIgnoreCase));
+            Path.GetFileNameWithoutExtension(p.FilePath ?? string.Empty).Equals(projectName, StringComparison.OrdinalIgnoreCase));
     }
 
     private static string ResolveFilePath(string filePath, string solutionPath)
     {
-        // 1. Try as absolute path
         if (Path.IsPathRooted(filePath) && File.Exists(filePath))
         {
             return Path.GetFullPath(filePath);
         }
 
-        // 2. Try relative to solution directory
         var solutionDir = Path.GetDirectoryName(Path.GetFullPath(solutionPath)) ?? ".";
         var relativeToSolution = Path.Combine(solutionDir, filePath);
         if (File.Exists(relativeToSolution))
@@ -111,14 +105,12 @@ public static class WorkspaceService
             return Path.GetFullPath(relativeToSolution);
         }
 
-        // 3. Try relative to current directory
         var relativeToCurrentDir = Path.GetFullPath(filePath);
         if (File.Exists(relativeToCurrentDir))
         {
             return relativeToCurrentDir;
         }
 
-        // 4. Return the original path (will fallback to filename search)
         return Path.GetFullPath(filePath);
     }
 
