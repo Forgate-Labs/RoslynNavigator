@@ -18,13 +18,39 @@ Roslyn Navigator provides targeted commands that extract and mutate only what yo
 
 ## Installation
 
+`RoslynNavigator` is installed from a cloned local repository, not from NuGet.
+
+### Install from this repository
+
 ```bash
-dotnet tool install --global RoslynNavigator
+git clone https://github.com/Forgate-Labs/RoslynNavigator.git
+cd RoslynNavigator
+
+dotnet pack src/RoslynNavigator/RoslynNavigator.csproj -c Release
+
+dotnet tool install --global \
+  --add-source ./src/RoslynNavigator/bin/Release \
+  RoslynNavigator
 ```
 
 Verify installation:
+
 ```bash
 roslyn-nav --help
+```
+
+### Update a local installation
+
+After pulling new changes:
+
+```bash
+git pull
+
+dotnet pack src/RoslynNavigator/RoslynNavigator.csproj -c Release
+
+dotnet tool update --global \
+  --add-source ./src/RoslynNavigator/bin/Release \
+  RoslynNavigator
 ```
 
 ## Quick Start
@@ -185,18 +211,6 @@ That gives coding agents a focused reference for when and how to use `roslyn-nav
 
 - .NET 10 SDK or later
 - Works with any C# solution (.sln)
-
-## Building from Source
-
-```bash
-git clone https://github.com/Forgate-Labs/RoslynNavigator.git
-cd RoslynNavigator
-dotnet build
-dotnet pack -c Release
-
-# Install locally
-dotnet tool install --global --add-source ./src/RoslynNavigator/bin/Release RoslynNavigator
-```
 
 ## Project Structure
 
